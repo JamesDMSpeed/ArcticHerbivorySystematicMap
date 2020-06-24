@@ -33,20 +33,27 @@ View(codeddata3)
 View(codeddata4)
 
 #Transpose coded data so that each evidence point is a row (rather than column as coded in excel template)
-t1<-data.frame(t(codeddata1[,c(7:ncol(codeddata1))]),check.names = F,stringsAsFactors = F)
+t1<-data.frame(t(codeddata1)[,c(7:ncol(codeddata1))],check.names = F,stringsAsFactors = F)
 names(t1)<-codeddata1$`Coding variable`
 t2<-data.frame(t(codeddata2[,c(7:ncol(codeddata2))]),check.names = F,stringsAsFactors = F)
 names(t2)<-codeddata2$`Coding variable`
-t3<-data.frame(t(codeddata3[,c(7:ncol(codeddata3))]),check.names = F,stringsAsFactors = F)
+t3<-data.frame(t(codeddata3[,c(7:ncol(codeddata3))]),check.names=F,stringsAsFactors = F)
 names(t3)<-codeddata3$`Coding variable`
-t4<-data.frame(t(codeddata4[,c(7:ncol(codeddata4))]),check.names = F,stringsAsFactors = F)
+t4<-data.frame(t(codeddata4[,c(8:ncol(codeddata4))]),check.names = F,stringsAsFactors = F)#NB extra meta column in this sheet
 names(t4)<-codeddata4$`Coding variable`
+
 
 #Rbind these together into a single dataset
 alldata<-do.call(rbind,list(t1,t2,t3,t4))
+alldata<-apply(alldata,2,function(x)(gsub("\r\r\n", "", x)))
+alldata<-data.frame(alldata,stringsAsFactors = F)
+alldata<-type.convert(alldata)
 
+str(alldata)
 head(alldata)
 View(alldata)
+alldata[is.na(as.numeric(as.character(alldata$coordinates_E))),c(1,10,11,12)]
+
 
 #Number of studies
 length(levels(as.factor(alldata$title)))#344
@@ -57,9 +64,9 @@ length(levels(as.factor(alldata$evidence_point_ID)))#803
 #Need to first replace \r\n in comment fields to prevent these being split between lines
 
 #alldata$comment<-gsub("\r\n", " ", alldata$comment)
-ad2<-data.frame(apply(alldata, 2,FUN=function(x) (gsub("\r\n", " ", x))))
-ad3<-data.frame(apply(ad2, 2,FUN=function(x) (gsub("\r", "", x))))
-write.table(ad3,'Data/AllCodedData.txt',row.names = F,sep=';')
+#ad2<-data.frame(apply(alldata, 2,FUN=function(x) (gsub("\r\r\n", " ", x))))
+#ad3<-data.frame(apply(ad2, 2,FUN=function(x) (gsub("\r", "", x))))
+write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';')
 
 
 
@@ -87,11 +94,7 @@ plot(bPolslaea,ylim=c(55,90))
 #Spatial evidence points
 
 #First remove evidence points with missing cooordinates
-alldataCN<-alldata
-alldataCN$coordinates_E<-as.numeric(alldataCN$coordinates_E)
-alldataCN$coordinates_N<-as.numeric(alldataCN$coordinates_N)
-alldatasp1<-alldataCN[!is.na(alldataCN$coordinates_E),]
-dim(alldatasp1)#792 evidence points
+alldatasp1<-alldata
 #Change to spatial points df
 alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 alldata_splaea<-spTransform(alldata_sp,polarproj)
@@ -189,7 +192,8 @@ bioclim_ex<-extract(bioclimdat,alldata_sp)
 alldata_sp<-cbind(alldata_sp,bioclim_ex)
 
 # MAT and MAP are bio1 and bio12 respectively
+pdf('Figures/ClimateSpace.pdf')
 climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10))+geom_point()+
   ggtitle("Climatic space") + scale_y_reverse()+
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
-
+dev.off()
