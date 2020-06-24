@@ -163,15 +163,18 @@ dev.off()
 
 #Contingency tables
 
-ggplot(alldata, aes(fill = study_design, x = herbivore_type)) + geom_bar()+
+ct1<-ggplot(alldata, aes(fill = study_design, x = herbivore_type)) + geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Herbivore type and study design")+ theme(axis.title.x = element_blank()) 
 
 
-ggplot(alldata, aes(fill = biological_organization_level_reported, x = herbivore_type)) + geom_bar()+
+ct2<-ggplot(alldata, aes(fill = biological_organization_level_reported, x = herbivore_type)) + geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Temporal resolution")+ theme(axis.title.x = element_blank()) 
+  ggtitle("Herbivore type and plant level")+ theme(axis.title.x = element_blank()) 
 
+pdf('Figures/ContingencyFigs.pdf',height=6,width=10)
+grid.arrange(ct1,ct2,ncol=2)
+dev.off()
 
 #NB: Identity of biology organization unit too many levels
 
