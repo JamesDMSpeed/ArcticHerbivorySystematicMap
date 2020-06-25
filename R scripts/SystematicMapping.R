@@ -33,7 +33,7 @@ View(codeddata3)
 View(codeddata4)
 
 #Transpose coded data so that each evidence point is a row (rather than column as coded in excel template)
-t1<-data.frame(t(codeddata1)[,c(7:ncol(codeddata1))],check.names = F,stringsAsFactors = F)
+t1<-data.frame(t(codeddata1[,c(7:ncol(codeddata1))]),check.names = F,stringsAsFactors = F)
 names(t1)<-codeddata1$`Coding variable`
 t2<-data.frame(t(codeddata2[,c(7:ncol(codeddata2))]),check.names = F,stringsAsFactors = F)
 names(t2)<-codeddata2$`Coding variable`
@@ -192,8 +192,10 @@ bioclim_ex<-extract(bioclimdat,alldata_sp)
 alldata_sp<-cbind(alldata_sp,bioclim_ex)
 
 # MAT and MAP are bio1 and bio12 respectively
-pdf('Figures/ClimateSpace.pdf')
-climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10))+geom_point()+
+
+climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
   ggtitle("Climatic space") + scale_y_reverse()+
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
+pdf('Figures/ClimateSpace.pdf')
+climatespace
 dev.off()
