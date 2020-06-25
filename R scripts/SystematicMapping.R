@@ -45,14 +45,16 @@ names(t4)<-codeddata4$`Coding variable`
 
 #Rbind these together into a single dataset
 alldata<-do.call(rbind,list(t1,t2,t3,t4))
+#Remove hidden line breaks in character
 alldata<-apply(alldata,2,function(x)(gsub("\r\r\n", "", x)))
+#Convert to a dataframe but supress changing characters to vectors
 alldata<-data.frame(alldata,stringsAsFactors = F)
+#Convert columns to guessed format
 alldata<-type.convert(alldata)
-
+#Checking
 str(alldata)
 head(alldata)
-View(alldata)
-alldata[is.na(as.numeric(as.character(alldata$coordinates_E))),c(1,10,11,12)]
+View(alldata)#Looks good!
 
 
 #Number of studies
@@ -61,11 +63,6 @@ length(levels(as.factor(alldata$title)))#344
 length(levels(as.factor(alldata$evidence_point_ID)))#803
 
 #Write data
-#Need to first replace \r\n in comment fields to prevent these being split between lines
-
-#alldata$comment<-gsub("\r\n", " ", alldata$comment)
-#ad2<-data.frame(apply(alldata, 2,FUN=function(x) (gsub("\r\r\n", " ", x))))
-#ad3<-data.frame(apply(ad2, 2,FUN=function(x) (gsub("\r", "", x))))
 write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';')
 
 
@@ -76,12 +73,16 @@ write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';')
 # Mapping in space --------------------------------------------------------
 
 #Evidence points
+
+#By country
 eps_country<-tapply(alldata$country,alldata$country,length)
 pdf('Figures/Countries.pdf')
 ggplot(data=alldata,aes(x=country))+geom_bar()+  
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Countries")+ theme(axis.title.x = element_blank()) 
 dev.off()
+
+#Across biome
 #World map
 polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
 boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
@@ -92,19 +93,17 @@ bPolslaea<-spTransform(bPols,polarproj)
 plot(bPolslaea,ylim=c(55,90))
 
 #Spatial evidence points
-
-#First remove evidence points with missing cooordinates
 alldatasp1<-alldata
 #Change to spatial points df
 alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 alldata_splaea<-spTransform(alldata_sp,polarproj)
 
-#CAFF limits
+#Get CAFF boundaries to add
 arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
-#Subarctic lower boundary
 subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
 
+#Figure
 pdf('Figures/SpatialDistribution.pdf')
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
@@ -198,4 +197,19 @@ climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordina
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
 pdf('Figures/ClimateSpace.pdf')
 climatespace
+dev.off()
+
+#Adding points for total Arctic climate space
+arcclim<-extract(bioclimdat,arczones)
+arcclim_all<-data.frame(do.call(rbind,arcclim))
+arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
+
+#Make this a png due to very many points = large file!
+climatespace2<-ggplot(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10))+geom_point(alpha=1/100,size=0.001)+
+  ggtitle("Climatic space") + scale_y_reverse()+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
+  geom_point(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))
+png('Figures/ClimateSpace_Available.png')
+climatespace2
 dev.off()
