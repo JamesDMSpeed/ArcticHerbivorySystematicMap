@@ -63,7 +63,14 @@ length(levels(as.factor(alldata$title)))#344
 length(levels(as.factor(alldata$evidence_point_ID)))#803
 
 #Write data
-write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';')
+write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
+
+#Write data to be imported to EviAtlas
+#Need to solve more link break and quote issues
+alldataW<-as.data.frame(sapply(alldata,function(x)(gsub("\r\n", " ", x))))
+alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
+write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
+#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv. Open in EviAtlas with UTF-8 encoding. ; sep and " quote
 
 
 
