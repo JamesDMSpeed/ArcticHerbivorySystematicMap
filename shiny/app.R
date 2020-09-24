@@ -1,3 +1,4 @@
+# LIBRARY ####
 library(shiny)
 library(shinydashboard)
 library(shinyjs)
@@ -13,8 +14,10 @@ library(raster)
 library(sp)
 #library(eply)
 
+
+# GET DATA ####
 MyTab <-  read_delim("AllCodedDataW_forEviAtlas.csv", 
-                                        ";", escape_double = FALSE, trim_ws = TRUE)
+                   ";", escape_double = FALSE, trim_ws = TRUE)
 
 
 # Add shortened versions of author lists
@@ -24,7 +27,7 @@ MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20,
                               MyTab$author_list2)
 
 
-
+# UI ####
 ui <- dashboardPage(
                     
   
@@ -38,35 +41,36 @@ ui <- dashboardPage(
           
           dashboardBody(
            
-            #div(class="outer",
-                tags$head(
-                  # Include our custom CSS
-                  includeCSS("styles.css")
-                  ),
+# Include custom CSS to add padding and auto-opacity to filtering-box
+    tags$head(
+      includeCSS("styles.css")
+      ),
           
-          #  column(width=12,
-                             
-                    box(width = NULL,
-                        leafletOutput('theMap')),
-                   
-                absolutePanel(id = "controls", 
-                              class = "panel panel-default", 
-                              fixed = TRUE,
-                              draggable = TRUE, 
-                              top = 80, left = "auto", right = 50, bottom = "auto",
-                              width = 230, height = "auto",
+
+# THE MAP #####                              
+    box(width = NULL,
+            leafletOutput('theMap')),
+                 
+# ABS. PANEL   ####
+    absolutePanel(id = "controls", 
+                  class = "panel panel-default", 
+                  fixed = F,
+                  draggable = TRUE, 
+                  top = 110, left = "auto", right = 50, bottom = "auto",
+                  width = 300, height = "auto",
                               
                    # Changing the colour of the slider from blue to orange
-                   tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: orange} .irs-from, .irs-to, .irs-single {background: orange }")),   
+        tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: orange} .irs-from, .irs-to, .irs-single {background: orange }")),   
                    
-                   
-                                       
-               sliderInput("year", 
-                           label = h5("Publication year"), 
-                           min = 1945, #min(MyTab$year), 
-                           max = 2019, #min(MyTab$year), 
-                           value = c(1945, 2019),
-                           sep="", ticks=F, width = "100%"),
+# CHOOSE YEARS ####                  
+         sliderInput("year", 
+                     label = h5("Publication year"), 
+                     min = 1940, #min(MyTab$year), 
+                     max = 2020, #min(MyTab$year), 
+                     value = c(1945, 2019),
+                     step=1, sep="", ticks=F, width = "100%",
+                     animate=F
+                     ),
                
                box(title = "Country", 
                    width = NULL, collapsible = T, collapsed = T,
@@ -97,9 +101,11 @@ ui <- dashboardPage(
              #  ) # column1
 
      # ), # div
-    
+
+     
+# FIGURES ####
      box(title = "Figures", 
-         width = NULL, collapsible = T, collapsed = F,
+         width = NULL, collapsible = T, collapsed = T,
           tabBox(width = NULL, id = 'figs', selected = NULL,
                  tabPanel('Count cases',
                           h5("Output is reactive to the filtering in the above map"),
@@ -131,11 +137,25 @@ ui <- dashboardPage(
                  
           )
          ),
-      box(title = "Lookup table", 
+      
+     
+# LOOKUP TABLE ####     
+     box(title = "Lookup table", 
           width = NULL, collapsible = T, collapsed = T,
-     verbatimTextOutput('featurePrint'),
-     selectInput('feature', 'Input FeatureID', 1:nrow(MyTab), multiple=FALSE, selectize=TRUE),
-     tableOutput('oneFeature'))
+      #verbatimTextOutput('featurePrint'),
+     selectInput('feature', 'Type the FeatureID of the record you wan to show', 
+                 1:nrow(MyTab), multiple=FALSE, selectize=TRUE),
+     tableOutput('oneFeature')),
+
+# RESPONSIVE TABLE ####
+box(title = "Responsive table", 
+    width = NULL, collapsible = T, collapsed = T,
+    h5("This table is responsive to the filters applied in the map"),
+    DTOutput('responsiveTable')),
+
+h4("Press the download button to download a speadsheet copy of raw data:"),
+downloadButton("downloadData", "Download")
+
          
                  
                 
@@ -150,13 +170,25 @@ ui <- dashboardPage(
 ) # page
 
 
+# SERVER ####
 server <- function(input, output, session) {
+
   
+# LOOKUP TABLE
+  oneFeatureTab <- reactive({
+    Value <- t(MyTab[input$feature,])
+    featureID <- rownames(Value)
+    temp <- as.data.frame(cbind(featureID, Value))
+    colnames(temp) <- c("featureID", "Value")
+    temp
+  })
   
-  output$oneFeature <- renderTable(t(MyTab[input$feature,]), rownames = TRUE)
+  output$oneFeature <- renderTable(
+    oneFeatureTab(), rownames = FALSE
+    )
   
-  # this needs to be made an interactive element
-  
+
+# FILTERED DATASET ####
   datR <- reactive({
     MyTab[
       dplyr::between(MyTab$year, input$year[1], input$year[2]) &
@@ -167,6 +199,8 @@ server <- function(input, output, session) {
     
   })
   
+  
+# THE MAP ####
   output$theMap <- renderLeaflet({
       
       datM <- datR()
@@ -195,8 +229,30 @@ server <- function(input, output, session) {
       
     })
     
-  output$featurePrint <- renderPrint(input$feature)
   
+# RESPONSIVE TABLE ####
+  #tempTable <- reactive({
+  #  t <- as.data.frame(datR())
+  #  t$comment <- substr(t$comment, start = 1, stop = 30)
+  #  t$comment <- ifelse(nchar(t$comment)>30, 
+  #         paste0(t$comment, " [...]"),
+  #         MyTab$author_list2) 
+  #})
+  output$responsiveTable <- 
+    renderDataTable({
+      DT::datatable(datR(), 
+        options = list(
+          scrollX = TRUE,
+          columnDefs = list(list(
+         targets = "_all",
+           render = JS(
+             "function(data, type, row, meta) {",
+             "return type === 'display' && data != null && data.length > 30 ?",
+           "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
+                                "}")
+         ))),
+      class = "display")
+})
   
   output$univ <- renderPlot({
     datF <- datR()
@@ -207,7 +263,8 @@ server <- function(input, output, session) {
       theme(text = element_text(size = 20))
   })
   
-  
+
+# TRENDS ####
   output$trends <- renderPlot({
     
     ggplot(data = datR(), aes_string(x=input$uni2))+
@@ -215,7 +272,14 @@ server <- function(input, output, session) {
       theme_bw()+
       theme(text = element_text(size = 20))
   })
-}
+  
+# DOWNLOAD ####
+  output$downloadData <- downloadHandler(
+    filename = function() {"ArcticHerbivorySystematicMap.csv"},
+    content = function(file) {
+      write.csv( MyTab, file,  row.names = FALSE)}
+  )
 
+}
 shinyApp(ui = ui, server = server)
 
