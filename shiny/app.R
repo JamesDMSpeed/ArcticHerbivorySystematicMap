@@ -15,7 +15,8 @@ library(sp)
 #library(eply)
 
 
-# GET DATA ####
+# Get Data ----------------------------------------------------------------
+
 MyTab <-  read_delim("AllCodedDataW_forEviAtlas.csv", 
                    ";", escape_double = FALSE, trim_ws = TRUE)
 
@@ -27,7 +28,9 @@ MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20,
                               MyTab$author_list2)
 
 
-# UI ####
+
+# UI ----------------------------------------------------------------------
+
 ui <- dashboardPage(
                     
   
@@ -47,22 +50,30 @@ ui <- dashboardPage(
       ),
           
 
-# THE MAP #####                              
+
+# The Map -----------------------------------------------------------------
+
     box(width = NULL,
             leafletOutput('theMap')),
                  
-# ABS. PANEL   ####
+# Abs.Panel ---------------------------------------------------------------
+
     absolutePanel(id = "controls", 
                   class = "panel panel-default", 
                   fixed = F,
                   draggable = TRUE, 
-                  top = 110, left = "auto", right = 50, bottom = "auto",
-                  width = 300, height = "auto",
+                  top = 100, left = 50, right = 'auto', bottom = "auto",
+                  width = 370, height = "auto",
                               
                    # Changing the colour of the slider from blue to orange
         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: orange} .irs-from, .irs-to, .irs-single {background: orange }")),   
-                   
-# CHOOSE YEARS ####                  
+
+
+# . Year and Colour ---------------------------------------------------------
+
+
+        fluidRow(
+          column(width = 7,
          sliderInput("year", 
                      label = h5("Publication year"), 
                      min = 1940, #min(MyTab$year), 
@@ -70,116 +81,230 @@ ui <- dashboardPage(
                      value = c(1945, 2019),
                      step=1, sep="", ticks=F, width = "100%",
                      animate=F
-                     ),
-               
-               box(title = "Country", 
-                   width = NULL, collapsible = T, collapsed = T,
-                               #tabPanel("Page 2",    
-                               checkboxGroupInput(inputId = "country", 
-                                                  label = "Country",
-                                                  choices = unique(MyTab$country),
-                                                  selected = unique(MyTab$country),
+                     )),
+         column(width=5,
+       selectInput("colour", h5("Choose colouring variable"), 
+                    choices = c("country", "language", "herbivore_type", 
+                                "effect_type", "experimental_design", 
+                                "study_method", "study_design"),
+            selected = "country"))),
+
+      
+      
+      
+# . Filters -----------------------------------------------------------------
+
+
+       fluidRow(
+                   
+
+# .. Country ---------------------------------------------------------------
+
+
+  tabBox(width = NULL, id = 'filters', selected = "Language",
+              tabPanel('Country',
+               column(width = 6,
+       checkboxGroupInput(inputId = "country", 
+                                      label = NULL,
+                                     choices = unique(MyTab$country)[1:5],
+                                       selected = unique(MyTab$country)[1:5],
                                                   width = NULL)),
-               box(title = "Language", 
-                   width = NULL, collapsible = T, collapsed = T,
+       column(width = 6,
+              checkboxGroupInput(inputId = "country2", 
+                                 label = NULL,
+                                 choices = unique(MyTab$country)[6:10],
+                                 selected = unique(MyTab$country)[6:10],
+                                 width = NULL))) ,
+            
+
+# .. Language --------------------------------------------------------------
+
+
+       tabPanel('Language',
                    checkboxGroupInput(inputId = "language", 
-                                      label = "Language",
+                                      label = NULL,
                                       choices = unique(MyTab$language),
                                       selected = unique(MyTab$language),
                                       width = NULL)),
                
-               box(title = "Herbivore type", 
-                   width = NULL, collapsible = T, collapsed = T,
-                   checkboxGroupInput(inputId = "herbivore", 
-                                      label = "Herbivore type",
-                                      choices = unique(MyTab$herbivore_type),
-                                      selected = unique(MyTab$herbivore_type),
-                                      width = NULL))
-                            
-                            
-                   ), # abs.panel1
-             #  ) # column1
 
-     # ), # div
+# .. Herbivore -------------------------------------------------------------
+
+             
+       tabPanel('Herbivore',
+                column(width=6,  
+                 checkboxGroupInput(inputId = "herbivore", 
+                                      label = NULL,
+                                      choices = unique(MyTab$herbivore_type)[1:5],
+                                      selected = unique(MyTab$herbivore_type)[1:5],
+                                      width = NULL)),
+                column(width=6,  
+                       checkboxGroupInput(inputId = "herbivore2", 
+                                          label = NULL,
+                                          choices = unique(MyTab$herbivore_type)[6:10],
+                                          selected = unique(MyTab$herbivore_type)[6:10],
+                                          width = NULL))),
+
+
+# .. study design ----------------------------------------------------------
+
+  tabPanel('Type',
+           checkboxGroupInput(
+             inputId = 'studydesign',
+             label=NULL,
+             choices = unique(MyTab$study_design),
+             selected = unique(MyTab$study_design),
+             width=NULL
+           )),
+
+
+# .. study method ----------------------------------------------------------
+
+  tabPanel('Method',
+      column(width=6,  
+           checkboxGroupInput(
+             inputId = 'studymethod',
+             label=NULL,
+             choices = unique(MyTab$study_method)[1:4],
+             selected = unique(MyTab$study_method)[1:4],
+             width=NULL
+           )),
+      column(width = 6,
+             checkboxGroupInput(
+               inputId = 'studymethod2',
+               label=NULL,
+               choices = unique(MyTab$study_method)[5:7],
+               selected = unique(MyTab$study_method)[5:7],
+               width=NULL))),
+
+# .. ex. design ------------------------------------------------------------
+
+  tabPanel('Design',
+           checkboxGroupInput(
+             inputId = 'expdesign',
+             label=NULL,
+             choices = unique(MyTab$experimental_design),
+             selected = unique(MyTab$experimental_design),
+             width=NULL
+           ))
+
+
+  )# TabBox
+ ) # fluid row
+), # abs.panel1
+
+
+
+
+# Remaining datapoints ----------------------------------------------------
+
+
+absolutePanel(id = "remaining", 
+              class = "panel panel-default", 
+              fixed = F,
+              draggable = TRUE, 
+              top = 420, left = 'auto', right = 40, bottom = "auto",
+              width = 150, height = "auto",
+              verbatimTextOutput('remaining')),
+
+# Lower Tabbox ------------------------------------------------------------
 
      
-# FIGURES ####
-     box(title = "Figures", 
-         width = NULL, collapsible = T, collapsed = T,
-          tabBox(width = NULL, id = 'figs', selected = NULL,
-                 tabPanel('Count cases',
-                          h5("Output is reactive to the filtering in the above map"),
-                          radioButtons(inputId = "uni", 
-                                       label = "",
-                                       choices = c("country", 
-                                                   "study_design",
-                                                   "study_method",
-                                                   "extent_of_spatial_scale",
-                                                   "temporal_resolution",
-                                                   "measured_response_variable",
-                                                   "herbivore_type",
-                                                   "herbivory_season",
-                                                   "effect_type",
-                                                   "management_herbivore",
-                                                   "conservation_herbivore",
-                                                   "management"
-                                                   )),
-                          plotOutput('univ')),     
-                 tabPanel('Trends',
-                          h5("Output is reactive to the filtering in the above map"),
-                          radioButtons(inputId = "uni2", 
-                                       label = "",
-                                       choices = c("year")), 
-                          plotOutput('trends')),
-                 tabPanel('Pairwise Plots',
-                          h5("Coming soon....")
-                          )    
-                 
-          )
-         ),
-      
-     
-# LOOKUP TABLE ####     
-     box(title = "Lookup table", 
-          width = NULL, collapsible = T, collapsed = T,
-      #verbatimTextOutput('featurePrint'),
-     selectInput('feature', 'Type the FeatureID of the record you wan to show', 
-                 1:nrow(MyTab), multiple=FALSE, selectize=TRUE),
-     tableOutput('oneFeature')),
+tabBox(width = NULL, id = 'additionals',
 
-# RESPONSIVE TABLE ####
-box(title = "Responsive table", 
-    width = NULL, collapsible = T, collapsed = T,
-    h5("This table is responsive to the filters applied in the map"),
-    DTOutput('responsiveTable')),
+
+# . count cases -----------------------------------------------------------
+
+          
+        tabPanel('Count cases',
+                h5("Output is reactive to the filtering in the above map"),
+                radioButtons(inputId = "uni", 
+                             label = "",
+                             choices = c("country", 
+                                         "study_design",
+                                         "study_method",
+                                         "extent_of_spatial_scale",
+                                         "temporal_resolution",
+                                         "measured_response_variable",
+                                         "herbivore_type",
+                                         "herbivory_season",
+                                         "effect_type",
+                                         "management_herbivore",
+                                         "conservation_herbivore",
+                                         "management"
+                                         )),
+                plotOutput('univ')),  
+     
+
+# . trends ----------------------------------------------------------------
+
+     
+         tabPanel('Trends',
+                  h5("Output is reactive to the filtering in the above map"),
+                  radioButtons(inputId = "uni2", 
+                               label = "",
+                               choices = c("year")), 
+                  plotOutput('trends')),
+
+
+# . pairwise plots --------------------------------------------------------
+
+     
+     #    tabPanel('Pairwise Plots',
+     #             h5("Coming soon....")),
+
+
+
+# . lookup table ----------------------------------------------------------
+
+         tabPanel('Lookup table',
+                  selectInput('feature', 'Type the evidence point ID of the record you wan to show. Get the unique ID by first clicking on the point on the map.', 
+                choices = MyTab$evidence_point_ID, multiple=FALSE, selectize=TRUE),
+                  tableOutput('oneFeature')         
+                  ),
+
+
+# . responsive table ------------------------------------------------------
+
+         
+         tabPanel('Responsive table',
+                  h5("This table is responsive to the filters applied in the map"),
+                  DTOutput('responsiveTable'))
+         
+         ),  # End panel box
+
+
+# Download ----------------------------------------------------------------
+
+
 
 h4("Press the download button to download a speadsheet copy of raw data:"),
 downloadButton("downloadData", "Download")
 
-         
-                 
                 
-              ) # body
+) # body
 
-
-
-                             
-                             
  
  
 ) # page
 
 
-# SERVER ####
-server <- function(input, output, session) {
 
-  
-# LOOKUP TABLE
+
+
+# SERVER ------------------------------------------------------------------
+
+
+
+server <- function(input, output, session){ 
+
+# LOOKUP TABLE -------------------------------------------
+
   oneFeatureTab <- reactive({
-    Value <- t(MyTab[input$feature,])
-    featureID <- rownames(Value)
-    temp <- as.data.frame(cbind(featureID, Value))
-    colnames(temp) <- c("featureID", "Value")
+    Value <- t(MyTab[MyTab$evidence_point_ID==input$feature,])
+    Variable <- rownames(Value)
+    temp <- as.data.frame(cbind(Variable, Value))
+    colnames(temp) <- c("Variable", "Value")
     temp
   })
   
@@ -188,41 +313,67 @@ server <- function(input, output, session) {
     )
   
 
-# FILTERED DATASET ####
+# FILTERED DATASET -------------------------------------
+# First, I need a combine the two inputs for country, herbivore type and studymethod:
+
+country        <-   reactive({c(input$country,        input$country2)})  
+herbivore_type <-   reactive({c(input$herbivore, input$herbivore2)})   
+studymethod    <-   reactive({c(input$studymethod,    input$studymethod2)})   
+  
+
+
   datR <- reactive({
     MyTab[
       dplyr::between(MyTab$year, input$year[1], input$year[2]) &
-        MyTab$country %in% input$country &
+        MyTab$country %in% country() &
         MyTab$language %in% input$language &
-        MyTab$herbivore_type %in% input$herbivore
+        MyTab$herbivore_type %in% herbivore_type() &
+        MyTab$study_design %in% input$studydesign &
+        MyTab$study_method %in% studymethod() &
+        MyTab$experimental_design %in% input$expdesign
       ,]
     
   })
   
   
+
+# Remaining datapoints ----------------------------------------------------
+  output$remaining <- renderText(paste("Datapoints: ", nrow(datR())))
+
+  
 # THE MAP ####
   output$theMap <- renderLeaflet({
       
-      datM <- datR()
+      
     
       # Convert to spatial...
-      dat2 <- sp::SpatialPointsDataFrame(coords = datM[,c("coordinates_E","coordinates_N")], 
-                     data = datM,
+      dat2 <- sp::SpatialPointsDataFrame(coords = datR()[,c("coordinates_E","coordinates_N")], 
+                     data = datR(),
                      proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
       
       theMap <- mapview::mapview(dat2,
                                  layer.name = "Evidence Point",
                                  map.types = c("Esri.WorldShadedRelief",
                                                "Esri.WorldImagery"),
-                                 cex = 5, lwd = 0,
+                                 cex = 5, 
+                                 #lwd = 0,
                                  alpha.regions = 0.5,
-                                 col.regions = "blue",
+                                 #col.regions = "blue",
+                                 zcol = input$colour,
                                  popup = leafpop::popupTable(dat2, 
-                                                    row.numbers = F,
-                                                    zcol = c("author_list2",
-                                                                   "year",
-                                                                   "journal")),
-                                 legend=F
+                                                    row.numbers = F, feature.id = F,
+                                                    zcol = c("evidence_point_ID",
+                                                             "author_list2",
+                                                             "year",
+                                                             "journal",
+                                                             "locality",
+                                                             "elevation",
+                                                             "study_design",
+                                                             "experimental_design",
+                                                             "herbivore_type",
+                                                             "study_method",
+                                                             "effect_type")),
+                                 legend=T
                                  )
                                
       theMap@map
@@ -230,14 +381,7 @@ server <- function(input, output, session) {
     })
     
   
-# RESPONSIVE TABLE ####
-  #tempTable <- reactive({
-  #  t <- as.data.frame(datR())
-  #  t$comment <- substr(t$comment, start = 1, stop = 30)
-  #  t$comment <- ifelse(nchar(t$comment)>30, 
-  #         paste0(t$comment, " [...]"),
-  #         MyTab$author_list2) 
-  #})
+# Responsive Table ####
   output$responsiveTable <- 
     renderDataTable({
       DT::datatable(datR(), 
@@ -254,6 +398,8 @@ server <- function(input, output, session) {
       class = "display")
 })
   
+  
+# Counts ####
   output$univ <- renderPlot({
     datF <- datR()
     ggplot(data = datF, aes_string(x=input$uni))+
@@ -262,6 +408,16 @@ server <- function(input, output, session) {
       theme_bw()+
       theme(text = element_text(size = 20))
   })
+  
+  
+# pairwise ####
+#output$univ <- renderPlot({
+#  
+#  ggplot(data = datR(), aes_string(x=input$myX, y=input$myY))+
+#    ???
+#    theme_bw()+
+#    theme(text = element_text(size = 20))
+#})
   
 
 # TRENDS ####
