@@ -117,6 +117,23 @@ points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
 dev.off()
 
+
+#Remove evidence points outside of arctic
+#Buffer the Arctic polygons by 10000m to get sites with coordinate inaccuracies offshore
+arczones_buffer<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
+plot(arczones_laea)
+plot(arczones_buffer,border=2,add=T)
+
+#Remove evidence points outside of buffered polygon
+alldata_splaea_removeoutsidearctic<-alldata_splaea[arczones_buffer,]
+dim(alldata_splaea)
+dim(alldata_splaea_removeoutsidearctic)
+
+plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
+points(alldata_splaea,pch=16,col='red',cex=0.5)
+points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
+plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
+
 # Mapping in time ---------------------------------------------------------
 #Evidence points - year of publication
 pub<-ggplot(alldata,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("Publication year")+xlab('Publication year')
