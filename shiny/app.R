@@ -2,7 +2,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinyjs)
-#library(shinyWidgets)
+library(shinyWidgets)
 library(DT)
 #library(httr)
 library(readr)
@@ -27,7 +27,7 @@ MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20,
                               paste0(MyTab$author_list2, " [...]"),
                               MyTab$author_list2)
 
-
+MyTab$language[MyTab$language == "English"] <- "english"
 
 # UI ----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ ui <- dashboardPage(
                   fixed = F,
                   draggable = TRUE, 
                   top = 100, left = 50, right = 'auto', bottom = "auto",
-                  width = 370, height = "auto",
+                  width = 300, height = "auto",
                               
                    # Changing the colour of the slider from blue to orange
         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: orange} .irs-from, .irs-to, .irs-single {background: orange }")),   
@@ -83,11 +83,12 @@ ui <- dashboardPage(
                      animate=F
                      )),
          column(width=5,
-       selectInput("colour", h5("Choose colouring variable"), 
-                    choices = c("country", "language", "herbivore_type", 
+       pickerInput(inputId = "colour", 
+                   label = "Colour by:", 
+                   choices = c("country", "language", "herbivore_type", 
                                 "effect_type", "experimental_design", 
                                 "study_method", "study_design"),
-            selected = "country"))),
+                   selected = "country"))),
 
       
       
@@ -95,117 +96,111 @@ ui <- dashboardPage(
 # . Filters -----------------------------------------------------------------
 
 
-       fluidRow(
+      # fluidRow(
+  column(width = 6,
+# .. Country ---------------------------------------------------------------
+         
+         pickerInput(
+           inputId = "country",
+           choices = unique(MyTab$country),
+           selected = unique(MyTab$country),
+           multiple = TRUE,
+           width = "100%",
+           options = list(
+             `actions-box` = TRUE, `selected-text-format`= "static", title = "Country")),
+         
                    
 
-# .. Country ---------------------------------------------------------------
-
-
-  tabBox(width = NULL, id = 'filters', selected = "Language",
-              tabPanel('Country',
-               column(width = 6,
-       checkboxGroupInput(inputId = "country", 
-                                      label = NULL,
-                                     choices = unique(MyTab$country)[1:5],
-                                       selected = unique(MyTab$country)[1:5],
-                                                  width = NULL)),
-       column(width = 6,
-              checkboxGroupInput(inputId = "country2", 
-                                 label = NULL,
-                                 choices = unique(MyTab$country)[6:10],
-                                 selected = unique(MyTab$country)[6:10],
-                                 width = NULL))) ,
-            
 
 # .. Language --------------------------------------------------------------
 
 
-       tabPanel('Language',
-                   checkboxGroupInput(inputId = "language", 
-                                      label = NULL,
-                                      choices = unique(MyTab$language),
-                                      selected = unique(MyTab$language),
-                                      width = NULL)),
+      pickerInput(inputId = "language", 
+                  choices = unique(MyTab$language),
+                  selected = unique(MyTab$language),
+                  multiple = TRUE,
+                  width = "100%",
+                  options = list(
+                    `actions-box` = TRUE, 
+                    `selected-text-format`= "static",
+                    title = "Language")
+                  ),
                
 
 # .. Herbivore -------------------------------------------------------------
 
              
-       tabPanel('Herbivore',
-                column(width=6,  
-                 checkboxGroupInput(inputId = "herbivore", 
-                                      label = NULL,
-                                      choices = unique(MyTab$herbivore_type)[1:5],
-                                      selected = unique(MyTab$herbivore_type)[1:5],
-                                      width = NULL)),
-                column(width=6,  
-                       checkboxGroupInput(inputId = "herbivore2", 
-                                          label = NULL,
-                                          choices = unique(MyTab$herbivore_type)[6:10],
-                                          selected = unique(MyTab$herbivore_type)[6:10],
-                                          width = NULL))),
+       pickerInput(inputId = "herbivore", 
+               choices = unique(MyTab$herbivore_type),
+               selected = unique(MyTab$herbivore_type),
+               multiple = TRUE,
+               width = "100%",
+               options = list(
+               `actions-box` = TRUE, 
+               `selected-text-format`= "static",
+               title = "Herbivore")
+               )
+
+  ),
+column(width = 6,
+                
 
 
 # .. study design ----------------------------------------------------------
 
-  tabPanel('Type',
-           checkboxGroupInput(
-             inputId = 'studydesign',
-             label=NULL,
+  pickerInput(inputId = 'studydesign',
              choices = unique(MyTab$study_design),
              selected = unique(MyTab$study_design),
-             width=NULL
-           )),
+             multiple = TRUE,
+             width = "100%",
+             options = list(
+             `actions-box` = TRUE, 
+             `selected-text-format`= "static",
+             title = "Type")
+             ),
+
 
 
 # .. study method ----------------------------------------------------------
 
-  tabPanel('Method',
-      column(width=6,  
-           checkboxGroupInput(
+  pickerInput(
              inputId = 'studymethod',
-             label=NULL,
-             choices = unique(MyTab$study_method)[1:4],
-             selected = unique(MyTab$study_method)[1:4],
-             width=NULL
-           )),
-      column(width = 6,
-             checkboxGroupInput(
-               inputId = 'studymethod2',
-               label=NULL,
-               choices = unique(MyTab$study_method)[5:7],
-               selected = unique(MyTab$study_method)[5:7],
-               width=NULL))),
-
+             choices = unique(MyTab$study_method),
+             selected = unique(MyTab$study_method),
+             multiple = TRUE,
+             width = "100%",
+             options = list(
+             `actions-box` = TRUE, 
+             `selected-text-format`= "static",
+             title = "Method")
+              ),
+      
 # .. ex. design ------------------------------------------------------------
 
-  tabPanel('Design',
-           checkboxGroupInput(
+  pickerInput(
              inputId = 'expdesign',
-             label=NULL,
              choices = unique(MyTab$experimental_design),
              selected = unique(MyTab$experimental_design),
-             width=NULL
-           ))
+             multiple = TRUE,
+             width = "100%",
+             options = list(
+               `actions-box` = TRUE, 
+               `selected-text-format`= "static",
+               title = "Design")
+           )
 
+ ), # column
 
-  )# TabBox
- ) # fluid row
+# Remaining datapoints ----------------------------------------------------
+verbatimTextOutput('remaining')
 ), # abs.panel1
 
 
 
 
-# Remaining datapoints ----------------------------------------------------
 
 
-absolutePanel(id = "remaining", 
-              class = "panel panel-default", 
-              fixed = F,
-              draggable = TRUE, 
-              top = 420, left = 'auto', right = 40, bottom = "auto",
-              width = 150, height = "auto",
-              verbatimTextOutput('remaining')),
+
 
 # Lower Tabbox ------------------------------------------------------------
 
@@ -216,23 +211,24 @@ tabBox(width = NULL, id = 'additionals',
 # . count cases -----------------------------------------------------------
 
           
-        tabPanel('Count cases',
-                h5("Output is reactive to the filtering in the above map"),
-                radioButtons(inputId = "uni", 
-                             label = "",
-                             choices = c("country", 
-                                         "study_design",
-                                         "study_method",
-                                         "extent_of_spatial_scale",
-                                         "temporal_resolution",
-                                         "measured_response_variable",
-                                         "herbivore_type",
-                                         "herbivory_season",
-                                         "effect_type",
-                                         "management_herbivore",
-                                         "conservation_herbivore",
-                                         "management"
-                                         )),
+  tabPanel('Count cases',
+    h5("Output is reactive to the filtering in the above map"),
+           selectInput(inputId = "uni", 
+                label = "",
+                choices = c("country", 
+                            "study_design",
+                            "study_method",
+                            "extent_of_spatial_scale",
+                            "temporal_resolution",
+                            "measured_response_variable",
+                             "herbivore_type",
+                             "herbivory_season",
+                             "effect_type",
+                             "management_herbivore",
+                             "conservation_herbivore",
+                             "management"),
+                selected = c("country"),
+                selectize = TRUE),
                 plotOutput('univ')),  
      
 
@@ -314,22 +310,17 @@ server <- function(input, output, session){
   
 
 # FILTERED DATASET -------------------------------------
-# First, I need a combine the two inputs for country, herbivore type and studymethod:
 
-country        <-   reactive({c(input$country,        input$country2)})  
-herbivore_type <-   reactive({c(input$herbivore, input$herbivore2)})   
-studymethod    <-   reactive({c(input$studymethod,    input$studymethod2)})   
-  
 
 
   datR <- reactive({
     MyTab[
       dplyr::between(MyTab$year, input$year[1], input$year[2]) &
-        MyTab$country %in% country() &
+        MyTab$country %in% input$country &
         MyTab$language %in% input$language &
-        MyTab$herbivore_type %in% herbivore_type() &
+        MyTab$herbivore_type %in% input$herbivore &
         MyTab$study_design %in% input$studydesign &
-        MyTab$study_method %in% studymethod() &
+        MyTab$study_method %in% input$studymethod &
         MyTab$experimental_design %in% input$expdesign
       ,]
     
@@ -400,7 +391,10 @@ studymethod    <-   reactive({c(input$studymethod,    input$studymethod2)})
   
   
 # Counts ####
-  output$univ <- renderPlot({
+
+
+  
+output$univ <- renderPlot({
     datF <- datR()
     ggplot(data = datF, aes_string(x=input$uni))+
       geom_bar()+
