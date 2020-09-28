@@ -62,17 +62,6 @@ length(levels(as.factor(alldata$title)))#344
 #Number of evidence points
 length(levels(as.factor(alldata$evidence_point_ID)))#803
 
-#Write data
-write.table(alldata,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
-
-#Write data to be imported to EviAtlas
-#Need to solve more link break and quote issues
-alldataW<-as.data.frame(sapply(alldata,function(x)(gsub("\r\n", " ", x))))
-alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
-write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
-#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv. Open in EviAtlas with UTF-8 encoding. ; sep and " quote
-
-
 
 # Mapping -----------------------------------------------------------------
 
@@ -133,6 +122,18 @@ plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
+
+#Save filtered data
+#Write data
+write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
+#Write data to be imported to EviAtlas
+#Need to solve more link break and quote issues
+alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(x)(gsub("\r\n", " ", x))))
+alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
+write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
+#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv. Open in EviAtlas with UTF-8 encoding. ; sep and " quote
+
+
 
 # Mapping in time ---------------------------------------------------------
 #Evidence points - year of publication
