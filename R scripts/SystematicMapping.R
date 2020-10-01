@@ -238,3 +238,28 @@ climatespace2<-ggplot(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10))+geom_poin
 png('Figures/ClimateSpace_Available.png')
 climatespace2
 dev.off()
+
+#Elevation
+#DTM from Guille
+dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
+download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
+dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
+
+#Use raster::getData instead
+charcount <- c('NO', 'SE','FI','RUS','CA','US','IS','GL','SJ') 
+allac2 <- do.call("merge", lapply(charcount, function(x)  raster::getData('alt', country=x)))
+#Issues with USA and Russia
+rusalt<-getData('alt',country='RU')
+rusalt2<-merge(rusalt[[1]],rusalt[[2]])
+usalt<-getData('alt',country='USA')
+usalt2<-do.call("merge",list(usalt[[1]],usalt[[2]],usalt[[3]],usalt[[4]]))
+plot(usalt2)
+arcelev<-merge(allac2,rusalt2,usalt2)
+arcelev<-crop(arcelev,alldata_sp)
+arcelev_laea<-projectRaster(arcelev,crs=polarproj,res=10000)
+arcelev_laea
+arcelev_laea<-mask(arcelev_laea,arczones_laea)
+plot(arcelev_laea)
+# Linking to other GIS variables ------------------------------------------
+
+
