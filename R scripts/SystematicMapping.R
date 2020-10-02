@@ -246,9 +246,9 @@ download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
 dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
 
 #Use raster::getData instead
-charcount <- c('NO', 'SE','FI','RUS','CA','US','IS','GL','SJ') 
+charcount <- c('NO', 'SE','FI','CA','IS','GL','SJ') 
 allac2 <- do.call("merge", lapply(charcount, function(x)  raster::getData('alt', country=x)))
-#Issues with USA and Russia
+#Issues with USA and Russia (crossing 180deg?)
 rusalt<-getData('alt',country='RU')
 rusalt2<-merge(rusalt[[1]],rusalt[[2]])
 usalt<-getData('alt',country='USA')
@@ -256,10 +256,44 @@ usalt2<-do.call("merge",list(usalt[[1]],usalt[[2]],usalt[[3]],usalt[[4]]))
 plot(usalt2)
 arcelev<-merge(allac2,rusalt2,usalt2)
 arcelev<-crop(arcelev,alldata_sp)
-arcelev_laea<-projectRaster(arcelev,crs=polarproj,res=10000)
+
+#Herbivore diversity layers
+vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
+vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
+vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
+vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
+
+
+#Context GIS layers
+bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
+bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
+arcelev_laea<-projectRaster(arcelev,vertherb_sr)
 arcelev_laea
-arcelev_laea<-mask(arcelev_laea,arczones_laea)
+arcelev_laea<-mask(arcelev_laea,vertherb_sr)
 plot(arcelev_laea)
-# Linking to other GIS variables ------------------------------------------
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea)
+names(context_stack)[23]<-'Elevation'
 
+#Extract variables
+alldata_final<-read.csv('Data/AllCodedDataW_forEviAtlas.csv',header=T,sep=';')
+alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
 
+alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
+alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
+alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
+head(alldata_final_sp2)
+
+write.csv(alldata_final_sp2,'Data/AllCodedData_withGIScontext.csv')
+
+#Herbivore diversity space figure
+vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
+herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
+  geom_point(alpha=1/10,size=0.01)+
+  ggtitle("Herbivore space") +
+  xlab("Vertebrate herbivore species richness")+ ylab('Vertebrate herbivore functional diversity')+
+  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
+  geom_point(data=alldata_final_sp2@data,aes(x=ArcticHerbivore_Species.richness*70, y=ArcticHerbivore_Functional.diversity,
+                                             colour=herbivore_type))
+png('Figures/HerbivoreSpace_Available.png')
+herbivorespace
+dev.off()
