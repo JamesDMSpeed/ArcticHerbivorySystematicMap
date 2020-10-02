@@ -4,15 +4,12 @@ library(shinydashboard)
 library(shinyjs)
 library(shinyWidgets)
 library(DT)
-#library(httr)
 library(readr)
 library(leaflet)
 library(mapview)
 library(dplyr)
 library(ggplot2)
-library(raster)
 library(sp)
-#library(eply)
 
 
 # Get Data ----------------------------------------------------------------
@@ -20,14 +17,24 @@ library(sp)
 MyTab <-  read_delim("AllCodedDataW_forEviAtlas.csv", 
                    ";", escape_double = FALSE, trim_ws = TRUE)
 
-
 # Add shortened versions of author lists
+MyTab$author_list <- as.character(MyTab$author_list)
+MyTab$language <- as.character(MyTab$language)
+
 MyTab$author_list2 <- substr(MyTab$author_list, start = 1, stop = 20)
 MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20, 
                               paste0(MyTab$author_list2, " [...]"),
                               MyTab$author_list2)
 
 MyTab$language[MyTab$language == "English"] <- "english"
+MyTab$incl <- NULL
+
+# Get total species list
+species  <- paste(MyTab$herbivore_identity, collapse = ",")
+species2 <-     unlist(strsplit(species, ","))
+species3 <- gsub(" ", "", species2, fixed = T)
+species4 <- unique(species3)
+
 
 # UI ----------------------------------------------------------------------
 
@@ -110,6 +117,17 @@ ui <- dashboardPage(
              `actions-box` = TRUE, `selected-text-format`= "static", title = "Country")),
          
                    
+# .. Species ---------------------------------------------------------------
+
+pickerInput(
+  inputId = "species",
+  choices = sort(species4),
+  selected = sort(species4),
+  multiple = TRUE,
+  width = "100%",
+  options = list(
+    `actions-box` = TRUE, `selected-text-format`= "static", title = "Species")),
+
 
 
 # .. Language --------------------------------------------------------------
@@ -187,17 +205,20 @@ column(width = 6,
                `actions-box` = TRUE, 
                `selected-text-format`= "static",
                title = "Design")
-           )
+           ),
+
+# Remaining datapoints ----------------------------------------------------
+
+verbatimTextOutput('remaining')
+
 
  ), # column
 
-# Remaining datapoints ----------------------------------------------------
-verbatimTextOutput('remaining')
 ), # abs.panel1
 
 
 
-
+#verbatimTextOutput("keepers"),
 
 
 
@@ -313,9 +334,19 @@ server <- function(input, output, session){
 
 
 
+
+    
+ 
   datR <- reactive({
+    for(i in 1:nrow(MyTab)){
+      MyTab$incl[i] <- any(input$species %in% gsub(" ", "", unlist(strsplit(MyTab$herbivore_identity[i], ","))))
+      
+    }
+   
+      
     MyTab[
-      dplyr::between(MyTab$year, input$year[1], input$year[2]) &
+        MyTab$incl == TRUE &
+        dplyr::between(MyTab$year, input$year[1], input$year[2]) &
         MyTab$country %in% input$country &
         MyTab$language %in% input$language &
         MyTab$herbivore_type %in% input$herbivore &
@@ -326,49 +357,44 @@ server <- function(input, output, session){
     
   })
   
-  
 
 # Remaining datapoints ----------------------------------------------------
-  output$remaining <- renderText(paste("Datapoints: ", nrow(datR())))
+  output$remaining <- renderText(nrow(datR()))
 
+ 
   
 # THE MAP ####
   output$theMap <- renderLeaflet({
       
       
+    # Convert to spatial...
+    dat2 <- sp::SpatialPointsDataFrame(coords = datR()[,c("coordinates_E","coordinates_N")], 
+                                       data = datR(),
+                                       proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
     
-      # Convert to spatial...
-      dat2 <- sp::SpatialPointsDataFrame(coords = datR()[,c("coordinates_E","coordinates_N")], 
-                     data = datR(),
-                     proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
-      
-      theMap <- mapview::mapview(dat2,
-                                 layer.name = "Evidence Point",
-                                 map.types = c("Esri.WorldShadedRelief",
-                                               "Esri.WorldImagery"),
-                                 cex = 5, 
-                                 #lwd = 0,
-                                 alpha.regions = 0.5,
-                                 #col.regions = "blue",
-                                 zcol = input$colour,
-                                 popup = leafpop::popupTable(dat2, 
-                                                    row.numbers = F, feature.id = F,
-                                                    zcol = c("evidence_point_ID",
-                                                             "author_list2",
-                                                             "year",
-                                                             "journal",
-                                                             "locality",
-                                                             "elevation",
-                                                             "study_design",
-                                                             "experimental_design",
-                                                             "herbivore_type",
-                                                             "study_method",
-                                                             "effect_type")),
-                                 legend=T
-                                 )
-                               
-      theMap@map
-      
+     m <- mapview::mapview(dat2,
+                  layer.name = "Evidence Point",
+                  map.types = c("Esri.WorldShadedRelief","Esri.WorldImagery"),
+                  cex = 5,
+                  alpha.regions = 0.5,
+                  zcol = input$colour,
+                  popup = leafpop::popupTable(dat2, 
+                                              row.numbers = F, feature.id = F,
+                                              zcol = c("evidence_point_ID",
+                                                       "author_list2",
+                                                       "year",
+                                                       "journal",
+                                                       "locality",
+                                                       "elevation",
+                                                       "study_design",
+                                                       "experimental_design",
+                                                       "herbivore_type",
+                                                       "study_method",
+                                                       "effect_type")),
+                  legend=T)
+                  
+     m@map
+     
     })
     
   
