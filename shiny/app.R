@@ -14,28 +14,146 @@ library(sp)
 
 # Get Data ----------------------------------------------------------------
 
-MyTab <-  read_delim("AllCodedDataW_forEviAtlas.csv", 
-                   ";", escape_double = FALSE, trim_ws = TRUE)
+MyTab <- read_csv("AllCodedData_withGIScontext.csv")
 
-# Add shortened versions of author lists
+# Add shortened versions of author lists, but first, change wierd column name
+if(!"author_list" %in% names(MyTab)) colnames(MyTab)[2] <- "author_list"
 MyTab$author_list <- as.character(MyTab$author_list)
 MyTab$language <- as.character(MyTab$language)
-
 MyTab$author_list2 <- substr(MyTab$author_list, start = 1, stop = 20)
 MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20, 
                               paste0(MyTab$author_list2, " [...]"),
                               MyTab$author_list2)
-
+# Fix alternate spelling
 MyTab$language[MyTab$language == "English"] <- "english"
+# Make a colums whihc is later used in the filter by species function
 MyTab$incl <- NULL
+# Scale species richness whihc is currently as proportions
+MyTab$ArcticHerbivore_Species.richness <- MyTab$ArcticHerbivore_Species.richness*70
+MyTab[,c("bio1", 
+         "bio2",
+         "bio5",
+         "bio6",
+         "bio7",
+         "bio8",
+         "bio9",
+         "bio10",
+         "bio11")] <- MyTab[,c("bio1", 
+                               "bio2",
+                               "bio5",
+                               "bio6",
+                               "bio7",
+                               "bio8",
+                               "bio9",
+                               "bio10",
+                               "bio11")]/10
 
-# Get total species list
+MyTab <- rename(MyTab,
+                "Annual_Mean_Temperature" = bio1,
+                "Mean_Diurnal_Range" = bio2,
+                "Isothermality" = bio3,
+                "Temperature_Seasonality" = bio4,
+                "Max_Temperature_of_Warmest_Month" = bio5,
+                "Min_Temperature_of_Coldest_Month" = bio6,
+                "Temperature_Annual_Range" = bio7,
+                "Mean_Temperature_of_Wettest_Quarter" = bio8,
+                "Mean_Temperature_of_Driest_Quarter" = bio9,
+                "Mean_Temperature_of_Warmest_Quarter" = bio10,
+                "Mean_Temperature_of_Coldest_Quarter" = bio11,
+                "Annual_Precipitation" = bio12,
+                "Precipitation_of_Wettest_Month" = bio13,
+                "Precipitation_of_Driest_Month" = bio14,
+                "Precipitation_Seasonality" = bio15,
+                "Precipitation_of_Wettest_Quarter" = bio16,
+                "Precipitation_of_Driest_Quarter" = bio17,
+                "Precipitation_of_Warmest_Quarter" = bio18,
+                "Precipitation_of_Coldest_Quarter" = bio19)
+
+
+
+# Get total species list --------------------------------------------------
 species  <- paste(MyTab$herbivore_identity, collapse = ",")
 species2 <-     unlist(strsplit(species, ","))
 species3 <- gsub(" ", "", species2, fixed = T)
 species4 <- unique(species3)
+rm(species, species2, species3)
 
 
+# Climate space data ------------------------------------------------------
+
+# Import dataset with the ranges of environmental variables within the study region
+RangeofEcoContexts <- read_csv("RangeofEcoContexts.csv")
+# remove row and id columns
+range <- select(RangeofEcoContexts,-X1, -ID)
+# remove empty rows
+range <- range[rowSums(is.na(range)) != ncol(range),]
+rm(RangeofEcoContexts)
+# scale variables
+range[,c("bio1", 
+         "bio2",
+         "bio5",
+         "bio6",
+         "bio7",
+         "bio8",
+         "bio9",
+         "bio10",
+         "bio11")] <- range[,c("bio1", 
+                               "bio2",
+                               "bio5",
+                               "bio6",
+                               "bio7",
+                               "bio8",
+                               "bio9",
+                               "bio10",
+                               "bio11")]/10
+# Rename columns
+range <- rename(range,
+                "Annual_Mean_Temperature" = bio1,
+                "Mean_Diurnal_Range" = bio2,
+                "Isothermality" = bio3,
+                "Temperature_Seasonality" = bio4,
+                "Max_Temperature_of_Warmest_Month" = bio5,
+                "Min_Temperature_of_Coldest_Month" = bio6,
+                "Temperature_Annual_Range" = bio7,
+                "Mean_Temperature_of_Wettest_Quarter" = bio8,
+                "Mean_Temperature_of_Driest_Quarter" = bio9,
+                "Mean_Temperature_of_Warmest_Quarter" = bio10,
+                "Mean_Temperature_of_Coldest_Quarter" = bio11,
+                "Annual_Precipitation" = bio12,
+                "Precipitation_of_Wettest_Month" = bio13,
+                "Precipitation_of_Driest_Month" = bio14,
+                "Precipitation_Seasonality" = bio15,
+                "Precipitation_of_Wettest_Quarter" = bio16,
+                "Precipitation_of_Driest_Quarter" = bio17,
+                "Precipitation_of_Warmest_Quarter" = bio18,
+                "Precipitation_of_Coldest_Quarter" = bio19)
+range$ArcticHerbivore_Species.richness <- range$ArcticHerbivore_Species.richness*70
+
+
+# List environmental and ecological variables -----------------------------
+EEvars <- c(
+  "ArcticHerbivore_Species.richness",                         
+  "ArcticHerbivore_Phylogenetic.diversity",                    
+  "ArcticHerbivore_Functional.diversity",
+  "Annual_Mean_Temperature",
+  "Mean_Diurnal_Range",
+  "Isothermality",
+  "Temperature_Seasonality",
+  "Max_Temperature_of_Warmest_Month",
+  "Min_Temperature_of_Coldest_Month",
+  "Temperature_Annual_Range",
+  "Mean_Temperature_of_Wettest_Quarter",
+  "Mean_Temperature_of_Driest_Quarter",
+  "Mean_Temperature_of_Warmest_Quarter",
+  "Mean_Temperature_of_Coldest_Quarter",
+  "Annual_Precipitation",
+  "Precipitation_of_Wettest_Month",
+  "Precipitation_of_Driest_Month",
+  "Precipitation_Seasonality",
+  "Precipitation_of_Wettest_Quarter",
+  "Precipitation_of_Driest_Quarter",
+  "Precipitation_of_Warmest_Quarter",
+  "Precipitation_of_Coldest_Quarter")
 # UI ----------------------------------------------------------------------
 
 ui <- dashboardPage(
@@ -75,7 +193,7 @@ ui <- dashboardPage(
                    # Changing the colour of the slider from blue to orange
         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: orange} .irs-from, .irs-to, .irs-single {background: orange }")),   
 
-
+     
 # . Year and Colour ---------------------------------------------------------
 
 
@@ -256,19 +374,57 @@ tabBox(width = NULL, id = 'additionals',
 # . trends ----------------------------------------------------------------
 
      
-         tabPanel('Trends',
+         tabPanel('Temporal trends',
                   h5("Output is reactive to the filtering in the above map"),
-                  radioButtons(inputId = "uni2", 
-                               label = "",
-                               choices = c("year")), 
+                 # radioButtons(inputId = "uni2", 
+                 #              label = "",
+                 #              choices = c("year")), 
                   plotOutput('trends')),
 
 
 # . pairwise plots --------------------------------------------------------
 
      
-     #    tabPanel('Pairwise Plots',
-     #             h5("Coming soon....")),
+  tabPanel('Pairwise Plots',
+      fluidRow(h5("The blue circles are the evidence points 
+                  identified in the systematic review. The darker 
+                  opaque points show all possible values for each 
+                  variable inside the study region (the Arctic circle)")),
+      fluidRow(
+           column(width = 3,
+           pickerInput(
+             inputId = "var1",
+             label = "X variable", 
+             choices = EEvars,
+             selected = EEvars[4]
+           )),
+           column(width = 3,
+           pickerInput(
+             inputId = "var2",
+             label = "Y variable", 
+             choices = EEvars,
+             selected = EEvars[15]
+           )),
+           column(width = 3,
+           pickerInput(
+             inputId = "var3",
+             label = "Size variable", 
+             choices = c("NULL", EEvars),
+             selected = EEvars[1]
+           ))),
+           #column(width=3,
+           #pickerInput(
+           #  inputId = "var4",
+           #  label = "Colour", 
+           #  choices = c("country", "language", "herbivore_type", 
+           #                        "effect_type", "experimental_design", 
+           #                        "study_method", "study_design")
+           #  ))),
+      fluidRow(     
+          plotOutput('space')),
+      fluidRow(
+          h5("For information about the climatic variables, 
+             go to: https://www.worldclim.org/data/bioclim.html"))),
 
 
 
@@ -431,23 +587,27 @@ output$univ <- renderPlot({
   
   
 # pairwise ####
-#output$univ <- renderPlot({
-#  
-#  ggplot(data = datR(), aes_string(x=input$myX, y=input$myY))+
-#    ???
-#    theme_bw()+
-#    theme(text = element_text(size = 20))
-#})
+output$space <- renderPlot({
   
+  ggplot(data = range, aes_string(x = input$var1, y = input$var2))+
+    geom_point(alpha=5/10, size=2)+
+    theme_bw()+
+   geom_point(data = MyTab, aes_string(size = input$var3), 
+                                       #colour = input$var4, fill=input$var4),
+              shape=21, colour = "blue", fill = "blue", stroke = 1, alpha=0.3)
+})
 
 # TRENDS ####
   output$trends <- renderPlot({
     
-    ggplot(data = datR(), aes_string(x=input$uni2))+
+    ggplot(data = datR(), aes(x=year))+
       geom_histogram()+
       theme_bw()+
       theme(text = element_text(size = 20))
   })
+  
+
+  
   
 # DOWNLOAD ####
   output$downloadData <- downloadHandler(
