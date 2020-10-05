@@ -58,9 +58,9 @@ View(alldata)#Looks good!
 
 
 #Number of studies
-length(levels(as.factor(alldata$title)))#344
+length(levels(as.factor(alldata$title)))  #329
 #Number of evidence points
-length(levels(as.factor(alldata$evidence_point_ID)))#803
+length(levels(as.factor(alldata$evidence_point_ID)))  #715
 
 
 # Mapping -----------------------------------------------------------------
