@@ -354,7 +354,7 @@ tabBox(width = NULL, id = 'additionals',
   tabPanel('Count cases',
       h5("This figure is responsive to the filters applied above"),
            selectInput(inputId = "uni", 
-                label = "Choose whickh variable to plot",
+                label = "Choose which variable to plot",
                 choices = c("country", 
                             "study_design",
                             "study_method",
@@ -385,9 +385,9 @@ tabBox(width = NULL, id = 'additionals',
      
   tabPanel('Pairwise Plots',
       fluidRow(h5("The blue circles are the evidence points 
-                  identified in the systematic review. The darker 
-                  opaque points show all possible values for each 
-                  variable inside the study region (the Arctic circle)")),
+                  identified in the systematic review (and responsive to the filters applied above).
+                  The darker opaque points show all possible values for each 
+                  variable inside the study region (the CAFF Arctic boundary)")),
       fluidRow(
            column(width = 3,
            pickerInput(
@@ -440,7 +440,7 @@ tabBox(width = NULL, id = 'additionals',
 
          
          tabPanel('Responsive table',
-                  h5("This figure is responsive to the filters applied above"),
+                  h5("This table is responsive to the filters applied above"),
                   
                   DTOutput('responsiveTable'))
          
@@ -451,7 +451,7 @@ tabBox(width = NULL, id = 'additionals',
 
 
 
-h4("Press the download button to download a speadsheet copy of raw data:"),
+h4("Press the download button to download a  copy of raw data:"),
 downloadButton("downloadData", "Download")
 
                 
