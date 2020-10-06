@@ -13,6 +13,7 @@ library(rgdal)#Spatial data
 library(raster)#Climate data
 library(ggplot2)
 library(gridExtra)
+library(rgeos)
 
 # Data Import and wrangling -----------------------------------------------
 
@@ -93,7 +94,8 @@ alldatasp1<-alldata
 #Change to spatial points df
 alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 alldata_splaea<-spTransform(alldata_sp,polarproj)
-
+#obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
+#obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
 #Get CAFF boundaries to add
 arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
@@ -245,9 +247,9 @@ dev.off()
 
 #Elevation
 #DTM from Guille
-dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
-download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
-dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
+#dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
+#download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
+#dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
 
 #Use raster::getData instead
 charcount <- c('NO', 'SE','FI','CA','IS','GL','SJ') 
@@ -295,7 +297,7 @@ alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,cr
 head(alldata_final_sp2)
 
 write.csv(alldata_final_sp2,'Data/AllCodedData_withGIScontext.csv')
-
+write.csv(alldata_final_sp2,'shiny/AllCodedData_withGIScontext.csv')
 #Herbivore diversity space figure
 vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
 herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
