@@ -10,6 +10,7 @@ library(mapview)
 library(dplyr)
 library(ggplot2)
 library(sp)
+library(stringr)
 
 
 # Get Data ----------------------------------------------------------------
@@ -69,7 +70,7 @@ MyTab <- rename(MyTab,
                 "Precipitation_of_Warmest_Quarter" = bio18,
                 "Precipitation_of_Coldest_Quarter" = bio19)
 
-
+MyTab <- rename(MyTab, "Elevation" = elevation_DEM)
 
 # Get total species list --------------------------------------------------
 species  <- paste(MyTab$herbivore_identity, collapse = ",")
@@ -135,6 +136,7 @@ EEvars <- c(
   "ArcticHerbivore_Species.richness",                         
   "ArcticHerbivore_Phylogenetic.diversity",                    
   "ArcticHerbivore_Functional.diversity",
+  "Elevation",
   "Annual_Mean_Temperature",
   "Mean_Diurnal_Range",
   "Isothermality",
@@ -336,14 +338,13 @@ verbatimTextOutput('remaining')
 
 
 
-#verbatimTextOutput("keepers"),
-
+uiOutput('activeFilters'), br(),
 
 
 
 # Lower Tabbox ------------------------------------------------------------
 
-     
+
 tabBox(width = NULL, id = 'additionals',
 
 
@@ -351,9 +352,9 @@ tabBox(width = NULL, id = 'additionals',
 
           
   tabPanel('Count cases',
-    h5("Output is reactive to the filtering in the above map"),
+      h5("This figure is responsive to the filters applied above"),
            selectInput(inputId = "uni", 
-                label = "",
+                label = "Choose which variable to plot",
                 choices = c("country", 
                             "study_design",
                             "study_method",
@@ -375,10 +376,7 @@ tabBox(width = NULL, id = 'additionals',
 
      
          tabPanel('Temporal trends',
-                  h5("Output is reactive to the filtering in the above map"),
-                 # radioButtons(inputId = "uni2", 
-                 #              label = "",
-                 #              choices = c("year")), 
+                  h5("This figure is responsive to the filters applied above"),
                   plotOutput('trends')),
 
 
@@ -387,32 +385,33 @@ tabBox(width = NULL, id = 'additionals',
      
   tabPanel('Pairwise Plots',
       fluidRow(h5("The blue circles are the evidence points 
-                  identified in the systematic review. The darker 
-                  opaque points show all possible values for each 
-                  variable inside the study region (the Arctic circle)")),
+                  identified in the systematic review (and responsive to the filters applied above).
+                  The darker opaque points show all possible values for each 
+                  variable inside the study region (the CAFF Arctic boundary)")),
       fluidRow(
            column(width = 3,
            pickerInput(
              inputId = "var1",
              label = "X variable", 
              choices = EEvars,
-             selected = EEvars[4]
+             selected = "Annual_Mean_Temperature",
            )),
            column(width = 3,
            pickerInput(
              inputId = "var2",
              label = "Y variable", 
              choices = EEvars,
-             selected = EEvars[15]
+             selected = "Annual_Precipitation"
            )),
            column(width = 3,
            pickerInput(
              inputId = "var3",
              label = "Size variable", 
              choices = c("NULL", EEvars),
-             selected = EEvars[1]
+             selected = "ArcticHerbivore_Species.richness"
            ))),
-           #column(width=3,
+          # column(width=3,
+                  
            #pickerInput(
            #  inputId = "var4",
            #  label = "Colour", 
@@ -441,7 +440,8 @@ tabBox(width = NULL, id = 'additionals',
 
          
          tabPanel('Responsive table',
-                  h5("This table is responsive to the filters applied in the map"),
+                  h5("This table is responsive to the filters applied above"),
+                  
                   DTOutput('responsiveTable'))
          
          ),  # End panel box
@@ -451,7 +451,7 @@ tabBox(width = NULL, id = 'additionals',
 
 
 
-h4("Press the download button to download a speadsheet copy of raw data:"),
+h4("Press the download button to download a  copy of raw data:"),
 downloadButton("downloadData", "Download")
 
                 
@@ -522,10 +522,10 @@ server <- function(input, output, session){
 # THE MAP ####
   output$theMap <- renderLeaflet({
       
-      
+    dat <- datR()
     # Convert to spatial...
-    dat2 <- sp::SpatialPointsDataFrame(coords = datR()[,c("coordinates_E","coordinates_N")], 
-                                       data = datR(),
+    dat2 <- sp::SpatialPointsDataFrame(coords = dat[,c("coordinates_E","coordinates_N")], 
+                                       data = dat,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
     
      m <- mapview::mapview(dat2,
@@ -557,7 +557,8 @@ server <- function(input, output, session){
 # Responsive Table ####
   output$responsiveTable <- 
     renderDataTable({
-      DT::datatable(datR(), 
+      ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
+      DT::datatable(dat, 
         options = list(
           scrollX = TRUE,
           columnDefs = list(list(
@@ -577,8 +578,8 @@ server <- function(input, output, session){
 
   
 output$univ <- renderPlot({
-    datF <- datR()
-    ggplot(data = datF, aes_string(x=input$uni))+
+   ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
+    ggplot(data = dat, aes_string(x=input$uni))+
       geom_bar()+
       coord_flip()+
       theme_bw()+
@@ -589,19 +590,22 @@ output$univ <- renderPlot({
 # pairwise ####
 output$space <- renderPlot({
   
+  
+  ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
   ggplot(data = range, aes_string(x = input$var1, y = input$var2))+
     geom_point(alpha=5/10, size=2)+
     theme_bw()+
-   geom_point(data = MyTab, aes_string(size = input$var3), 
+   geom_point(data = dat, aes_string(size = input$var3), 
                                        #colour = input$var4, fill=input$var4),
               shape=21, colour = "blue", fill = "blue", stroke = 1, alpha=0.3)
 })
 
 # TRENDS ####
   output$trends <- renderPlot({
-    
-    ggplot(data = datR(), aes(x=year))+
+    ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
+    ggplot(data = dat, aes(x=year))+
       geom_histogram()+
+      geom_histogram(data = MyTab, alpha = 0.3)+
       theme_bw()+
       theme(text = element_text(size = 20))
   })
@@ -615,7 +619,113 @@ output$space <- renderPlot({
     content = function(file) {
       write.csv( MyTab, file,  row.names = FALSE)}
   )
+  
 
+# Active filters --------------------------------------------------------------
+  output$years <- renderPrint({
+    t <- input$year
+    #t <- strsplit(t, "\\s+")
+    #t <- noquote(unlist(t))
+    
+    t
+  })
+  
+  output$countries <- renderPrint({
+    t <- input$country
+    if(length(t) == length(unique(MyTab$country))) {t <- "All"} else{
+    #t <- gsub(pattern="\\[",replacement = "",t)
+    #t <- stringr::str_replace(t, " \\[.*\\]", "")
+    t <- strsplit(t, "\\s+")
+    t <- noquote(unlist(t))
+    }
+    t
+  })
+   
+ 
+  output$sp <- renderPrint({
+    t <- input$species
+    if(length(t) == length(species4)) {t <- "All"} else{
+      t <- strsplit(t, "\\s+")
+      t <- noquote(unlist(t))
+    }
+    
+    t
+  })
+
+  output$la <- renderPrint({
+    t <- input$language
+    if(length(t) == length(unique(MyTab$language))) {t <- "All"} else{
+      t <- strsplit(t, "\\s+")
+      t <- noquote(unlist(t))
+    }
+    t
+  })
+ 
+   output$la <- renderPrint({
+    t <- input$language
+    if(length(t) == length(unique(MyTab$language))) {t <- "All"} else{
+      t <- strsplit(t, "\\s+")
+      t <- noquote(unlist(t))
+    }
+    t
+  })
+   
+   output$he <- renderPrint({
+     t <- input$herbivore
+     if(length(t) == length(unique(MyTab$herbivore_type))) {t <- "All"} else{
+       t <- strsplit(t, "\\s+")
+       t <- noquote(unlist(t))
+     }
+     t
+   })
+   
+   output$ty <- renderPrint({
+     t <- input$studydesign
+     if(length(t) == length(unique(MyTab$study_design))) {t <- "All"} else{
+       t <- strsplit(t, "\\s+")
+       t <- noquote(unlist(t))
+     }
+     t
+   })
+   output$me <- renderPrint({
+     t <- input$studymethod
+     if(length(t) == length(unique(MyTab$study_method))) {t <- "All"} else{
+       t <- strsplit(t, "\\s+")
+       t <- noquote(unlist(t))
+     }
+     t
+   })
+   output$ex <- renderPrint({
+     t <- input$expdesign
+     if(length(t) == length(unique(MyTab$experimental_design))) {t <- "All"} else{
+       t <- strsplit(t, "\\s+")
+       t <- noquote(unlist(t))
+     }
+     t
+   })
+   
+output$activeFilters <- renderUI({
+    dropdownButton(
+      switchInput(
+        inputId = "filteron",
+        label = "Filters", 
+        value = TRUE,
+        labelWidth = "80px"),
+      h3("Active Filters"),
+      h4("Years: "), textOutput('years'),
+      h4("Countries: "), textOutput('countries'),
+      h4("Species: "), textOutput('sp'),
+      h4("Language: "), textOutput('la'),
+      h4("Herbivore types: "), textOutput('he'),
+      h4("Study design types: "), textOutput('ty'),
+      h4("Study method: "), textOutput('me'),
+      h4("Experimental design: "), textOutput('ex'),
+      circle = TRUE, status = "info",
+      icon = icon("gear"), width = "300px",
+      tooltip = tooltipOptions(title = "Click to see which filters are active")
+    )
+  })
+  
 }
 shinyApp(ui = ui, server = server)
 

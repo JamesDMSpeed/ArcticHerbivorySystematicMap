@@ -13,6 +13,7 @@ library(rgdal)#Spatial data
 library(raster)#Climate data
 library(ggplot2)
 library(gridExtra)
+library(rgeos)
 
 # Data Import and wrangling -----------------------------------------------
 
@@ -93,7 +94,8 @@ alldatasp1<-alldata
 #Change to spatial points df
 alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 alldata_splaea<-spTransform(alldata_sp,polarproj)
-
+#obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
+#obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
 #Get CAFF boundaries to add
 arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
@@ -117,6 +119,10 @@ plot(arczones_buffer,border=2,add=T)
 alldata_splaea_removeoutsidearctic<-alldata_splaea[arczones_buffer,]
 dim(alldata_splaea)
 dim(alldata_splaea_removeoutsidearctic)
+
+#List removed studies
+removedstudies<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic$evidence_point_ID==F,]
+write.csv(removedstudies@data,'Data/StudiesOutsideCAFFBound.csv')
 
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
@@ -241,9 +247,9 @@ dev.off()
 
 #Elevation
 #DTM from Guille
-dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
-download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
-dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
+#dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
+#download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
+#dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
 
 #Use raster::getData instead
 charcount <- c('NO', 'SE','FI','CA','IS','GL','SJ') 
@@ -274,6 +280,13 @@ plot(arcelev_laea)
 context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea)
 names(context_stack)[23]<-'Elevation'
 
+context_range<-extract(context_stack,1:ncell(context_stack),df=T)
+write.csv(context_range,'Data/RangeofEcoContexts.csv')
+#NDVI trends
+ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
+download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc')
+ndvitrend<-stack('Data/GIS_layers/NDVItrend.nc')#Can't open
+
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataW_forEviAtlas.csv',header=T,sep=';')
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
@@ -284,7 +297,7 @@ alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,cr
 head(alldata_final_sp2)
 
 write.csv(alldata_final_sp2,'Data/AllCodedData_withGIScontext.csv')
-
+write.csv(alldata_final_sp2,'shiny/AllCodedData_withGIScontext.csv')
 #Herbivore diversity space figure
 vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
 herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
