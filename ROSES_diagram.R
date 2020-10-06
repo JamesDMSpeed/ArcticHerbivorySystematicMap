@@ -30,7 +30,7 @@ library(tidyverse)
 #instead, I just saved the file in my computer and import from there
 
 #set the working directory
-setwd("C:/Users/isabel/OneDrive - Landb?na?arh?sk?li ?slands/ISABEL/HN systematic map")
+setwd("C:/Users/isabel/OneDrive - Landbúnaðarháskóli Íslands/ISABEL/HN systematic map")
 overview <- read_excel("Overview_all_scored.xlsx", sheet="all entries", range=cell_cols("A:AD"))
 
 #check
@@ -82,14 +82,14 @@ sum(score[score$current_score %in% c("remove_correction","remove_dataset",
                                  "remove_map","remove_suppplement"), ]$n)  #16
 
 #studies excluded based on locality (both exclude_site_coordinates and exclude_site_text)
-sum(score[score$current_score %in% c("exclude_site_coordinates","exclude_site_text"), ]$n)  #88
+sum(score[score$current_score %in% c("exclude_site_coordinates","exclude_site_text"), ]$n)  #93
 
 
 #total number of studies excluded at full stage phase
 sum(score[score$current_score %in% c("remove_correction","remove_dataset",
                                  "remove_map","remove_suppplement", 
                                  "exclude_site_coordinates","exclude_site_text",
-                                 "exclude_full_text"), ]$n)  #528
+                                 "exclude_full_text"), ]$n)  #533
 
 #number of documents after full text screening
   length(levels(as.factor(overview$ID_Eeva))) - score[score$current_score == "remove_duplicate", ]$n -
@@ -99,7 +99,7 @@ sum(score[score$current_score %in% c("remove_correction","remove_dataset",
                                                 sum(score[score$current_score %in% c("remove_correction","remove_dataset",
                                                        "remove_map","remove_suppplement", 
                                                        "exclude_site_coordinates","exclude_site_text",
-                                                       "exclude_full_text"), ]$n)  #329
+                                                       "exclude_full_text"), ]$n)  #324
   #this should be the same as 
     score[score$current_score == "include", ]$n
     
