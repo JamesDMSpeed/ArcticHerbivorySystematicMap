@@ -522,10 +522,10 @@ server <- function(input, output, session){
 # THE MAP ####
   output$theMap <- renderLeaflet({
       
-      
+    dat <- datR()
     # Convert to spatial...
-    dat2 <- sp::SpatialPointsDataFrame(coords = datR()[,c("coordinates_E","coordinates_N")], 
-                                       data = datR(),
+    dat2 <- sp::SpatialPointsDataFrame(coords = dat[,c("coordinates_E","coordinates_N")], 
+                                       data = dat,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
     
      m <- mapview::mapview(dat2,
@@ -605,6 +605,7 @@ output$space <- renderPlot({
     ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
     ggplot(data = dat, aes(x=year))+
       geom_histogram()+
+      geom_histogram(data = MyTab, alpha = 0.3)+
       theme_bw()+
       theme(text = element_text(size = 20))
   })
