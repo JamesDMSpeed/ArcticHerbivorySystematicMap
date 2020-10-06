@@ -118,6 +118,10 @@ alldata_splaea_removeoutsidearctic<-alldata_splaea[arczones_buffer,]
 dim(alldata_splaea)
 dim(alldata_splaea_removeoutsidearctic)
 
+#List removed studies
+removedstudies<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic$evidence_point_ID==F,]
+write.csv(removedstudies@data,'Data/StudiesOutsideCAFFBound.csv')
+
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
@@ -273,6 +277,13 @@ arcelev_laea<-mask(arcelev_laea,vertherb_sr)
 plot(arcelev_laea)
 context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea)
 names(context_stack)[23]<-'Elevation'
+
+context_range<-extract(context_stack,1:ncell(context_stack),df=T)
+write.csv(context_range,'Data/RangeofEcoContexts.csv')
+#NDVI trends
+ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
+download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc')
+ndvitrend<-stack('Data/GIS_layers/NDVItrend.nc')#Can't open
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataW_forEviAtlas.csv',header=T,sep=';')
