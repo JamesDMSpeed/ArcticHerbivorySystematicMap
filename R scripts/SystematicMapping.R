@@ -263,6 +263,15 @@ plot(usalt2)
 arcelev<-merge(allac2,rusalt2,usalt2)
 arcelev<-crop(arcelev,alldata_sp)
 
+#Distance from coast
+distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
+distancefromcoast
+plot(distancefromcoast)
+
+#Geographic stack
+geographicstack<-stack(crop(arcelev_laea,distancefromcoast),crop(distancefromcoast,arcelev_laea))
+names(geographicstack)[1]<-'Elevation'
+
 #Herbivore diversity layers
 vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
 vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
@@ -284,8 +293,27 @@ context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 #NDVI trends
 ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
-download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc')
-ndvitrend<-stack('Data/GIS_layers/NDVItrend.nc')#Can't open
+download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
+ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend')#Can't open
+lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
+
+plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
+ndvitrend<-t(flip(ndvitrend,direction=2))
+plot(ndvitrend)
+lostrend<-(flip(lstrend,direction=1))
+plot(lostrend)
+
+ndvitrend@crs<-bioclimdat@crs
+lostrend@crs<-bioclimdat@crs
+ndvitrend_laea<-projectRaster(ndvitrend,crs=arczones)
+lostrend_laea<-projectRaster(lostrend,crs=arczones)
+plot(ndvitrend_laea)
+plot(lostrend_laea)
+points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
+plot(arczones,add=T)
+
+climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataW_forEviAtlas.csv',header=T,sep=';')
@@ -293,11 +321,15 @@ alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,allda
 
 alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
+alldata_final_sp1$distance_from_coast<-extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
-head(alldata_final_sp2)
+alldata_final_sp3<-cbind(alldata_final_sp2,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2))
+head(alldata_final_sp3)
 
-write.csv(alldata_final_sp2,'Data/AllCodedData_withGIScontext.csv')
-write.csv(alldata_final_sp2,'shiny/AllCodedData_withGIScontext.csv')
+write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
+write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
+
+
 #Herbivore diversity space figure
 vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
 herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
