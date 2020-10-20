@@ -14,6 +14,7 @@ library(raster)#Climate data
 library(ggplot2)
 library(gridExtra)
 library(rgeos)
+library(RColorBrewer)#Colours 
 
 # Data Import and wrangling -----------------------------------------------
 
@@ -63,6 +64,22 @@ length(levels(as.factor(alldata$title)))  #329
 #Number of evidence points
 length(levels(as.factor(alldata$evidence_point_ID)))  #715
 
+#Fix issue with different levels for extent of spatial scale
+levels(as.factor(alldata$extent_of_spatial_scale))
+alldata$extent_of_spatial_scale<-as.factor(alldata$extent_of_spatial_scale)
+levels(alldata$extent_of_spatial_scale)<-
+  c("1x1 km or less",                                          
+    "from 100x100 km to 1000x1000 km",                         
+    "from 100x100 km to 1000x1000 km",
+    "from 10x10 km to 100x100 km"     ,                        
+    "from 10x10 km to 100x100 km"      ,
+    "from 1x1 km to 10x10 km"           ,                      
+    "from 1x1 km to 10x10 km"            ,
+    "larger than 1000x1000 km"            ,                    
+    "not relevant"                         ,                   
+    "not reported"  )
+levels(alldata$extent_of_spatial_scale)
+
 
 # Mapping -----------------------------------------------------------------
 
@@ -89,6 +106,11 @@ bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
 bPolslaea<-spTransform(bPols,polarproj)
 plot(bPolslaea,ylim=c(55,90))
 
+#CAVM arctic subzones
+subzones<-readOGR('Data/cp_biozone_la_shp','cavm_all polygon')
+subzones
+spplot(subzones,zcol=subzones$ZONE)
+
 #Spatial evidence points
 alldatasp1<-alldata
 #Change to spatial points df
@@ -102,7 +124,6 @@ arczones_laea<-spTransform(arczones,polarproj)
 subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
 
 #Figure
-pdf('Figures/SpatialDistribution.pdf')
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
@@ -138,7 +159,6 @@ alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(
 alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
 #Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv. Open in EviAtlas with UTF-8 encoding. ; sep and " quote
-
 
 
 # Mapping in time ---------------------------------------------------------
@@ -262,15 +282,24 @@ usalt2<-do.call("merge",list(usalt[[1]],usalt[[2]],usalt[[3]],usalt[[4]]))
 plot(usalt2)
 arcelev<-merge(allac2,rusalt2,usalt2)
 arcelev<-crop(arcelev,alldata_sp)
+plot(arcelev)
+
+arcelev_laea<-projectRaster(arcelev,vertherb_sr)
+arcelev_laea
+arcelev_laea<-mask(arcelev_laea,vertherb_sr)
+plot(arcelev_laea)
 
 #Distance from coast
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
 distancefromcoast
 plot(distancefromcoast)
 
+
 #Geographic stack
 geographicstack<-stack(crop(arcelev_laea,distancefromcoast),crop(distancefromcoast,arcelev_laea))
 names(geographicstack)[1]<-'Elevation'
+geographicstack$DistancetoCoast<-mask(geographicstack$DistancetoCoast,geographicstack$Elevation)
+plot(geographicstack)
 
 #Herbivore diversity layers
 vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
@@ -282,10 +311,6 @@ vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
 #Context GIS layers
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
-arcelev_laea<-projectRaster(arcelev,vertherb_sr)
-arcelev_laea
-arcelev_laea<-mask(arcelev_laea,vertherb_sr)
-plot(arcelev_laea)
 context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea)
 names(context_stack)[23]<-'Elevation'
 
@@ -313,6 +338,7 @@ points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
 climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
 
 #Extract variables
@@ -331,14 +357,104 @@ write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 
 
 #Herbivore diversity space figure
+alldata_final_sp2$SimpleHerbivore<-as.factor(alldata_final_sp2$herbivore_type)
+levels(alldata_final_sp2$SimpleHerbivore)<-c(
+  rep('Invertebrate',times=3),
+                                             'Vertebrate',
+                                             'Invertebrate','Invertebrate','Multiple','Vertebrate','Unknown','Vertebrate')
+
+
 vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
 herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
-  geom_point(alpha=1/10,size=0.01)+
+  geom_point(size=0.01)+
   ggtitle("Herbivore space") +
   xlab("Vertebrate herbivore species richness")+ ylab('Vertebrate herbivore functional diversity')+
   #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
   geom_point(data=alldata_final_sp2@data,aes(x=ArcticHerbivore_Species.richness*70, y=ArcticHerbivore_Functional.diversity,
-                                             colour=herbivore_type))
+                                             colour=SimpleHerbivore))
 png('Figures/HerbivoreSpace_Available.png')
 herbivorespace
 dev.off()
+
+
+#Geographic space figure
+geogcontextdat<-extract(geographicstack,1:ncell(geographicstack),df=T)
+geospace<-ggplot(data=geogcontextdat,mapping=aes(x=DistancetoCoast,y=Elevation))+
+  geom_point(alpha=2/10,size=0.2)+
+  ggtitle("Geographic space") +
+  xlab("Distance to coast (km)")+ ylab('Elevation (m)')+
+  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
+  geom_point(data=alldata_final_sp3@data,aes(x=distance_from_coast, y=elevation_DEM,
+                                             colour=coordinates_N
+                                            ))
+geospace+theme(legend.position=(c(0.9,0.8)))
+png('Figures/GeographicSpace_Available.png')
+geospace
+dev.off()
+
+
+#Climate change figure
+climcontextdat<-extract(climatechangestack,1:ncell(climatechangestack),df=T)
+climchangespace<-ggplot(data=climcontextdat,mapping=aes(x=GrowingSeasonLength.trend,y=NDVI.trend))+
+  geom_point(alpha=1/10,size=0.1)+
+  ggtitle("Climate change space") +
+  xlab("Change in growing season length (days per decade")+ ylab('Change in NDVI (% per decade)')+
+  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
+  geom_point(data=alldata_final_sp3@data,aes(x=GrowingSeasonLength.trend, y=NDVI.trend,
+                                              colour=coordinates_N
+  ))
+png('Figures/ClimateChangeSpace_Available.png')
+climchangespace
+dev.off()
+
+legtit<- "Latitude (°)"
+png('Figures/4contexts.png')
+tiff('Figures/4contexts.tif')
+grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
+             climchangespace+theme(legend.position="none"),
+             geospace+theme(legend.position="none"),
+             herbivorespace+theme(legend.position=c(0.8,0.2))+theme(legend.title=element_blank()),
+             ncol=2)
+dev.off()
+dev.off()
+
+
+
+
+#Distribution figure
+subzonesR<-rasterize(subzones,bioclimdat_laea,field='ZONE')
+#Simplify CAVM zones
+agzones<-aggregate(subzones,by=list(subzones$ZONE),dissolve=T,FUN='mean')
+#Set ice to NA
+agzones$ZONE[agzones$ZONE==0]<-NA
+
+pdf('Figures/SpatialDistribution.pdf')
+tiff('Figures/SpatialDistribution.tif')
+colzones<-brewer.pal(6,'YlGn')
+
+myColorkey <- list(space='right',
+                  col=colzones,
+                  at=seq(0.5,6.5,by=1), title='Arctic subzone',
+                  labels=list(labels=c('Subarctic','E','D','C','B','A'),at=1:6))
+blankras<-vertherb_sr*0
+
+levelplot(projectRaster(blankras,crs=alldata_splaea@proj4string),
+          margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
+   layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+   layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
+                     fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
+  layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+ 
+  layer(sp.points(alldata_splaea_removeoutsidearctic,col=1,pch=16,cex=0.4))
+dev.off()
+dev.off()
+
+#Summarize by subzone
+
+agzone1<-spTransform(agzones,alldata_splaea@proj4string)
+names(agzone1)[7]<-'ZONE_'
+allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
+plot(allzones)
+
+
+a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
+tapply(a$ZONE_,a$ZONE_,length)
