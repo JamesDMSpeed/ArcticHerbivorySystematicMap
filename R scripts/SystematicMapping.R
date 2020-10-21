@@ -163,11 +163,17 @@ write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
 
 # Mapping in time ---------------------------------------------------------
 #Evidence points - year of publication
-pub<-ggplot(alldata,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("Publication year")+xlab('Publication year')
+pub<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("Publication year")+xlab('Publication year')
 #Evidence points - year of study start
-startyr<-ggplot(alldata,aes(x=as.numeric(year_start)))+geom_histogram()+ggtitle("Study start year")+xlab('Study start year')
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not available"]<-NA
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not relevant"]<-NA
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not reported" ]<-NA
+alldata_splaea_removeoutsidearctic$year_start<-droplevels(alldata_splaea_removeoutsidearctic$year_start)
+
+startyr<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(as.character(year_start))))+geom_histogram()+ggtitle("Study start year")+xlab('Study start year')
 
 pdf('Figures/Time.pdf')
+tiff('Figures/Time.tif',width=6,height=4,units='in',res=150)
 grid.arrange(pub,startyr,ncol=2)
 dev.off()
 
@@ -175,16 +181,16 @@ dev.off()
 
 #Study design
 
-studdes<-ggplot(alldata,aes(x=study_design))+geom_bar()+
+studdes<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=study_design))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Study design")+ theme(axis.title.x = element_blank()) 
-exdes<-ggplot(alldata,aes(x=experimental_design))+geom_bar()+
+exdes<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=experimental_design))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Experimental design")+ theme(axis.title.x = element_blank()) 
-studmeth<-ggplot(alldata,aes(x=study_method))+geom_bar()+
+studmeth<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=study_method))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Study method")+ theme(axis.title.x = element_blank()) 
-expquant<-ggplot(alldata,aes(x=exposure_quantification))+geom_bar()+
+expquant<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=exposure_quantification))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Exposure quantification")+ theme(axis.title.x = element_blank()) 
 
@@ -194,7 +200,7 @@ dev.off()
 
 #Herbivore type
 pdf('Figures/HerbivoreType.pdf')
-ggplot(alldata,aes(x=herbivore_type))+geom_bar()+
+ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=herbivore_type))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Herbivore type")+ theme(axis.title.x = element_blank()) 
 dev.off()
@@ -202,11 +208,11 @@ dev.off()
 
 # Mapping temporal and spatial resolutions & extents --------------------------------
 
-tr1<-ggplot(alldata,aes(x=as.numeric(extent_of_temporal_scale)))+geom_histogram()+scale_x_log10()+
+tr1<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(extent_of_temporal_scale)))+geom_histogram()+scale_x_log10()+
   ggtitle("Extent of temporal scale") +
   xlab("Temporal scale (years)")
 
-tr2<-ggplot(alldata,aes(x=temporal_resolution))+geom_bar()+
+tr2<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=temporal_resolution))+geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Temporal resolution")+ theme(axis.title.x = element_blank()) 
 
@@ -216,19 +222,40 @@ dev.off()
 
 #Contingency tables
 
-ct1<-ggplot(alldata, aes(fill = study_design, x = herbivore_type)) + geom_bar()+
+ct1<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = study_design, x = herbivore_type)) + geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Herbivore type and study design")+ theme(axis.title.x = element_blank()) 
 
 
-ct2<-ggplot(alldata, aes(fill = biological_organization_level_reported, x = herbivore_type)) + geom_bar()+
+ct2<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = biological_organization_level_reported, x = herbivore_type)) + geom_bar()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle("Herbivore type and plant level")+ theme(axis.title.x = element_blank()) 
 
 pdf('Figures/ContingencyFigs.pdf',height=6,width=10)
+tiff('Figures/ContingencyFigs.tif',height=6,width=10,units = 'in',res=150)
 grid.arrange(ct1,ct2,ncol=2)
 dev.off()
 
+
+#Simplified herbivores
+alldata_splaea_removeoutsidearctic$SimpleHerbivore<-alldata_splaea_removeoutsidearctic$herbivore_type
+levels(alldata_splaea_removeoutsidearctic$SimpleHerbivore)<-c(
+  rep('Invertebrate',times=3),
+  'Vertebrate','Invertebrate','Invertebrate','Multiple','Vertebrate','Unknown','Vertebrate')
+
+ct1a<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = study_design, x = SimpleHerbivore)) + geom_bar()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position=c(0.8,0.8))+ theme(legend.text=element_text(size=10))+labs(fill='Study design')+
+  ggtitle("Herbivore type and study design")+ theme(axis.title.x = element_blank()) 
+
+ct2a<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = biological_organization_level_reported, x = SimpleHerbivore)) + geom_bar()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position=c(0.8,0.8))+ theme(legend.text=element_text(size=10))+labs(fill='Plant level')+
+  ggtitle("Herbivore type and plant level")+ theme(axis.title.x = element_blank()) 
+
+tiff('Figures/AltGroups.tif',width=6,height=10,units='in',res=150)
+grid.arrange(ct1a,ct2a,ncol=1)
+dev.off()
 #NB: Identity of biology organization unit too many levels
 
 # Temperature and precipitation axes --------------------------------------
@@ -307,15 +334,30 @@ vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif'
 vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
 vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
 
+#Human context
+#GPW:Center for International Earth Science Information Network - CIESIN - Columbia University. 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. Accessed 21.10.2020. 
+#2015 human pop density
 
-#Context GIS layers
-bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
-bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea)
-names(context_stack)[23]<-'Elevation'
+gpwurl<-'https://uitno.box.com/shared/static/u2t8wrffagosabv4k498dh856shzkqyi.zip'
+download.file(gpwurl,'Data/GIS_layers/GPW2015.zip',mode='wb')
+unzip('Data/GIS_layers/GPW2015.zip',exdir='Data/GIS_layers/GPW')
 
-context_range<-extract(context_stack,1:ncell(context_stack),df=T)
-write.csv(context_range,'Data/RangeofEcoContexts.csv')
+gpw<-raster('Data/GIS_layers/GPW/gpw_v4_population_density_rev11_2015_2pt5_min.tif')
+levelplot(gpw+1,zscaleLog=T,margin=F,scales=list(draw=F))
+
+#Human footprint
+#Venter, O., E. W. Sanderson, A. Magrach, J. R. Allan, J. Beher, K. R. Jones, H. P. Possingham, W. F. Laurance, P. Wood, B. M. Fekete, M. A. Levy, and J. E. Watson. 2018. Last of the Wild Project, Version 3 (LWP-3): 2009 Human Footprint, 2018 Release. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H46T0JQ4. Accessed 21.10.2020. 
+humfooturl<-'https://uitno.box.com/shared/static/1bjcuidtjis8456locp1rio2ul6a7zi4.zip'
+download.file(humfooturl,'Data/GIS_layers/Humanfootprint.zip')
+unzip('Data/GIS_layers/Humanfootprint.zip',exdir='Data/GIS_layers/HumanFootprint')
+
+humanfoot<-raster('Data/GIS_layers/HumanFootprint/wildareas-v3-2009-human-footprint.tif')
+levelplot(humanfoot,margin=F)
+
+humanstack1<-stack(gpw,projectRaster(humanfoot,gpw))
+humanstack<-aggregate(mask(crop(humanstack1,spTransform(arczones,gpw@crs)),spTransform(arczones,gpw@crs)),50)
+names(humanstack)<-c('GPW','Footprint')
+
 #NDVI trends
 ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
 download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
@@ -349,11 +391,21 @@ alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
 alldata_final_sp1$distance_from_coast<-extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
-alldata_final_sp3<-cbind(alldata_final_sp2,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2))
+alldata_final_sp2a<-cbind(alldata_final_sp2,extract(humanstack,alldata_final_sp2))
+alldata_final_sp3<-cbind(alldata_final_sp2a,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
 head(alldata_final_sp3)
 
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
 write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
+
+#Context GIS layers
+bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
+bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea))
+names(context_stack)[c(23,26,27)]<-c('Elevation','HumanPopulationDensity','Human footprint')
+
+context_range<-extract(context_stack,1:ncell(context_stack),df=T)
+write.csv(context_range,'Data/RangeofEcoContexts.csv')
 
 
 #Herbivore diversity space figure
@@ -369,7 +421,6 @@ herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.ri
   geom_point(size=0.01)+
   ggtitle("Herbivore space") +
   xlab("Vertebrate herbivore species richness")+ ylab('Vertebrate herbivore functional diversity')+
-  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
   geom_point(data=alldata_final_sp2@data,aes(x=ArcticHerbivore_Species.richness*70, y=ArcticHerbivore_Functional.diversity,
                                              colour=SimpleHerbivore))
 png('Figures/HerbivoreSpace_Available.png')
@@ -383,7 +434,6 @@ geospace<-ggplot(data=geogcontextdat,mapping=aes(x=DistancetoCoast,y=Elevation))
   geom_point(alpha=2/10,size=0.2)+
   ggtitle("Geographic space") +
   xlab("Distance to coast (km)")+ ylab('Elevation (m)')+
-  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
   geom_point(data=alldata_final_sp3@data,aes(x=distance_from_coast, y=elevation_DEM,
                                              colour=coordinates_N
                                             ))
@@ -399,7 +449,6 @@ climchangespace<-ggplot(data=climcontextdat,mapping=aes(x=GrowingSeasonLength.tr
   geom_point(alpha=1/10,size=0.1)+
   ggtitle("Climate change space") +
   xlab("Change in growing season length (days per decade")+ ylab('Change in NDVI (% per decade)')+
-  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
   geom_point(data=alldata_final_sp3@data,aes(x=GrowingSeasonLength.trend, y=NDVI.trend,
                                               colour=coordinates_N
   ))
@@ -419,7 +468,19 @@ dev.off()
 dev.off()
 
 
+#Human context
+humancontextdat<-extract(humanstack,1:ncell(humanstack),df=T)
+humanspace<-ggplot(data=humancontextdat,mapping=aes(x=GPW,y=Footprint))+
+  geom_point(size=0.3)+
+  ggtitle("Human space") +
+  xlab(expression("Human population density" ~(km^-2)))+ ylab('Human footprint')+
+  geom_point(data=alldata_final_sp3@data,aes(x=GPW, y=Footprint,
+                                             colour=coordinates_N))
 
+png('Figures/HumanSpace_Available.png')
+tiff('Figures/HumanSpace_Available.tif',width=6,height=4,units='in',res=150)
+humanspace+scale_x_log10()+scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High')) 
+dev.off()
 
 #Distribution figure
 subzonesR<-rasterize(subzones,bioclimdat_laea,field='ZONE')
