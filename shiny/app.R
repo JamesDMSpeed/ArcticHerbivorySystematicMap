@@ -430,7 +430,7 @@ tabBox(width = NULL, id = 'additionals',
 # . lookup table ----------------------------------------------------------
 
          tabPanel('Lookup table',
-                  selectInput('feature', 'Type the evidence point ID of the record you wan to show. Get the unique ID by first clicking on the point on the map.', 
+                  selectInput('feature', 'Type the evidence point ID of the record you want to show. Get the unique ID by first clicking on the point on the map.', 
                 choices = MyTab$evidence_point_ID, multiple=FALSE, selectize=TRUE),
                   tableOutput('oneFeature')         
                   ),
@@ -451,7 +451,7 @@ tabBox(width = NULL, id = 'additionals',
 
 
 
-h4("Press the download button to download a  copy of raw data:"),
+h4("Press the download button to download a copy of the raw data:"),
 downloadButton("downloadData", "Download")
 
                 
