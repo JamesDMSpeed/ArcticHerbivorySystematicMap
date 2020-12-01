@@ -7,11 +7,12 @@ library(DT)
 library(readr)
 library(leaflet)
 library(mapview)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(sp)
 library(stringr)
-
+#
 
 # Get Data ----------------------------------------------------------------
 
@@ -49,7 +50,7 @@ MyTab[,c("bio1",
                                "bio10",
                                "bio11")]/10
 
-MyTab <- rename(MyTab,
+MyTab <- dplyr::rename(MyTab,
                 "Annual_Mean_Temperature" = bio1,
                 "Mean_Diurnal_Range" = bio2,
                 "Isothermality" = bio3,
@@ -70,7 +71,37 @@ MyTab <- rename(MyTab,
                 "Precipitation_of_Warmest_Quarter" = bio18,
                 "Precipitation_of_Coldest_Quarter" = bio19)
 
-MyTab <- rename(MyTab, "Elevation" = elevation_DEM)
+MyTab <- dplyr::rename(MyTab, "Elevation" = elevation_DEM)
+
+# Make some variables continous even though they contain categories
+r <- c("not available",  "not relevant",  "not reported")
+MyTab$last_year_of_study <- MyTab$year_end
+MyTab$last_year_of_study[MyTab$last_year_of_study %in% r] <- NA
+MyTab$last_year_of_study <- as.numeric(MyTab$last_year_of_study)
+
+MyTab$first_year_of_study <- MyTab$year_start
+MyTab$first_year_of_study[MyTab$first_year_of_study %in% r] <- NA
+MyTab$first_year_of_study <- as.numeric(MyTab$first_year_of_study)
+
+# Reduce the number of levels in some variables
+
+MyTab$extent_of_spatial_scale <- as.factor(MyTab$extent_of_spatial_scale)
+
+MyTab$extent_of_spatial_scale <- plyr::revalue(MyTab$extent_of_spatial_scale,
+         c("not reported"="not reported or nor relevant",
+           "not relevant"="not reported or nor relevant",
+           "from 100x100 km to 1000x1000 km (including 1000x1000 km)" = "from 100x100 km to 1000x1000 km",
+           "from 10x10 km to 100x100 km (including 100x100 km)" = "from 10x10 km to 100x100 km",
+           "from 1x1 km to 10x10 km (including 10x10 km)" = "from 1x1 km to 10x10 km"
+           ))
+MyTab$extent_of_spatial_scale <- factor(MyTab$extent_of_spatial_scale, 
+                                        levels = c("1x1 km or less", 
+                                                   "from 1x1 km to 10x10 km",
+                                                   "from 100x100 km to 1000x1000 km",
+                                                   "larger than 1000x1000 km",
+                                                   "not reported or nor relevant"))
+
+
 
 # Get total species list --------------------------------------------------
 species  <- paste(MyTab$herbivore_identity, collapse = ",")
@@ -108,7 +139,7 @@ range[,c("bio1",
                                "bio10",
                                "bio11")]/10
 # Rename columns
-range <- rename(range,
+range <- dplyr::rename(range,
                 "Annual_Mean_Temperature" = bio1,
                 "Mean_Diurnal_Range" = bio2,
                 "Isothermality" = bio3,
@@ -133,29 +164,69 @@ range$ArcticHerbivore_Species.richness <- range$ArcticHerbivore_Species.richness
 
 # List environmental and ecological variables -----------------------------
 EEvars <- c(
-  "ArcticHerbivore_Species.richness",                         
-  "ArcticHerbivore_Phylogenetic.diversity",                    
-  "ArcticHerbivore_Functional.diversity",
-  "Elevation",
   "Annual_Mean_Temperature",
-  "Mean_Diurnal_Range",
+  "Annual_Precipitation",
+  "ArcticHerbivore_Functional.diversity",
+  "ArcticHerbivore_Phylogenetic.diversity",
+  "ArcticHerbivore_Species.richness",                         
+  "Elevation",
+  "Footprint",
+  "GPW",
+  "GrowingSeasonLength.trend",
   "Isothermality",
-  "Temperature_Seasonality",
   "Max_Temperature_of_Warmest_Month",
-  "Min_Temperature_of_Coldest_Month",
-  "Temperature_Annual_Range",
-  "Mean_Temperature_of_Wettest_Quarter",
+  "Mean_Diurnal_Range",
+  "Mean_Temperature_of_Coldest_Quarter",
   "Mean_Temperature_of_Driest_Quarter",
   "Mean_Temperature_of_Warmest_Quarter",
-  "Mean_Temperature_of_Coldest_Quarter",
-  "Annual_Precipitation",
-  "Precipitation_of_Wettest_Month",
+  "Mean_Temperature_of_Wettest_Quarter",
+  "Min_Temperature_of_Coldest_Month",
+  "NDVI.trend",
+  "Precipitation_of_Coldest_Quarter",
   "Precipitation_of_Driest_Month",
-  "Precipitation_Seasonality",
-  "Precipitation_of_Wettest_Quarter",
   "Precipitation_of_Driest_Quarter",
   "Precipitation_of_Warmest_Quarter",
-  "Precipitation_of_Coldest_Quarter")
+  "Precipitation_of_Wettest_Month",
+  "Precipitation_of_Wettest_Quarter",
+  "Precipitation_Seasonality",
+  "Temperature_Annual_Range",
+  "Temperature_Seasonality"
+  )
+
+varA <- c("additional_exposures",
+          "conservation_herbivore",
+          "country", 
+          "effect_type",
+          "experimental_design",
+          "exposure_quantification",
+          "extent_of_spatial_scale",
+          "extent_of_temporal_scale",
+          "herbivory_season",
+          "herbivore_type",
+          "management",
+          "management_herbivore",
+          "measured_response_variable",
+          "redundancy",
+          "soil_type",
+          "study_design",
+          "study_method",
+          "spatial_resolution_recorded",
+          "spatial_resolution_reported",
+          "temporal_resolution"
+)
+
+# those without background data
+EEvars2 <- c( "GPW",
+              "Footprint",
+              "NDVI.trend",
+              "GrowingSeasonLength.trend")
+
+# Soil type
+soil <- read_csv("SoilLegend.csv")
+# make a new column (removing the period behind the name)
+MyTab$soil_type <- soil$SoilType[match(MyTab$soil_type., soil$Letter)]
+
+
 # UI ----------------------------------------------------------------------
 
 ui <- dashboardPage(
@@ -189,7 +260,7 @@ ui <- dashboardPage(
                   class = "panel panel-default", 
                   fixed = F,
                   draggable = TRUE, 
-                  top = 100, left = 50, right = 'auto', bottom = "auto",
+                  top = 80, left = 70, right = 'auto', bottom = "auto",
                   width = 300, height = "auto",
                               
                    # Changing the colour of the slider from blue to orange
@@ -201,20 +272,17 @@ ui <- dashboardPage(
 
         fluidRow(
           column(width = 7,
-         sliderInput("year", 
-                     label = h5("Publication year"), 
-                     min = 1940, #min(MyTab$year), 
-                     max = 2020, #min(MyTab$year), 
-                     value = c(1945, 2019),
-                     step=1, sep="", ticks=F, width = "100%",
-                     animate=F
-                     )),
+                 br(),
+                 switchInput(
+                   inputId = "filteron",
+                   label = "Filters", 
+                   value = TRUE,
+                   labelWidth = "80px")
+         ),
          column(width=5,
        pickerInput(inputId = "colour", 
                    label = "Colour by:", 
-                   choices = c("country", "language", "herbivore_type", 
-                                "effect_type", "experimental_design", 
-                                "study_method", "study_design"),
+                   choices = varA,
                    selected = "country"))),
 
       
@@ -222,6 +290,14 @@ ui <- dashboardPage(
       
 # . Filters -----------------------------------------------------------------
 
+sliderInput("year", 
+            label = h5("Publication year"), 
+            min = 1940, #min(MyTab$year), 
+            max = 2020, #min(MyTab$year), 
+            value = c(1945, 2019),
+            step=1, sep="", ticks=F, width = "100%",
+            animate=F
+),
 
       # fluidRow(
   column(width = 6,
@@ -332,12 +408,13 @@ column(width = 6,
 verbatimTextOutput('remaining')
 
 
- ), # column
+ ) # column
 
 ), # abs.panel1
 
 
-
+# Active Filters ####
+h5("Click to see which filters are active: "),
 uiOutput('activeFilters'), br(),
 
 
@@ -352,21 +429,10 @@ tabBox(width = NULL, id = 'additionals',
 
           
   tabPanel('Count cases',
-      h5("This figure is responsive to the filters applied above"),
+      h5("This figure is responsive to the filters applied above. When filters are applied, the unfiltered data is shown as light gray bars."),
            selectInput(inputId = "uni", 
-                label = "Choose which variable to plot",
-                choices = c("country", 
-                            "study_design",
-                            "study_method",
-                            "extent_of_spatial_scale",
-                            "temporal_resolution",
-                            "measured_response_variable",
-                             "herbivore_type",
-                             "herbivory_season",
-                             "effect_type",
-                             "management_herbivore",
-                             "conservation_herbivore",
-                             "management"),
+                label = "Select variable",
+                choices = varA,
                 selected = c("country"),
                 selectize = TRUE),
                 plotOutput('univ')),  
@@ -375,8 +441,18 @@ tabBox(width = NULL, id = 'additionals',
 # . trends ----------------------------------------------------------------
 
      
-         tabPanel('Temporal trends',
+         tabPanel('Univariate continuous variables',
                   h5("This figure is responsive to the filters applied above"),
+                  
+                  pickerInput(
+                    inputId = "cont",
+                    label = "Select variable",
+                    choices = c("year",
+                                "coordinates_N",
+                                "coordinates_E",
+                                "first_year_of_study",
+                                "last_year_of_study",
+                                EEvars)),
                   plotOutput('trends')),
 
 
@@ -384,41 +460,47 @@ tabBox(width = NULL, id = 'additionals',
 
      
   tabPanel('Pairwise Plots',
-      fluidRow(h5("The blue circles are the evidence points 
-                  identified in the systematic review (and responsive to the filters applied above).
-                  The darker opaque points show all possible values for each 
-                  variable inside the study region (the CAFF Arctic boundary)")),
+      fluidRow(h5("The coloured circles are the evidence points 
+                  identified in the systematic review. The grey 
+                  background points show all possible values for each 
+                  variable inside the study region (the Arctic circle)")),
       fluidRow(
-           column(width = 3,
+           column(width = 2,
            pickerInput(
              inputId = "var1",
              label = "X variable", 
              choices = EEvars,
-             selected = "Annual_Mean_Temperature",
+             selected = "Annual_Mean_Temperature"
            )),
-           column(width = 3,
+           column(width = 2,
            pickerInput(
              inputId = "var2",
              label = "Y variable", 
-             choices = EEvars,
+             choices = EEvars[!EEvars %in% EEvars2],  # avoid weird error by removing 4 variables that don't have background points
              selected = "Annual_Precipitation"
            )),
-           column(width = 3,
+           column(width = 2,
            pickerInput(
              inputId = "var3",
              label = "Size variable", 
-             choices = c("NULL", EEvars),
+             choices = c("NULL" = 3, EEvars),
              selected = "ArcticHerbivore_Species.richness"
-           ))),
-          # column(width=3,
-                  
-           #pickerInput(
-           #  inputId = "var4",
-           #  label = "Colour", 
-           #  choices = c("country", "language", "herbivore_type", 
-           #                        "effect_type", "experimental_design", 
-           #                        "study_method", "study_design")
-           #  ))),
+           )),
+           column(width=2,
+           pickerInput(
+             inputId = "var4",
+             label = "Colour", 
+             choices = c("NULL", varA) #"extent_of_spatial_scale", "study_design", "experimental_design")
+             )),
+           column(width=3,
+                  sliderInput('alpha', "Transparency of background points",
+                              min=0, max = 1, step = 0.1, value = 0.2)
+                  #switchInput(
+                  #  inputId = "var5",
+                  #  label = "Background points", 
+                  #  value = TRUE,
+                  #  labelWidth = "80px")
+           )),
       fluidRow(     
           plotOutput('space')),
       fluidRow(
@@ -440,7 +522,7 @@ tabBox(width = NULL, id = 'additionals',
 
          
          tabPanel('Responsive table',
-                  h5("This table is responsive to the filters applied above"),
+                  h5("This figure is responsive to the filters applied above"),
                   
                   DTOutput('responsiveTable'))
          
@@ -451,7 +533,7 @@ tabBox(width = NULL, id = 'additionals',
 
 
 
-h4("Press the download button to download a copy of the raw data:"),
+h4("Press the download button to download a speadsheet copy of the raw data:"),
 downloadButton("downloadData", "Download")
 
                 
@@ -522,7 +604,7 @@ server <- function(input, output, session){
 # THE MAP ####
   output$theMap <- renderLeaflet({
       
-    dat <- datR()
+    ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
     # Convert to spatial...
     dat2 <- sp::SpatialPointsDataFrame(coords = dat[,c("coordinates_E","coordinates_N")], 
                                        data = dat,
@@ -581,6 +663,7 @@ output$univ <- renderPlot({
    ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
     ggplot(data = dat, aes_string(x=input$uni))+
       geom_bar()+
+      geom_bar(data = MyTab, alpha =0.3)+
       coord_flip()+
       theme_bw()+
       theme(text = element_text(size = 20))
@@ -592,18 +675,40 @@ output$space <- renderPlot({
   
   
   ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
-  ggplot(data = range, aes_string(x = input$var1, y = input$var2))+
-    geom_point(alpha=5/10, size=2)+
-    theme_bw()+
-   geom_point(data = dat, aes_string(size = input$var3), 
-                                       #colour = input$var4, fill=input$var4),
-              shape=21, colour = "blue", fill = "blue", stroke = 1, alpha=0.3)
-})
+  
+  
+  myG <- ggplot(data = dat, 
+                aes_string(x = input$var1, y = input$var2, size = input$var3))+    
+                  theme_bw()
+  # remove size legend if size = NULL
+  if(input$var3=="3"){
+    myG <- myG + guides(size = FALSE)
+  }
+  
+  if(input$var4!="NULL"){
+    myG <- myG+    geom_point(aes_string(fill=input$var4),
+               shape=21,  stroke = 1, alpha=0.5, colour="black")+
+           guides(fill = guide_legend(override.aes = list(size = 5)))+
+           scale_color_viridis_d(option = "B", 
+                                 direction = -1,
+                                 aesthetics = c("fill"),
+                                 begin=0.4)} else{
+    myG <- myG+    geom_point(shape=21,  fill="blue", 
+                      stroke = 1, alpha=0.5, colour="black")
+                          }
+ # add background points is var 1 and 2 are not GPW, Footprint ...                         
+  if(!c(input$var1, input$var2) %in% EEvars2 ){
+    myG <- myG +geom_point(data = range, aes_string(x = input$var1, y = input$var2),
+                           alpha=input$alpha, size=2)  }
+  
+ 
+  myG
+           })
 
 # TRENDS ####
   output$trends <- renderPlot({
     ifelse(input$filteron == TRUE, dat <- datR(), dat <- MyTab)
-    ggplot(data = dat, aes(x=year))+
+    ggplot(data = dat, aes_string(x=input$cont))+
       geom_histogram()+
       geom_histogram(data = MyTab, alpha = 0.3)+
       theme_bw()+
@@ -706,11 +811,6 @@ output$space <- renderPlot({
    
 output$activeFilters <- renderUI({
     dropdownButton(
-      switchInput(
-        inputId = "filteron",
-        label = "Filters", 
-        value = TRUE,
-        labelWidth = "80px"),
       h3("Active Filters"),
       h4("Years: "), textOutput('years'),
       h4("Countries: "), textOutput('countries'),
@@ -721,7 +821,7 @@ output$activeFilters <- renderUI({
       h4("Study method: "), textOutput('me'),
       h4("Experimental design: "), textOutput('ex'),
       circle = TRUE, status = "info",
-      icon = icon("gear"), width = "300px",
+      icon = icon("list"), width = "300px",
       tooltip = tooltipOptions(title = "Click to see which filters are active")
     )
   })
