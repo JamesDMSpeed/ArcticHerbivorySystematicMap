@@ -11,6 +11,7 @@ library(maptools)#Playing with maps
 library(sp)#Spatial data
 library(rgdal)#Spatial data
 library(raster)#Climate data
+library(rasterVis)#Visualisations
 library(ggplot2)
 library(gridExtra)
 library(rgeos)
@@ -60,9 +61,9 @@ View(alldata)#Looks good!
 
 
 #Number of studies
-length(levels(as.factor(alldata$title)))  #329
+length(levels(as.factor(alldata$title)))  #328
 #Number of evidence points
-length(levels(as.factor(alldata$evidence_point_ID)))  #715
+length(levels(as.factor(alldata$evidence_point_ID)))  #705
 
 #Fix issue with different levels for extent of spatial scale
 levels(as.factor(alldata$extent_of_spatial_scale))
@@ -109,7 +110,7 @@ plot(bPolslaea,ylim=c(55,90))
 #CAVM arctic subzones
 subzones<-readOGR('Data/cp_biozone_la_shp','cavm_all polygon')
 subzones
-spplot(subzones,zcol=subzones$ZONE)
+#spplot(subzones,zcol=subzones$ZONE)
 
 #Spatial evidence points
 alldatasp1<-alldata
@@ -130,6 +131,10 @@ plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CA
 dev.off()
 
 
+#Remove redundant studies
+alldata_splaea_removeredundant<-alldata_splaea[alldata_splaea$redundancy!='redundant',]
+
+
 #Remove evidence points outside of arctic
 #Buffer the Arctic polygons by 10000m to get sites with coordinate inaccuracies offshore
 arczones_buffer<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
@@ -137,7 +142,7 @@ plot(arczones_laea)
 plot(arczones_buffer,border=2,add=T)
 
 #Remove evidence points outside of buffered polygon
-alldata_splaea_removeoutsidearctic<-alldata_splaea[arczones_buffer,]
+alldata_splaea_removeoutsidearctic<-alldata_splaea_removeredundant[arczones_buffer,]
 dim(alldata_splaea)
 dim(alldata_splaea_removeoutsidearctic)
 
@@ -150,6 +155,8 @@ points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
+
+
 #Save filtered data
 #Write data
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
@@ -158,7 +165,7 @@ write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names
 alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(x)(gsub("\r\n", " ", x))))
 alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
-#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv. Open in EviAtlas with UTF-8 encoding. ; sep and " quote
+#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv.
 
 
 # Mapping in time ---------------------------------------------------------
@@ -328,6 +335,70 @@ names(geographicstack)[1]<-'Elevation'
 geographicstack$DistancetoCoast<-mask(geographicstack$DistancetoCoast,geographicstack$Elevation)
 plot(geographicstack)
 
+#Distance to treeline
+treelineurl<-'https://uitno.box.com/shared/static/09fxunzc49qg5oqtg1uannk4exmr8eh4.zip'
+download.file(treelineurl,'Data/GIS_layers/Treeline.zip')
+unzip('Data/GIS_layers/Treeline.zip',exdir = 'Data/GIS_layers/Treeline')
+treelineshp<-readOGR('Data/GIS_layers/Treeline','cp_treeline_la')
+
+#Calculate distance from treeline (change lines to points for ease)
+arczonesT<-rasterize(spTransform(arczones,distancefromcoast@crs),distancefromcoast,field='ZONE_')
+plot(arczonesT)
+treelinepts<-as(treelineshp,'SpatialPoints')
+treelinedist<-mask(distanceFromPoints(arczonesT,treelinepts),arczonesT)
+plot(treelinedist)
+
+#Set subarctic (S of treeline) to negative 
+northoftreeline<-treelinedist
+northoftreeline[arczonesT==0]<-0-treelinedist[arczonesT==0] 
+plot(northoftreeline)
+diverge0 <- function(p, ramp) {
+  require(RColorBrewer)
+  require(rasterVis)
+  if(length(ramp)==1 && is.character(ramp) && ramp %in% 
+     row.names(brewer.pal.info)) {
+    ramp <- suppressWarnings(colorRampPalette(rev(brewer.pal(11, ramp))))
+  } else if(length(ramp) > 1 && is.character(ramp) && all(ramp %in% colors())) {
+    ramp <- colorRampPalette(ramp)
+  } else if(!is.function(ramp)) 
+    stop('ramp should be either the name of a RColorBrewer palette, ', 
+         'a vector of colours to be interpolated, or a colorRampPalette.')
+  rng <- range(p$legend[[1]]$args$key$at)
+  s <- seq(-max(abs(rng)), max(abs(rng)), len=1001)
+  i <- findInterval(rng[which.min(abs(rng))], s)
+  zlim <- switch(which.min(abs(rng)), `1`=i:(1000+1), `2`=1:(i+1))
+  p$legend[[1]]$args$key$at <- s[zlim]
+  p$par.settings$regions$col <- ramp(1000)[zlim[-length(zlim)]]
+  p
+}
+treelinelp<-levelplot(northoftreeline,margin=F,scales=list(draw=F))+
+  layer(sp.lines(treelineshp))
+diverge0(treelinelp,'RdBu')
+
+#Permafrost
+permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
+download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
+unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+
+permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
+permafrost
+plot(permafrost)
+
+permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb')
+plot(permrast)
+
+#Soils
+#soilras<-raster('Data/GIS_layers/Soils/sq1.asc')
+#hswd<-stack('Data/GIS_layers/Soils/HWSD_RASTER/hwsd')
+dsmw<-readOGR('Data/GIS_layers/Soils/DSMW','DSMW')#http://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/faounesco-soil-map-of-the-world/en/
+dsmw$SimpleSoilUnit<-substr(dsmw$DOMSOI,1,1)
+#Legend http://www.fao.org/fileadmin/user_upload/soils/docs/Soil_map_FAOUNESCO/images/Legend_I.jpg 
+levels(as.factor(dsmw$SimpleSoilUnit))
+#spplot(dsmw,'SimpleSoilUnit')
+
+dsmw_arc<-crop(dsmw,alldata_sp)
+
+
 #Herbivore diversity layers
 vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
 vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
@@ -384,16 +455,21 @@ climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
 
 #Extract variables
-alldata_final<-read.csv('Data/AllCodedDataW_forEviAtlas.csv',header=T,sep=';')
+alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
 
 alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
 alldata_final_sp1$distance_from_coast<-extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
+alldata_final_sp1$soil_type.<-extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
 alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,extract(humanstack,alldata_final_sp2))
-alldata_final_sp3<-cbind(alldata_final_sp2a,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
+alldata_final_sp3a<-cbind(alldata_final_sp2a,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
 head(alldata_final_sp3)
+
+#Remove empty columns
+na_count <-sapply(alldata_final_sp3a@data, function(y) sum(length(which(is.na(y))))/length(y))
+alldata_final_sp3<-alldata_final_sp3a[,na_count<1]
 
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
 write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
@@ -401,12 +477,23 @@ write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 #Context GIS layers
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea))
-names(context_stack)[c(23,26,27)]<-c('Elevation','HumanPopulationDensity','Human footprint')
+
+crs(dsmw_arc)<-crs(bioclimdat)
+dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
+soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
+plot(soiltyperast)
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'))
+names(context_stack)[c(23,26,27,28)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type')
 
 context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 
+#Soil Legend
+soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=levels(as.factor(dsmw_arc$simplesoilnum)),
+  SoilType=c('Cambisols','Chernozems','Podsoluvisols','Rendzinas','Gleysols','Phaeozems',
+         'Lithosols','Fluvisols','Kastanozems','Luvisols','Greyzems','Nitosols','Histosols',
+         'Podzols','Arenosols','Regosols','Solonetz','Andosols','Rankers','Planosols','Xerosols'))
+write.csv(soilleg,'Data/SoilLegend.csv')
 
 #Herbivore diversity space figure
 alldata_final_sp2$SimpleHerbivore<-as.factor(alldata_final_sp2$herbivore_type)
