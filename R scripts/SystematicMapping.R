@@ -487,6 +487,7 @@ names(context_stack)[c(23,26,27,28)]<-c('Elevation','HumanPopulationDensity','Hu
 
 context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
+write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
 #Soil Legend
 soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=levels(as.factor(dsmw_arc$simplesoilnum)),
