@@ -311,7 +311,10 @@ sliderInput("year",
            multiple = TRUE,
            width = "100%",
            options = list(
-             `actions-box` = TRUE, `selected-text-format`= "static", title = "Country")),
+             `actions-box` = TRUE, 
+             `selected-text-format`= "static", 
+             title = "Country",
+             size=6)),
          
                    
 # .. Species ---------------------------------------------------------------
@@ -323,7 +326,8 @@ pickerInput(
   multiple = TRUE,
   width = "100%",
   options = list(
-    `actions-box` = TRUE, `selected-text-format`= "static", title = "Species")),
+    `actions-box` = TRUE, `selected-text-format`= "static", title = "Species",
+    size=6)),
 
 
 
@@ -353,7 +357,8 @@ pickerInput(
                options = list(
                `actions-box` = TRUE, 
                `selected-text-format`= "static",
-               title = "Herbivore")
+               title = "Herbivore",
+               size=6)
                )
 
   ),
@@ -387,7 +392,8 @@ column(width = 6,
              options = list(
              `actions-box` = TRUE, 
              `selected-text-format`= "static",
-             title = "Method")
+             title = "Method",
+             size=5)
               ),
       
 # .. ex. design ------------------------------------------------------------
@@ -401,7 +407,8 @@ column(width = 6,
              options = list(
                `actions-box` = TRUE, 
                `selected-text-format`= "static",
-               title = "Design")
+               title = "Design",
+               size=4)
            ),
 
 # Remaining datapoints ----------------------------------------------------
@@ -611,7 +618,7 @@ server <- function(input, output, session){
                                        data = dat,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
     dat2 <- sf::st_as_sf(dat2)
-    dat2 <- st_jitter(dat2, factor = 0.001)
+    dat2 <- st_jitter(dat2, factor = 0.00001)
     
      m <- mapview::mapview(dat2,
                   layer.name = "Evidence Point",
