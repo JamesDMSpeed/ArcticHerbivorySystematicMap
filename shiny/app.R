@@ -12,6 +12,7 @@ library(dplyr)
 library(ggplot2)
 library(sp)
 library(stringr)
+library(sf)
 #
 
 # Get Data ----------------------------------------------------------------
@@ -609,6 +610,8 @@ server <- function(input, output, session){
     dat2 <- sp::SpatialPointsDataFrame(coords = dat[,c("coordinates_E","coordinates_N")], 
                                        data = dat,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
+    dat2 <- sf::st_as_sf(dat2)
+    dat2 <- st_jitter(dat2, factor = 0.001)
     
      m <- mapview::mapview(dat2,
                   layer.name = "Evidence Point",
