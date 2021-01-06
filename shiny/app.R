@@ -209,8 +209,7 @@ EEvars <- c(
   "Temperature_Seasonality"
   )
 
-varA <- c("Subzone",
-          "additional_exposures",
+varA <- c("additional_exposures",
           "conservation_herbivore",
           "country", 
           "effect_type",
@@ -230,6 +229,7 @@ varA <- c("Subzone",
           "study_method",
           "spatial_resolution_recorded",
           "spatial_resolution_reported",
+          "Subzone",
           "temporal_resolution"
 )
 
@@ -307,7 +307,7 @@ ui <- dashboardPage(
        pickerInput(inputId = "colour", 
                    label = "Colour by:", 
                    choices = varA,
-                   selected = "country"))),
+                   selected = "Subzone"))),
 
       
       
