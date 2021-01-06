@@ -12,14 +12,22 @@ library(dplyr)
 library(ggplot2)
 library(sp)
 library(stringr)
+library(data.table)
+library(rlang)
 library(sf)
 #
 
+#Note: If map fails to load need to install older version of mapview
+#library(devtools)
+#install_version('mapview',version='2.7.8')
+
+
 # Get Data ----------------------------------------------------------------
 
-MyTab <- read_csv("AllCodedData_withGIScontext.csv")
+MyTab <- fread("AllCodedData_withGIScontext.csv")
+#MyTab <- read_csv("AllCodedData_withGIScontext.csv")
 
-# Add shortened versions of author lists, but first, change wierd column name
+# Add shortened versions of author lists, but first, change weird column name
 if(!"author_list" %in% names(MyTab)) colnames(MyTab)[2] <- "author_list"
 MyTab$author_list <- as.character(MyTab$author_list)
 MyTab$language <- as.character(MyTab$language)
@@ -27,6 +35,9 @@ MyTab$author_list2 <- substr(MyTab$author_list, start = 1, stop = 20)
 MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20, 
                               paste0(MyTab$author_list2, " [...]"),
                               MyTab$author_list2)
+names(MyTab)[names(MyTab)=='GPW']<-'HumanPopulationDensity'
+names(MyTab)[names(MyTab)=='Footprint']<-'Human.footprint'
+
 # Fix alternate spelling
 MyTab$language[MyTab$language == "English"] <- "english"
 # Make a colums whihc is later used in the filter by species function
@@ -70,7 +81,8 @@ MyTab <- dplyr::rename(MyTab,
                 "Precipitation_of_Wettest_Quarter" = bio16,
                 "Precipitation_of_Driest_Quarter" = bio17,
                 "Precipitation_of_Warmest_Quarter" = bio18,
-                "Precipitation_of_Coldest_Quarter" = bio19)
+                "Precipitation_of_Coldest_Quarter" = bio19,
+                "DistancetoCoast"=distance_from_coast)
 
 MyTab <- dplyr::rename(MyTab, "Elevation" = elevation_DEM)
 
@@ -115,9 +127,9 @@ rm(species, species2, species3)
 # Climate space data ------------------------------------------------------
 
 # Import dataset with the ranges of environmental variables within the study region
-RangeofEcoContexts <- read_csv("RangeofEcoContexts.csv")
+RangeofEcoContexts <- fread("RangeofEcoContexts.csv")
 # remove row and id columns
-range <- select(RangeofEcoContexts,-X1, -ID)
+range <- select(RangeofEcoContexts,-V1, -ID)
 # remove empty rows
 range <- range[rowSums(is.na(range)) != ncol(range),]
 rm(RangeofEcoContexts)
@@ -164,16 +176,19 @@ range$ArcticHerbivore_Species.richness <- range$ArcticHerbivore_Species.richness
 
 
 # List environmental and ecological variables -----------------------------
+
 EEvars <- c(
   "Annual_Mean_Temperature",
   "Annual_Precipitation",
   "ArcticHerbivore_Functional.diversity",
   "ArcticHerbivore_Phylogenetic.diversity",
-  "ArcticHerbivore_Species.richness",                         
+  "ArcticHerbivore_Species.richness",
+  "DistancetoCoast",
+  "DistanceToTreeline",
   "Elevation",
-  "Footprint",
-  "GPW",
   "GrowingSeasonLength.trend",
+  "Human.footprint",
+  "HumanPopulationDensity",
   "Isothermality",
   "Max_Temperature_of_Warmest_Month",
   "Mean_Diurnal_Range",
@@ -194,7 +209,8 @@ EEvars <- c(
   "Temperature_Seasonality"
   )
 
-varA <- c("additional_exposures",
+varA <- c("Subzone",
+          "additional_exposures",
           "conservation_herbivore",
           "country", 
           "effect_type",
@@ -207,6 +223,7 @@ varA <- c("additional_exposures",
           "management",
           "management_herbivore",
           "measured_response_variable",
+          "Permafrost",
           "redundancy",
           "soil_type",
           "study_design",
@@ -217,15 +234,21 @@ varA <- c("additional_exposures",
 )
 
 # those without background data
-EEvars2 <- c( "GPW",
-              "Footprint",
-              "NDVI.trend",
-              "GrowingSeasonLength.trend")
+EEvars2 <- c("bbb" )
 
 # Soil type
-soil <- read_csv("SoilLegend.csv")
+soil <- fread("SoilLegend.csv")
 # make a new column (removing the period behind the name)
 MyTab$soil_type <- soil$SoilType[match(MyTab$soil_type., soil$Letter)]
+
+#Set factor levels for subzone
+MyTab$Subzone<-as.factor(MyTab$Subzone)
+levels(MyTab$Subzone)<-c('A','B','C','D','E','Non-Arctic','Non-Arctic')
+
+#Factor levels for permafrost
+MyTab$Permafrost[is.na(MyTab$Permafrost)]<-'None'
+MyTab$Permafrost<-as.factor(MyTab$Permafrost)
+levels(MyTab$Permafrost)<-c('Continuous','Discontinuous','IsolatedPatches','Sporadic','None')
 
 
 # UI ----------------------------------------------------------------------
@@ -252,7 +275,7 @@ ui <- dashboardPage(
 
 # The Map -----------------------------------------------------------------
 
-    box(width = NULL,
+    shinydashboard::box(width = NULL,
             leafletOutput('theMap')),
                  
 # Abs.Panel ---------------------------------------------------------------
@@ -311,10 +334,7 @@ sliderInput("year",
            multiple = TRUE,
            width = "100%",
            options = list(
-             `actions-box` = TRUE, 
-             `selected-text-format`= "static", 
-             title = "Country",
-             size=6)),
+             `actions-box` = TRUE, `selected-text-format`= "static", title = "Country",size=6)),
          
                    
 # .. Species ---------------------------------------------------------------
@@ -326,8 +346,7 @@ pickerInput(
   multiple = TRUE,
   width = "100%",
   options = list(
-    `actions-box` = TRUE, `selected-text-format`= "static", title = "Species",
-    size=6)),
+    `actions-box` = TRUE, `selected-text-format`= "static", title = "Species",size=6)),
 
 
 
@@ -357,8 +376,7 @@ pickerInput(
                options = list(
                `actions-box` = TRUE, 
                `selected-text-format`= "static",
-               title = "Herbivore",
-               size=6)
+               title = "Herbivore")
                )
 
   ),
@@ -392,8 +410,7 @@ column(width = 6,
              options = list(
              `actions-box` = TRUE, 
              `selected-text-format`= "static",
-             title = "Method",
-             size=5)
+             title = "Method")
               ),
       
 # .. ex. design ------------------------------------------------------------
@@ -407,8 +424,7 @@ column(width = 6,
              options = list(
                `actions-box` = TRUE, 
                `selected-text-format`= "static",
-               title = "Design",
-               size=4)
+               title = "Design")
            ),
 
 # Remaining datapoints ----------------------------------------------------
@@ -471,7 +487,7 @@ tabBox(width = NULL, id = 'additionals',
       fluidRow(h5("The coloured circles are the evidence points 
                   identified in the systematic review. The grey 
                   background points show all possible values for each 
-                  variable inside the study region (the Arctic circle)")),
+                  variable inside the study region")),
       fluidRow(
            column(width = 2,
            pickerInput(
@@ -617,12 +633,13 @@ server <- function(input, output, session){
     dat2 <- sp::SpatialPointsDataFrame(coords = dat[,c("coordinates_E","coordinates_N")], 
                                        data = dat,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))# +ellps=WGS84 +towgs84=0,0,0"))
+    
     dat2 <- sf::st_as_sf(dat2)
     dat2 <- st_jitter(dat2, factor = 0.00001)
     
      m <- mapview::mapview(dat2,
                   layer.name = "Evidence Point",
-                  map.types = c("Esri.WorldShadedRelief","Esri.WorldImagery"),
+                  map.types = c("Esri.WorldImagery","Esri.WorldShadedRelief"),
                   cex = 5,
                   alpha.regions = 0.5,
                   zcol = input$colour,
