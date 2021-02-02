@@ -169,6 +169,7 @@ write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
 
 
 # Mapping in time ---------------------------------------------------------
+
 #Evidence points - year of publication
 pub<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("Publication year")+xlab('Publication year')
 #Evidence points - year of study start
@@ -183,6 +184,81 @@ pdf('Figures/Time.pdf')
 tiff('Figures/Time.tif',width=6,height=4,units='in',res=150)
 grid.arrange(pub,startyr,ncol=2)
 dev.off()
+
+# Figure 2 ---------------------------------------------------------
+
+
+#Year of publication - panel A
+pub<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("A) Publication year")+
+      theme(axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text.x  = element_text(size=16),
+      axis.text.y =element_text(size=16)) + theme(plot.title = element_text(size=16))+
+      theme(plot.margin=unit(c(0.2,0.4,0.4,0.1),"cm"))
+
+pub
+
+#Year of study start - panel B
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not available"]<-NA
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not relevant"]<-NA
+alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not reported" ]<-NA
+alldata_splaea_removeoutsidearctic$year_start<-droplevels(alldata_splaea_removeoutsidearctic$year_start)
+
+startyr<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(as.character(year_start))))+geom_histogram()+ggtitle("B) Study start year")+xlab('Study start year')+ylab("")+ 
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x  = element_text(size=16),
+        axis.text.y =element_text(size=16)) + theme(plot.title = element_text(size=16))+
+  theme(plot.margin=unit(c(0.2,0.2,0.4,0.4),"cm"))
+startyr
+
+#Extent of temporal scale - panel C
+# the study with more than 1000 years temporal scale is a modeling study that simulates current (and future) climate for 1500 years
+# the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
+levels(alldata_splaea_removeoutsidearctic$extent_of_temporal_scale)[levels(alldata_splaea_removeoutsidearctic$extent_of_temporal_scale)=="0"] <- "1"
+
+tr1<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(as.character(extent_of_temporal_scale))))+geom_histogram()+scale_x_continuous(trans='log10')+
+  ggtitle("C) Extent of temporal scale") + xlab("Temporal scale (years)")  +ylab("")+ theme(axis.title.x = element_text(size=16),
+                 axis.text.x  = element_text(size=16),
+                 axis.text.y =element_text(size=16)) + theme(plot.title = element_text(size=16))+
+  theme(plot.margin=unit(c(0.4,0.4,0.2,0.1),"cm"))
+
+tr1
+
+#Temporal resolution  - panel D
+# the study with temporal_resolution  = "twice" is now corrected in the raw data. it was a mistake, we have no level "twice"
+# the edit below is therefore redundant
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="twice"] <- "twice, interval longer than one year"
+
+# rename factor levels shorter to read
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="twice, interval one year or shorter"] <- "twice <= 1 yr"
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="twice, interval longer than one year"] <- "twice > 1 yr"
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="regular with intervals shorter than a year"] <- "regular < 1 yr"
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="regular with intervals longer than a year"] <- "regular > 1 yr"
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="irregular with intervals shorter than a year"] <- "irregular < 1 yr"
+levels(alldata_splaea_removeoutsidearctic$temporal_resolution)[levels(alldata_splaea_removeoutsidearctic$temporal_resolution)=="irregular with intervals longer than a year"] <- "irregular > 1 yr"
+
+# relevel factor
+alldata_splaea_removeoutsidearctic$temporal_resolution<-fct_relevel(alldata_splaea_removeoutsidearctic$temporal_resolution, "once", 
+            "twice <= 1 yr", "regular < 1 yr", "irregular < 1 yr",
+            "twice > 1 yr", "regular > 1 yr", "irregular > 1 yr",
+             "annual","not reported")
+
+tr2<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=temporal_resolution))+geom_bar()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ ggtitle("D) Temporal resolution") +
+     theme(axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+                 axis.text.x  = element_text(size=16),
+                 axis.text.y =element_text(size=16)) + theme(plot.title = element_text(size=16))+
+  theme(plot.margin=unit(c(0.4,0.2,0.2,0.4),"cm"))
+
+tr2
+
+pdf('Figures/Figure_2.pdf',width=8,height=8)
+grid.arrange(pub, startyr, tr1,tr2,ncol=2)
+dev.off()
+
+
 
 # Mapping study types -----------------------------------------------------
 
