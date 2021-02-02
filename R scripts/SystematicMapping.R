@@ -255,6 +255,7 @@ tr2<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=temporal_resolution))+
 tr2
 
 pdf('Figures/Figure_2.pdf',width=8,height=8)
+tiff('Figures/Figure_2.tif',height=8,width=8,units = 'in',res=150)
 grid.arrange(pub, startyr, tr1,tr2,ncol=2)
 dev.off()
 
