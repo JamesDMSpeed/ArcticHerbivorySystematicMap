@@ -607,3 +607,45 @@ plot(allzones)
 
 a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
 tapply(a$ZONE_,a$ZONE_,length)
+
+# Trying kernels and marginal histograms  --------------------------------------
+
+
+library(tidyverse)
+library(cowplot)
+library(magrittr) # for pipes and %<>%
+
+toto<-alldata
+toto$group<-as.factor(c(rep(1, times=353), rep(2, times=352)))
+
+# create plot with kernels density distribution
+first_plot<-toto %>%
+  ggplot(aes(coordinates_E, coordinates_N, color=group)) +
+  geom_point() +
+  #stat_density2d(aes(fill = ..level..), alpha = 0.3, geom = "polygon")+
+  #stat_density_2d(geom = "polygon", aes(alpha = 0.3, fill = group)) + 
+  #scale_alpha_continuous(range = c(0, 1))
+  stat_density_2d(geom = "polygon",
+                  aes(alpha = ..level.., fill = group),
+                  bins = 20) 
+
+first_plot
+
+#create y-axis histogram
+y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
+  geom_density(data = toto, aes(x = coordinates_N,fill = group), color = NA, alpha = 0.5) +
+  coord_flip()
+
+#create x-axis histogram
+x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
+  geom_density(data = toto, aes(y = coordinates_E,fill = group), color = NA, alpha = 0.5) +
+  coord_flip()
+
+
+# create the combined plot
+combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
+combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
+
+
+# show the result
+ggdraw(combined_plot)
