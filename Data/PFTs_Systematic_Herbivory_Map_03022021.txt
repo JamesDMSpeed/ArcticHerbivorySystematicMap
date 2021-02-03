@@ -1,0 +1,715 @@
+evidence_point_ID	evergreen_dwarf_shrubs	decidious_dwarf_shrubs	decidious_tall_shrubs	evergreen_tall_shrubs	decidious_trees	evergreen_trees	graminoids	forbs	ferns_and_allies	bryophytes	vascular_plant_community	lichens	article_checked	original_scored_data	comments
+3_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+13_a	yes	yes	no	no	no	no	yes	no	no	yes	no	no			
+23_a	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes			cryptogams
+25_a	no	no	no	no	yes	yes	no	no	no	no	no	no			
+25_b	no	no	no	no	yes	yes	no	no	no	no	no	no			
+25_c	no	no	no	no	yes	yes	no	no	no	no	no	no			
+25_d	no	no	no	no	yes	yes	no	no	no	no	no	no			
+26_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+28_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	no	x	forbs, grasses, sedges, deciduous_shrubs, evergreen_shrubs, vascular_cryptogams, Empetrum_nigrum, total_community	
+30_a	no	yes	no	no	no	no	yes	no	no	no	no	no			
+44_a	yes	yes	yes	no	no	no	yes	yes	yes	no	no	no	x	Salix_spp, Betula_nana, graminoids, forbs, evergreen_dwarf_shrubs, deciduous_dwarf_shrubs, pteridophytes, bryophytes	Salix glauca, salix lapponum
+45_a	no	yes	no	no	no	no	no	yes	no	no	no	no			
+50_a	yes	yes	no	no	no	no	no	no	no	no	no	no			
+54_a	no	yes	no	no	no	no	no	yes	no	no	no	no			
+54_b	no	yes	no	no	no	no	yes	no	no	no	no	no			
+56_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+78_a	yes	yes	yes	yes	yes	no	yes	yes	no	yes	no	yes	x	deciduous_shrubs, evergreen_shrubs, forbs, graminoids, mosses, liverworts, Sphagnum_spp, lichens	
+78_b	yes	yes	yes	yes	yes	no	yes	yes	no	yes	no	yes	--	deciduous_shrubs, evergreen_shrubs, forbs, graminoids, mosses, liverworts, Sphagnum_spp, lichens	
+78_c	yes	yes	yes	yes	yes	no	yes	yes	no	yes	no	yes	--	deciduous_shrubs, evergreen_shrubs, forbs, graminoids, mosses, liverworts, Sphagnum_spp, lichens	
+78_d	yes	yes	yes	yes	yes	no	yes	yes	no	yes	no	yes	--	deciduous_shrubs, evergreen_shrubs, forbs, graminoids, mosses, liverworts, Sphagnum_spp, lichens	
+87_a	no	yes	yes	no	no	no	no	no	no	no	no	no			
+88_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+122_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	no			
+130_a	no	no	yes	no	no	no	no	no	no	no	no	no			Alnus viridis grouped into decidious tall shrubs
+161_a	no	yes	no	no	no	no	yes	yes	no	yes	no	no			
+175_a	yes	yes	no	no	no	no	no	yes	no	no	no	no			
+192_a	yes	yes	no	no	no	no	yes	no	no	no	no	no			
+199_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+216_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_c	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_d	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_e	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_f	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_g	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_h	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_i	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_j	no	no	no	no	no	no	no	no	no	no	yes	no			
+217_k	no	no	no	no	no	no	no	no	no	no	yes	no			
+234_a	no	yes	no	no	no	no	no	no	no	yes	no	no			
+234_b	no	yes	no	no	no	no	no	no	no	no	no	no			
+234_c	no	no	no	no	no	no	no	no	no	no	yes	no			
+239_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+252_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+252_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+255_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+258_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+288_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+288_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+288_c	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+288_d	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+290_a	no	no	no	no	no	no	yes	yes	yes	no	no	no			
+299_a	yes	yes	yes	yes	no	yes	yes	yes	no	yes	no	yes			
+300_a	yes	yes	yes	yes	no	yes	yes	yes	no	yes	no	yes			
+307_a	no	yes	yes	no	no	no	no	no	no	no	no	no		Salix_alaxensis, Salix_arbusculoides, Salix_glauca/niphochlada, Salix_pulchra, Salix_richardsonii, Alnus_sp, Betula_nana	
+364_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	woody_plants, shrubs, other	
+371_a	yes	no	no	no	no	no	yes	yes	no	no	no	no			
+380_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+408_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+411_a	yes	yes	no	no	no	no	yes	no	no	yes	no	yes	x	lichens, deciduous_shrubs, evergreen_shrubs, graminoids, mosses	
+411_b	yes	yes	no	no	no	no	yes	no	no	yes	no	yes	--	lichens, deciduous_shrubs, evergreen_shrubs, graminoids, mosses	
+411_c	yes	yes	no	no	no	no	yes	no	no	yes	no	yes	--	lichens, deciduous_shrubs, evergreen_shrubs, graminoids, mosses	
+411_d	yes	yes	no	no	no	no	yes	no	no	yes	no	yes	--	lichens, deciduous_shrubs, evergreen_shrubs, graminoids, mosses	
+420_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	dwarf_shrub, shrub_mat	
+422_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+422_b	no	yes	no	no	no	no	no	no	no	no	no	no			
+422_c	no	yes	no	no	no	no	no	no	no	no	no	no			
+424_a	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	shrubs, graminoids, forbs, lichens, bryophytes	"PFT group reported as ""shrubs"" but no mention of evergreen shrubs - only the deciduous Vaccinium myrtillus"
+424_b	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	shrubs, graminoids, forbs, lichens, bryophytes	"PFT reported as ""shrubs"" but no mention of evergreen shrubs - only the deciduous Vaccinium myrtillus"
+442_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	deciduous_shrubs, evergreen_shrubs, graminoids, forbs, lichens, bryophytes	
+470_a	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+470_b	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+470_c	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+471_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+520_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	graminoids, forbs, deciduous_shrubs, evergreen_shrubs, mosses, lichens	
+520_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	graminoids, forbs, deciduous_shrubs, evergreen_shrubs, mosses, lichens	
+525_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+528_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	forbs, grasses, sedges, deciduous_shrubs, evergreen_shrubs, Empetrum_nigrum	
+533_a	no	yes	yes	no	no	no	no	no	no	no	no	no		Salix_alaxensis, Salix_pulchra, Salix_glauca/niphoclada, Salix_lanata, Alnus_viridis, Betula nana	
+533_b	no	yes	yes	no	no	no	no	no	no	no	no	no		Salix_alaxensis, Salix_pulchra, Salix_glauca/niphoclada, Salix_lanata, Alnus_viridis, Betula nana	
+546_a	no	no	no	no	no	no	yes	no	yes	no	no	no			
+557_a	no	no	no	no	yes	yes	no	no	no	no	no	no			
+561_a	yes	yes	no	no	no	no	no	no	no	yes	yes	yes			
+588_a	yes	yes	no	no	no	no	no	no	no	no	no	no			
+604_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+614_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+619_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+630_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+645_a	yes	yes	no	no	no	no	no	yes	no	yes	no	yes			
+656_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+698_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+699_a	no	yes	no	no	no	no	yes	yes	no	yes	yes	no			
+699_b	no	yes	no	no	no	no	yes	yes	no	yes	yes	no			
+700_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+700_b	no	no	no	no	no	no	no	no	no	no	no	no			
+709_a	no	no	yes	no	no	no	no	no	no	no	no	no		Salix_alaxensis	
+709_b	no	no	yes	no	no	no	no	no	no	no	no	no		Salix_alaxensis	
+723_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+723_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+728_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+728_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+735_a	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	yes	x	graminoids, forbs, evergreen_ericoids, deciduous_woody_plants, tall_robust_bryophytes, small_bryophytes, lichens	deciduous_woody_plants - no mention of species, all three columns with deciduous woody plants therefore marked
+735_b	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	yes	--	graminoids, forbs, evergreen_ericoids, deciduous_woody_plants, tall_robust_bryophytes, small_bryophytes, lichens	deciduous_woody_plants - no mention of species, all three columns with deciduous woody plants therefore marked
+740_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+740_b	no	no	no	no	no	no	no	yes	no	no	no	no			
+757_a	no	no	no	no	no	no	no	no	no	no	no	no			
+763_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+763_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+766_a	yes	yes	yes	no	no	no	no	no	no	no	no	no	x	shrubs	
+770_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+770_b	no	no	yes	no	no	no	no	no	no	no	no	no			
+770_c	no	no	yes	no	no	no	no	no	no	no	no	no			
+773_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+852_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+852_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+865_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+873_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_d	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_e	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_f	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_g	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_h	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_i	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_j	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_k	no	no	no	no	yes	no	no	no	no	no	no	no			
+873_l	no	no	no	no	yes	no	no	no	no	no	no	no			
+874_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+877_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+877_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+878_a	yes	yes	yes	no	no	no	no	no	no	no	yes	no	x	shrubs	"This is the description in the paper: ""dwarf heath, mires, meadows, deciduous shrubs, and some evergreen (Juniperus communis L.)"" "
+878_b	yes	yes	yes	no	no	no	no	no	no	no	yes	no	--	shrubs	
+878_c	yes	yes	yes	no	no	no	no	no	no	no	yes	no	--	shrubs	
+879_a	no	yes	no	no	yes	no	yes	yes	no	yes	no	no			
+881_a	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	no	x	Betula_pubescens, Empetrum_nigrum, Vaccinium _myrtillus, Chamaepericlymenum_suecicum, Salix_spp	information changed from scored data  - data taken from Table 1
+881_b	yes	yes	yes	no	no	no	yes	yes	yes	yes	no	no	--	Betula_pubescens, Empetrum_nigrum, Vaccinium _myrtillus, Chamaepericlymenum_suecicum, Salix_spp	information changed from scored data  - data taken from Table 1
+881_c	yes	yes	yes	no	no	no	yes	yes	yes	yes	no	no	--	Betula_pubescens, Empetrum_nigrum, Vaccinium _myrtillus, Chamaepericlymenum_suecicum, Salix_spp	information changed from scored data  - data taken from Table 1
+881_d	yes	yes	yes	no	no	no	yes	yes	yes	yes	no	no	--	Betula_pubescens, Empetrum_nigrum, Vaccinium _myrtillus, Chamaepericlymenum_suecicum, Salix_spp	information changed from scored data  - data taken from Table 1
+888_a	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+888_b	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+888_c	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+888_d	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+895_a	no	yes	no	no	no	no	no	yes	no	no	no	no			
+901	no	yes	no	no	no	no	no	no	no	no	no	no			
+907_a	yes	yes	no	no	no	no	yes	no	no	no	yes	no			
+908_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+911_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	no	x	graminoid_cover, shrub_cover	"Salix spp. - no mention of species, but location description states that vegetation of the study area is characterised by dwarf shrubs; only dwarf shrubs selected here."
+912_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+915_a	yes	yes	yes	no	no	no	yes	yes	yes	no	no	no	x	long species list, see fig 3.	
+915_b	yes	yes	yes	no	no	no	yes	yes	yes	no	no	no	--	long species list, see fig 3.	
+917_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+921_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+929_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+929_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+929_c	no	no	no	no	no	no	yes	no	no	no	no	no			
+929_d	no	no	no	no	no	no	yes	no	no	no	no	no			
+941_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+949_a	yes	yes	no	no	no	no	no	no	no	no	no	no	x	shrubs	
+1009_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1022_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1022_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1059_a	yes	yes	no	no	no	no	yes	no	no	no	no	no	x	regional	
+1010_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+1036_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_d	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_e	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_f	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_g	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_h	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_i	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_j	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_k	no	no	no	no	yes	no	no	no	no	no	no	no			
+1036_l	no	no	no	no	yes	no	no	no	no	no	no	no			
+1060_a	no	yes	yes	no	no	no	yes	yes	yes	yes	no	yes			
+1060_b	no	yes	yes	no	no	no	yes	yes	yes	yes	no	yes			
+1060_c	no	yes	yes	no	no	no	yes	yes	yes	yes	no	yes			
+1060_d	no	yes	yes	no	no	no	yes	yes	yes	yes	no	yes			
+1060_e	no	yes	yes	no	no	no	yes	yes	yes	yes	no	yes			
+1074_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+1074_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+1088_a	yes	yes	no	no	no	no	yes	no	no	yes	no	yes	x	woody_plants, graminoids, bryophytes, lichens	
+1093_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1100_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+1146_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1146_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1146_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+1146_d	no	no	no	no	yes	no	no	no	no	no	no	no			
+1146_e	no	no	no	no	yes	no	no	no	no	no	no	no			
+1146_f	no	no	no	no	yes	no	no	no	no	no	no	no			
+1162_a	no	yes	no	no	no	no	yes	no	no	no	yes	no			
+1175_a	no	no	yes	no	no	no	no	no	no	no	no	no	x	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1175_b	no	no	yes	no	no	no	no	no	no	no	no	no	--	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1175_c	no	no	yes	no	no	no	no	no	no	no	no	no	--	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1176_a	no	no	yes	no	no	no	no	no	no	no	no	no	--	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1176_b	no	no	yes	no	no	no	no	no	no	no	no	no	--	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1176_c	no	no	yes	no	no	no	no	no	no	no	no	no	--	Salix_sp	Salix phylicifolia, Salix lanata, Salix glauca, Salix lapponium and  hybrids
+1182_a	no	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1182_b	no	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1182_c	no	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1187_a	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1187_b	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1187_c	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1190_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+1203_a	no	yes	no	no	no	no	yes	yes	yes	yes	no	no			
+1203_b	no	yes	no	no	no	no	yes	yes	yes	yes	no	no			
+1212_a	no	yes	no	no	no	no	yes	yes	yes	yes	no	no	x	green_moss, brown_moss, grasses, herbs, vascular_litter, equisetum, shrubs, roots	
+1212_b	no	yes	no	no	no	no	yes	yes	yes	yes	no	no	--	green_moss, brown_moss, grasses, herbs, vascular_litter, equisetum, shrubs, roots	
+1223_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1223_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1229_a	no	no	no	no	no	yes	no	no	no	no	no	no			
+1233_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_c	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_d	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_e	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_f	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_g	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_h	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_i	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_j	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1233_k	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1254_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1296_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+1300_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	herbaceous_dicotyledon, graminoids, shrubs	
+1300_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	herbaceous_dicotyledon, graminoids, shrubs	
+1300_c	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	herbaceous_dicotyledon, graminoids, shrubs	
+1306_a	no	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1306_b	no	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1309_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1325_a	no	no	no	no	no	yes	no	no	no	no	no	no			
+1325_b	no	no	no	no	no	yes	no	no	no	no	no	no			
+1325_c	no	no	no	no	no	yes	no	no	no	no	no	no			
+1329_a	yes	yes	no	no	no	no	no	no	no	no	no	no			
+1329_b	yes	yes	no	no	no	no	no	no	no	no	no	no			
+1329_c	yes	yes	no	no	no	no	no	no	no	no	no	no			
+1334_a	no	yes	no	no	no	no	yes	no	no	yes	no	no			
+1334_b	no	no	no	no	no	no	yes	no	no	yes	no	no			
+1337_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1340_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_b	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_c	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_d	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_e	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_f	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1340_g	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_b	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_c	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_d	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_e	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1341_f	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1347_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+1348_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+1348_b	no	yes	no	no	no	no	no	no	no	no	no	no			
+1348_c	no	yes	no	no	no	no	no	no	no	no	no	no			
+1348_d	no	yes	no	no	no	no	no	no	no	no	no	no			
+1350_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1350_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1350_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1399_a	yes	yes	no	no	no	no	no	yes	no	no	no	no			
+1416_a	yes	no	no	no	no	no	yes	no	no	yes	no	no	x	shrubs, grasses, mosses	Unclear if they only looked at deciduous shrubs or also evergreen. Given that site description only mentions decidious species, only decidious included here.
+1423_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1423_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1426_a	no	no	yes	no	no	no	yes	no	no	no	no	no	x	Carex_spp., Salix_spp., Eriophorum_angustifolium, Salix_lapponum	
+1426_e	no	no	yes	no	no	no	yes	no	no	no	no	no	--	Carex_spp., Salix_spp., Eriophorum_angustifolium, Salix_lapponum	
+1443_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1444_a	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1444_b	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1444_c	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1444_d	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1445_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+1445_b	no	no	yes	no	no	no	no	no	no	no	no	no			
+1448_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+1449_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1453_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1461_a	no	no	no	no	no	no	yes	yes	no	yes	no	no			
+1467_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+1467_b	no	no	no	no	no	no	no	no	no	no	no	yes			
+1472_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+1473_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1478_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1484_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+1484_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+1484_c	no	no	no	no	no	no	no	no	no	no	yes	no			
+1488_a	yes	yes	no	no	no	no	no	yes	no	no	no	no			
+1492_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1492_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1536_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+1539_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+1539_b	no	no	no	no	no	no	no	yes	no	no	no	no			
+1548_a	yes	yes	no	no	no	no	yes	no	no	yes	no	yes			
+1556_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+1563_a	no	no	no	no	no	no	no	no	no	yes	no	no			
+1574_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1574_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1574_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_d	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_e	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_f	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_g	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_h	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_i	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_j	no	no	no	no	no	no	no	no	no	no	no	no			
+1578_k	no	no	no	no	no	no	no	no	no	no	no	no			
+1587_a	yes	yes	yes	no	no	no	yes	yes	no	yes	no	yes	x	Salix_spp., Betula_nana, dwarf_shrubs, forbs, sedges, grass_leaves, grass_flowers, bryophytes, lichens	not clear what willow species - both dwarf and talll shrub categories marked
+1587_b	yes	yes	yes	no	no	no	yes	yes	no	yes	no	yes	--	Salix_spp., Betula_nana, dwarf_shrubs, forbs, sedges, grass_leaves, grass_flowers, bryophytes, lichens	not clear what willow species - both dwarf and talll shrub categories marked
+1587_c	yes	yes	yes	no	no	no	yes	yes	no	yes	no	yes	--	Salix_spp., Betula_nana, dwarf_shrubs, forbs, sedges, grass_leaves, grass_flowers, bryophytes, lichens	not clear what willow species - both dwarf and talll shrub categories marked
+1590_a	no	yes	yes	no	no	no	yes	yes	no	no	yes	no			
+1599_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1599_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1601_a	no	no	no	no	no	no	yes	yes	no	no	no	no			
+1601_b	no	no	no	no	no	no	yes	yes	no	no	no	no			
+1645_a	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+1663_a	yes	yes	yes	no	no	no	yes	yes	yes	no	no	no			
+1671_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+1679_a	no	yes	no	no	no	no	yes	no	no	no	no	no			
+1679_b	no	yes	no	no	no	no	yes	no	no	no	no	no			
+1684_a	no	yes	no	no	no	no	no	yes	no	no	no	yes			
+1689_a	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	no			
+1700_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1700_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+1700_c	no	no	no	no	no	no	yes	no	no	no	no	no			
+1721_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+1721_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+1721_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+1727_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1728_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1728_b	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1728_c	no	no	no	no	no	no	no	no	no	yes	yes	no			
+1752_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_d	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_e	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_f	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_g	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_h	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_i	no	no	no	no	no	no	no	no	no	no	no	no			
+1752_j	no	no	no	no	no	no	no	no	no	no	no	no			
+1770_a	yes	no	no	no	no	no	yes	yes	no	yes	no	yes			
+1776_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1776_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1776_c	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1776_d	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1776_e	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+1784_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+1798_a	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+1798_b	no	yes	no	no	no	no	yes	yes	no	no	no	no			
+1811_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1812_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	no			
+1812_b	yes	yes	no	no	no	no	yes	no	no	yes	no	no			
+1813_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1813_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1813_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1813_d	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_d	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_e	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_f	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_g	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_h	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_i	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_j	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_k	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_l	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_m	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_n	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_o	no	no	no	no	no	no	no	no	no	no	no	no			
+1842_p	no	no	no	no	no	no	no	no	no	no	no	no			
+1853_a	no	no	no	no	no	no	no	yes	no	no	no	yes			
+1855_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+1881_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1930_a	no	no	no	no	no	no	no	no	no	no	no	no			
+1930_b	no	no	no	no	no	no	no	no	no	no	no	no			
+1930_c	no	no	no	no	no	no	no	no	no	no	no	no			
+1930_d	no	no	no	no	no	no	no	no	no	no	no	no			
+1974_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2005_a	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	yes			
+2005_b	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	yes			
+2005_c	yes	yes	yes	no	yes	no	yes	yes	no	yes	no	yes			
+2006_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+2006_b	no	no	no	no	no	no	no	no	no	no	no	yes			
+2006_c	no	no	no	no	no	no	no	no	no	no	no	yes			
+2013_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+2020_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+2022_a	yes	yes	no	no	no	no	no	yes	no	no	no	no	x	Vaccinium_myrtillus, Betula_nana, Vaccinium_uliginosum, Empetrum_hermaphroditum, Vaccinium_vitis-idaea, decidious_shrubs, evergreen_shrubs, herbs	
+2040_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2043_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2043_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2043_c	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2043_d	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2044_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	graminoids, herbs, deciduous_shrubs, evergreen_shrubs, mosses, lichens	
+2044_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	graminoids, herbs, deciduous_shrubs, evergreen_shrubs, mosses, lichens	
+2057_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+2057_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+2061_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+2062_a	no	yes	no	no	no	no	yes	yes	yes	no	no	no			
+2062_b	no	no	no	no	no	no	yes	no	no	yes	yes	yes			
+2089_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+2089_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2089_c	no	no	no	no	no	no	no	yes	no	no	no	no			
+2089_d	no	no	no	no	no	no	yes	no	no	no	no	no			
+2102_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+2102_b	yes	no	no	no	no	no	no	no	no	no	no	no			
+2103_a	no	no	no	no	no	no	no	no	no	yes	no	yes			
+2112_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2128_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2128_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2128_c	no	no	no	no	no	no	no	no	no	no	yes	no			
+2129_a	no	no	no	no	no	no	yes	no	no	no	yes	no			
+2129_b	no	no	no	no	no	no	yes	no	no	no	yes	no			
+2129_c	no	no	no	no	no	no	yes	no	no	no	yes	no			
+2132_a	yes	yes	no	no	no	no	yes	no	no	no	yes	yes			
+2143_a	no	no	no	no	no	no	no	no	no	no	no	no			
+2180_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2182_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2182_b	no	yes	no	no	no	no	no	no	no	no	no	no			
+2190_a	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+2192_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2193_a	no	no	yes	no	no	no	yes	yes	no	no	no	no			
+2193_b	no	no	yes	no	no	no	yes	yes	no	no	no	no			
+2198_a	no	no	no	no	no	no	no	no	no	no	no	no			
+2199_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2199_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2212_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2212_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+2213_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	grasses, sedges, forbs, evergreen_shrubs, deciduous_ shrubs	
+2225_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2231_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_c	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_d	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_e	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_f	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_g	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_h	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_i	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_j	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_k	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_l	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_m	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_n	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_o	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_p	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_q	no	no	no	no	no	no	yes	no	no	no	no	no			
+2231_r	no	no	no	no	no	no	yes	no	no	no	no	no			
+2275_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+2276_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+2303_a	yes	yes	no	no	no	no	yes	yes	no	no	no	yes			
+2305_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2307_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2311_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	Geranium_sylvaticum, Polygonum_viviparum, Ranunculus_acris, other_herbs, graminoids, dwarf_shrubs	
+2311_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	Geranium_sylvaticum, Polygonum_viviparum, Ranunculus_acris, other_herbs, graminoids, dwarf_shrubs	
+2312_a	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	grasses, sedges, forbs, evergreen_shrubs, deciduous_ shrubs	
+2312_b	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	grasses, sedges, forbs, evergreen_shrubs, deciduous_ shrubs	
+2312_c	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	grasses, sedges, forbs, evergreen_shrubs, deciduous_ shrubs	
+2312_d	no	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	grasses, sedges, forbs, evergreen_shrubs, deciduous_ shrubs	
+2315_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+2315_b	no	no	yes	no	no	no	no	no	no	no	no	no			
+2316_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2316_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2316_c	no	no	no	no	no	no	yes	no	no	no	no	no			
+2317_a	yes	no	no	no	no	no	yes	no	no	yes	no	yes	x	Long species list. See Table 2	
+2322_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2323_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2328_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+2329_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+2364_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2407_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2419_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2419_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2467_a	no	no	no	no	no	no	no	no	no	no	no	no			
+2470_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2477_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2479_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2498_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	Long species list. See Table III	
+2520_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2525_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2526_a	yes	yes	no	no	yes	no	no	no	no	no	no	no			
+2534_a	yes	yes	no	no	no	no	yes	yes	yes	yes	no	no	x	Long species list. See Table 2	
+2534_b	no	no	no	no	no	no	no	no	no	no	no	no	--	Long species list. See Table 2	
+2534_c	no	no	no	no	no	no	no	no	no	no	no	no	--	Long species list. See Table 2	
+2534_d	no	no	no	no	no	no	no	no	no	no	no	no	--	Long species list. See Table 2	
+2534_e	no	no	no	no	no	no	no	no	no	no	no	no	--	Long species list. See Table 2	
+2538_a	no	no	no	no	no	no	no	no	no	no	no	no			
+2545_a	yes	yes	yes	no	yes	no	yes	yes	no	no	no	no	x	woody_plants, herbs, graminoids	Unclear - all columns for woody plants except evergreen trees marked. The study area is north of evergreen forests, but authors mention among others Betula pubescens (decidious_tree) and Salix glauca (decidious_tall_shrub), Vaccinium_myrtillus (decidious_dwarf_shrub). No junipers mentioned so tall_evergreen_shrubs not included. As the study area has Empetrum_nigrum as a common shrub, evergreen_dwarf_shrubs included.
+2545_b	yes	yes	yes	no	yes	no	yes	yes	no	no	no	no	--	woody_plants, herbs, graminoids	Unclear - all columns for woody plants except evergreen trees marked. The study area is north of evergreen forests, but authors mention among others Betula pubescens (decidious_tree) and Salix glauca (decidious_tall_shrub), Vaccinium_myrtillus (decidious_dwarf_shrub). No junipers mentioned so tall_evergreen_shrubs not included. As the study area has Empetrum_nigrum as a common shrub, evergreen_dwarf_shrubs included.
+2547_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2548_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2548_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2552_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+2552_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+2552_c	no	no	no	no	no	no	no	no	no	no	yes	no			
+2552_d	no	no	no	no	no	no	no	no	no	no	yes	no			
+2552_e	no	no	no	no	no	no	no	no	no	no	yes	no			
+2552_f	no	no	no	no	no	no	no	no	no	no	yes	no			
+2558_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+2559_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	vascular_plants, woody_plants, herbs, graminoids, Cassiope_tetragona, Dryas_octopetala, Salix_polaris, Bistorta_vivipara, Luzula_arcuata, Alopecurus_borealis, Dupontia_fischeri	
+2559_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	vascular_plants, woody_plants, herbs, graminoids, Cassiope_tetragona, Dryas_octopetala, Salix_polaris, Bistorta_vivipara, Luzula_arcuata, Alopecurus_borealis, Dupontia_fischeri	
+2559_c	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	vascular_plants, woody_plants, herbs, graminoids, Cassiope_tetragona, Dryas_octopetala, Salix_polaris, Bistorta_vivipara, Luzula_arcuata, Alopecurus_borealis, Dupontia_fischeri	
+2559_d	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	vascular_plants, woody_plants, herbs, graminoids, Cassiope_tetragona, Dryas_octopetala, Salix_polaris, Bistorta_vivipara, Luzula_arcuata, Alopecurus_borealis, Dupontia_fischeri	
+2577_a	no	no	no	no	no	no	yes	yes	no	no	no	no	x	Poa_arctica, dicotyledons	not clear - no further description than dicotyledons
+2577_b	no	no	no	no	no	no	yes	yes	no	no	no	no	--	Poa_arctica, dicotyledons	not clear - no further description than dicotyledons
+2591_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+2596_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	Long species list. See Table 5	
+2602_a	yes	yes	no	no	no	no	no	yes	no	no	no	no			
+2610_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+2610_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+2614_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2624_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2624_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+2637_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	Long species/functional group list. See Table 4 and Figure 6	
+2639_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2640_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2643_a	no	no	yes	no	yes	no	yes	yes	yes	no	no	no	x	Long species list. See Table 1. 	
+2669_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2681_a	no	no	yes	no	no	no	no	no	no	no	no	no			Salix_planifolia coded as tall shrub
+2682_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2688_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	lichens, mosses, non_forage_shrub, forage_shrub, non_forage_graminoid, forage_graminoid, non_forage_forb, forage_forb	
+2691_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2693_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2698_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2728_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2728_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+2728_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+2735_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2741_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+2741_b	yes	no	no	no	no	no	no	no	no	no	no	no			
+2750_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+2750_b	no	no	no	no	no	no	no	yes	no	no	no	no			
+2761_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+2814_a	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes	x	Long species list. See appendix. 	
+2814_b	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes	--	Long species list. See appendix. 	
+2814_c	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes	--	Long species list. See appendix. 	
+2816_a	yes	no	yes	no	no	no	yes	no	no	no	no	no			
+2861_a	yes	no	no	no	no	no	no	no	no	no	no	no			
+2864_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	lichens, shrubs, graminoids_and_forbs, mosses, other	
+2873_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+2909_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+2909_b	no	no	no	no	no	no	no	no	no	no	yes	no			
+2912_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2954_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+2954_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+2954_c	no	no	no	no	yes	no	no	no	no	no	no	no			
+2954_d	no	no	no	no	yes	no	no	no	no	no	no	no			
+2954_e	no	no	no	no	yes	no	no	no	no	no	no	no			
+2960_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	Long species list. See Table 1	
+2960_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	Long species list. See Table 1	
+2961_a	no	no	yes	no	no	no	no	no	no	no	no	no			
+2963_a	no	no	no	no	no	no	yes	no	no	yes	no	no			
+2963_b	no	no	no	no	no	no	yes	no	no	yes	no	no			
+3014_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no	x	woody_plants, prostrate_herbs, low_herbs, rosette_herbs, tall_herbs, rhizomatous_graminoids, tall_graminoids	
+3014_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no	--	woody_plants, prostrate_herbs, low_herbs, rosette_herbs, tall_herbs, rhizomatous_graminoids, tall_graminoids	
+3030_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3032_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3045_a	no	no	no	no	no	no	no	yes	no	no	no	no			
+3045_b	no	no	no	no	no	no	no	yes	no	no	no	no			
+3083_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3085_a	no	no	no	no	no	no	yes	yes	no	no	no	no			
+3104_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3104_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+3116_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3130_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3138_a	no	no	no	no	no	no	no	no	no	yes	yes	no			
+3138_b	no	no	no	no	no	no	no	no	no	yes	yes	no			
+3138_c	no	no	no	no	no	no	no	no	no	yes	no	no			
+3142_a	no	yes	no	no	no	no	yes	yes	no	yes	no	no	x	for a list of species see Table 4	Unclear - only Salix sp. mentioned. But the paper has a photo of the site which has no tall shrubs or trees, so only dwarf shrubs are included here
+3142_b	no	yes	no	no	no	no	yes	yes	no	yes	no	no	--	for a list of species see Table 4	Unclear - only Salix sp. mentioned. But the paper has a photo of the site which has no tall shrubs or trees, so only dwarf shrubs are included here
+3147_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+3156_a	yes	yes	no	no	no	no	yes	no	no	no	no	no			
+3159_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3161_a	no	no	yes	no	no	no	yes	no	no	yes	no	yes			
+3161_b	yes	no	yes	no	no	no	yes	yes	no	no	no	no			
+3168_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3172_a	no	yes	yes	no	no	no	no	no	no	no	no	no	x	Salix_spp	
+3183_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3204_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+3206_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	x	graminoids, woody_plants, lichens, moss, Anthoxanthum_odoratum, Carex_bigelowii, Carex_lachenalii, Luzula_multiflora_frigida, Polygonum_viviparum, Salix_herbaceae, Vaccinium_vitis-idaea, Conostomum_tetragonum, Dicranum_spp, Kiaeria_spp, Hepaticae, Pohlia_spp, Polytrichum_alpinum, Polytrichum_juniperinum, Polytrichum_norvegicum, Cetraria_delisei,  Cetraria_islandica, Clasina_mitis, Cladonia_spp, Lecidea_spp, Nephroma_arcticum, Ochrolechia_spp, Peltigera_rufocanus, Stereocaulon_spp	
+3213_a	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+3213_b	no	no	no	no	no	no	yes	no	no	yes	yes	yes			
+3213_c	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+3213_d	no	no	no	no	no	no	yes	no	no	yes	yes	yes			
+3213_e	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+3213_f	no	no	no	no	no	no	yes	no	no	yes	yes	yes			
+3213_g	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+3213_h	no	no	no	no	no	no	yes	no	no	yes	yes	yes			
+3213_i	no	no	no	no	no	no	no	no	no	yes	yes	yes			
+3221_a	no	no	no	no	no	yes	no	no	no	no	no	no			
+3225_a	no	yes	no	no	no	no	no	yes	no	no	no	no			
+3227_a	no	no	yes	no	no	no	yes	no	yes	yes	no	no	x	Carex, Equisetum, Dupontia, Eriophorum, Salix, mosses	
+3273_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+3359_a	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_b	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_c	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_d	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_e	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_f	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_g	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3359_h	yes	yes	no	no	no	no	yes	yes	no	no	no	no			
+3386_a	yes	yes	no	no	yes	no	yes	yes	no	yes	no	yes	x	shrubs, graminoids, herbs, lichen, moss. List of species in Table 3 (page 22)	
+3386_b	yes	yes	no	no	yes	no	yes	yes	no	yes	no	yes	--	shrubs, graminoids, herbs, lichen, moss. List of species in Table 3 (page 22)	
+3411_a	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes	x	lichens, graminoids, forbs, mosses, dwarf_shrubs	
+3411_b	yes	yes	no	no	no	no	yes	yes	yes	yes	no	yes	--	lichens, graminoids, forbs, mosses, dwarf_shrubs	
+3411_c	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes	--	lichens, graminoids, forbs, mosses, dwarf_shrubs	
+3415_a	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	x	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_b	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_c	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_d	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_e	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_f	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_g	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_h	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_i	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_j	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_k	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_l	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_m	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_n	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_o	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_p	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_q	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_r	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_s	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_t	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3415_u	yes	yes	no	no	yes	no	yes	yes	yes	yes	no	yes	--	 grasses, grasslike_plants, forbs, shrubs, mosses, lichens, species list available (pages 4-7)	
+3425_a	yes	yes	yes	no	yes	no	yes	yes	yes	no	no	no			
+3425_b	yes	yes	yes	no	yes	no	yes	yes	yes	no	no	no			
+3425_c	yes	yes	no	no	no	no	yes	no	yes	no	no	no			
+3425_d	yes	yes	yes	no	yes	no	yes	yes	yes	no	no	no			
+3425_m	yes	yes	no	no	yes	no	yes	yes	no	yes	no	yes			
+3425_n	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_o	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_p	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_q	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_r	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_s	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_t	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3425_u	yes	yes	yes	no	yes	no	yes	yes	yes	yes	no	yes			
+3427_a	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_c	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_d	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_e	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_h	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_i	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_j	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_k	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_l	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3427_r	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3428_a	no	yes	no	no	yes	no	no	no	no	no	no	no			
+3428_b	yes	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3430_a	no	no	no	no	no	no	no	no	no	no	yes	no			
+3493_a	no	yes	no	no	no	no	yes	yes	no	yes	no	yes			
+3508_a	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_b	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_c	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_d	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_e	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_f	yes	yes	yes	no	no	no	yes	yes	no	no	no	no			
+3508_g	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_h	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_i	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_j	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_k	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_l	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_m	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_n	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_o	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_p	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_q	no	no	no	no	no	no	no	no	no	no	no	no			
+3508_r	no	no	no	no	no	no	no	no	no	no	no	no			
+3509_a	no	no	no	no	no	no	no	no	no	yes	no	no			
+3509_b	no	no	no	no	no	no	no	no	no	yes	no	no			
+3509_c	no	no	no	no	no	no	no	no	no	yes	no	no			
+3509_d	no	no	no	no	no	no	no	no	no	yes	no	no			
+3509_e	no	no	no	no	no	no	no	no	no	yes	no	no			
+3509_f	no	no	no	no	no	no	no	no	no	yes	no	no			
+3510_a	no	no	no	no	yes	no	no	no	no	no	no	no			
+3510_b	no	no	no	no	yes	no	no	no	no	no	no	no			
+3538_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+3539_a	yes	yes	yes	no	no	no	yes	yes	no	no	no	yes		shrubs, grasses, lichens	lichens, erect shrubs, dwarf shrubs, forbs
+3539_b	yes	yes	yes	no	no	no	yes	yes	no	no	no	yes		shrubs, grasses, lichens	lichens, erect shrubs, dwarf shrubs, forbs
+3539_c	yes	yes	yes	no	no	no	yes	yes	no	no	no	yes		shrubs, grasses, lichens	lichens, erect shrubs, dwarf shrubs, forbs
+3541_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+3556_a	no	no	no	no	no	no	no	no	no	no	yes	yes			
+3557_a	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_b	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_c	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_d	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_e	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_f	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_g	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3557_h	yes	yes	no	no	no	no	yes	no	no	yes	yes	yes		lichens, plants, moss, grasses, dwarf-shrubs	study reports mosses, dwarf-shrubs, and herbaceous plants, but the species are not described
+3563_a	no	no	no	no	no	no	no	no	no	no	yes	no		different groups of plants	results reported as totals per vegetation type
+3565_a	no	yes	no	no	no	no	no	no	no	no	no	no			
+3568_c	no	no	no	no	no	no	no	no	no	yes	no	yes			
+3568_d	no	no	no	no	no	no	no	no	no	yes	no	yes			
+3568_e	no	no	no	no	no	no	no	no	no	yes	no	yes			
+3569_a	yes	no	no	no	no	no	yes	no	no	no	no	no			
+3575_a	no	no	no	no	no	no	yes	no	no	no	no	no			
+3575_b	no	no	no	no	no	no	yes	no	no	no	no	no			
+3580_a	yes	yes	yes	no	yes	no	yes	yes	no	no	no	no	x	green_sedges, dead_sedges, shrubs, forbs	
+3580_b	yes	yes	yes	no	yes	no	yes	yes	no	no	no	no	--	green_sedges, dead_sedges, shrubs, forbs	
+3581_a	no	no	no	no	no	no	no	no	no	no	no	yes			
+3586_a	no	no	no	no	no	no	yes	yes	yes	yes	no	no			
