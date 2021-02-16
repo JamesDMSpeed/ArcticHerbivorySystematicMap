@@ -38,54 +38,82 @@ dim(alldata)
 names(alldata)
 
 
-# Approaches  -----------------------------------------------
+# Approaches, study designs, and methods  -----------------------------------------------
 
-# proportion of experimental field studies 
+table(alldata$study_method)
+table(alldata$study_design)
+table(alldata$study_design_comments)
+table(alldata$study_method_comments)
+
+tito<-filter(alldata, study_method_comments=="phytotron") 
+tito$study_method # all phytothron studies are counted in the greenhouse studies
+
+tito<-filter(alldata, study_method_comments=="dendrochronology") 
+tito$study_method # dendrochronology study is in the group "other" 
+
+# no. experimental field studies 
 tito<-filter(alldata, study_design=="experimental") 
-tito<-filter(tito, study_method=="field") 
-dim(tito)[1]/dim(alldata)[1]
+sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) # 306
 
-# proportion of observational field studies
+# no. observational field studies
 # first combine obs & quasi-exp
 alldata$study_design[alldata$study_design=="quasi-experimental"]<-"observational"
 tito<-filter(alldata, study_design=="observational") 
-tito<-filter(tito, study_method=="field") 
-dim(tito)[1]/dim(alldata)[1]
+sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) # 313
 
-#tito<-filter(alldata, study_design=="quasi-experimental") 
-#tito<-filter(tito, study_method=="field") 
-#dim(tito)[1]/dim(alldata)[1]
+# no other methods
+sum(grepl("remote sensing",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 29
+sum(grepl("greenhouse",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 13
+sum(grepl("modelling",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 19
 
-tito<-filter(alldata, study_method=="greenhouse") 
-dim(tito)[1]/dim(alldata)[1]
-
-tito<-filter(alldata, study_method=="remote sensing") 
-dim(tito)[1]/dim(alldata)[1]
-
-tito<-filter(alldata, study_method=="modelling") 
-dim(tito)[1]/dim(alldata)[1]
 
 ## additional exposures
+table(alldata$additional_exposures)
+levels(as.factor(alldata$additional_treatments_comments))
+
 tito<-filter(alldata, study_method=="field") 
 tito<-filter(tito, study_design=="experimental") 
-tito<-filter(tito, additional_exposures!="none") 
-tito<-filter(tito, additional_exposures!="not relevant") 
-warming<-filter(tito, additional_exposures=="warming"); dim(warming)[1]
-nut<-filter(tito, additional_exposures=="nutrient manipulation"); dim(nut)[1]
-sev<-filter(tito, additional_exposures=="several")
-other<-filter(tito, additional_exposures=="other")
+sum(grepl("warming",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) # 19
+sum(grepl("nutrient manipulation",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) # 23
 
-sev$additional_treatments_comments
-# additional 7 evidence points to warming
-# additional 4 nutrient manipulation
-18+7
-19+4
 
-other$additional_treatments_comments
-# additional 2 nutrient removal
+## temporal aspects
+table(alldata$temporal_resolution)
+table(alldata$extent_of_temporal_scale)
+alldata$extent_of_temporal_scale<-as.numeric(alldata$extent_of_temporal_scale)
 
-dim(warming)[1]+7
-dim(nut)[1]+4+2
+
+tito<-filter(alldata, temporal_resolution=="once") 
+dim(tito)[1]
+
+tito<-filter(alldata, extent_of_temporal_scale==1) 
+dim(tito)[1]
+
+tito<-alldata[alldata$extent_of_temporal_scale>10,]
+dim(tito)[1]
+
+
+
+# Arctic plants and plant communities (population)  -----------------------------------------------
+
+table(alldata$biological_organization_level_reported)
+table(alldata$biological_organization_level_reported_comments)
+
+sum(grepl("population/species",c(alldata$biological_organization_level_recorded, alldata$biological_organization_recorded_comments)), na.rm=TRUE) 
+sum(grepl("individual",c(alldata$biological_organization_level_recorded, alldata$biological_organization_recorded_comments)), na.rm=TRUE) 
+sum(grepl("groups of species",c(alldata$biological_organization_level_recorded, alldata$biological_organization_recorded_comments)), na.rm=TRUE) 
+sum(grepl("community",c(alldata$biological_organization_level_recorded, alldata$biological_organization_recorded_comments)), na.rm=TRUE) 
+
+sum(grepl("population/species",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
+sum(grepl("individual",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
+sum(grepl("groups of species",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
+sum(grepl("community",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
+
+
+
+
+
+
 
 ## approaches to herbivory in experimental field studies
 tito<-filter(alldata, study_method=="field")
@@ -156,15 +184,7 @@ summary(tito$year)
 boxplot(tito$year)
 dim(tito)
 
-## temporal scale of sampling  -----------------------------------------------
-tito<-filter(alldata, temporal_resolution=="once") 
-dim(tito)[1]/dim(alldata)[1]
 
-tito<-alldata[alldata$extent_of_temporal_scale>10,]
-dim(tito)[1]/dim(alldata)[1]
-str(tito)
-
-## temporal scale of sampling  -----------------------------------------------
 
 
 ## spatial scale of sampling  -----------------------------------------------
@@ -209,48 +229,39 @@ sum(str_count(sev$measured_response_comments, "morphological measure")) #165
 (dim(phy)[1]+65)/dim(alldata)[1] #18%
 (dim(mor)[1]+165)/dim(alldata)[1] #28%
 
-# plants recorded  -----------------------------------------------
-pop<-filter(alldata, biological_organization_level_recorded=="population/species") 
-ind<-filter(alldata, biological_organization_level_recorded=="individual") 
-com<-filter(alldata, biological_organization_level_recorded=="community") 
-gru<-filter(alldata, biological_organization_level_recorded=="groups of species") 
 
-
-sev<-filter(alldata, biological_organization_level_recorded=="several") 
-sum(na.omit(str_count(sev$biological_organization_recorded_comments, "population/species"))) #25
-sum(na.omit(str_count(sev$biological_organization_recorded_comments, "individual"))) #9
-sum(na.omit(str_count(sev$biological_organization_recorded_comments, "community"))) #5
-sum(na.omit(str_count(sev$biological_organization_recorded_comments, "groups of species"))) #16
-
-
-(dim(pop)[1]+25)/dim(alldata)[1] #49%
-(dim(ind)[1]+9)/dim(alldata)[1] #29%
-(dim(com)[1]+5)/dim(alldata)[1] #11%
-(dim(gru)[1]+16)/dim(alldata)[1] #13%
-
-# plants reported  -----------------------------------------------
-table(alldata$biological_organization_level_reported)
-
-pop<-filter(alldata, biological_organization_level_reported=="population/species") 
-ind<-filter(alldata, biological_organization_level_reported=="individual") 
-com<-filter(alldata, biological_organization_level_reported=="community") 
-gru<-filter(alldata, biological_organization_level_reported=="groups of species") 
-
-
-sev<-filter(alldata, biological_organization_level_reported=="several") 
-sum(na.omit(str_count(sev$biological_organization_reported_comments, "population/species"))) #68
-sum(na.omit(str_count(sev$biological_organization_reported_comments, "individual"))) #2
-sum(na.omit(str_count(sev$biological_organization_reported_comments, "community"))) #50
-sum(na.omit(str_count(sev$biological_organization_reported_comments, "groups of species"))) #101
-
-
-(dim(pop)[1]+68)/dim(alldata)[1] #49%
-(dim(ind)[1]+2)/dim(alldata)[1] #9%
-(dim(com)[1]+50)/dim(alldata)[1] #25%
-(dim(gru)[1]+101)/dim(alldata)[1] #29%
 
 # herbivores  -----------------------------------------------
 table(alldata$herbivore_type)
+dim(alldata)[1]
+
+## no. points per group
+sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 405
+sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 135
+sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 161
+sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
+sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 3
+sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
+sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 1
+sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
+sum(grepl("unknown",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
+
+# sum vertebrates =701
+sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) 
+
+# sum invertebrates = 79
+sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
+sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) 
+
+
+79/(701+79)
+
+
 oth<-filter(alldata, herbivore_type=="other vertebrates") 
 wat<-filter(alldata, herbivore_type=="waterfowl") 
 sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
