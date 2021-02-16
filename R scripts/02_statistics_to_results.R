@@ -37,6 +37,13 @@ alldata<-read.csv("Data/AllCodedData_withGIScontext.csv")
 dim(alldata)
 names(alldata)
 
+# data for plant functional groups
+plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_16022021.txt")
+dim(plants)
+head(plants)  
+
+# filter plant data so only evidence points in alldata are considered 
+plants<-plants[plants$evidence_point_ID %in% alldata$evidence_point_ID,]
 
 # Approaches, study designs, and methods  -----------------------------------------------
 
@@ -108,6 +115,176 @@ sum(grepl("population/species",c(alldata$biological_organization_level_reported,
 sum(grepl("individual",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
 sum(grepl("groups of species",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
 sum(grepl("community",c(alldata$biological_organization_level_reported, alldata$biological_organization_reported_comments)), na.rm=TRUE) 
+
+# no evidence points looking at different plant groups
+names(plants)
+sum(grepl("yes",plants$graminoids), na.rm=TRUE) 
+sum(grepl("yes",plants$decidious_dwarf_shrubs), na.rm=TRUE) 
+sum(grepl("yes",plants$evergreen_dwarf_shrubs), na.rm=TRUE)
+sum(grepl("yes",plants$forbs), na.rm=TRUE) 
+sum(grepl("yes",plants$bryophytes), na.rm=TRUE)
+sum(grepl("yes",plants$lichens), na.rm=TRUE) 
+sum(grepl("yes",plants$decidious_trees), na.rm=TRUE)
+sum(grepl("yes",plants$vascular_plant_community), na.rm=TRUE) 
+sum(grepl("yes",plants$ferns_and_allies), na.rm=TRUE)
+sum(grepl("yes",plants$evergreen_trees), na.rm=TRUE) 
+sum(grepl("yes",plants$evergreen_tall_shrubs), na.rm=TRUE) 
+sum(grepl("yes",plants$decidious_tall_shrubs), na.rm=TRUE) 
+
+# Herbivores(exposure) -----------------------------------------------
+
+table(alldata$herbivore_type)
+levels(as.factor(alldata$herbivore_type_comments))
+
+## no. points per group
+sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 405
+sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 135
+sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 161
+sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
+sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 3
+sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
+sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 1
+sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
+sum(grepl("unknown",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
+sum(grepl("several",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
+
+
+# in total vertebrates
+sum(grepl("other vertebrates|waterfowl|small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 602
+
+# in total invertebrates
+sum(grepl("invertebrates|insects|feeders|defoliating",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 82
+
+
+## vertebrate herbivore genera
+sum(grepl("Rangifer", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Lagopus", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Lepus", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Alces", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Ovibos", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Ovis", alldata$herbivore_identity), na.rm=TRUE) 
+
+sum(grepl("Microtus", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Clethrionomus|Clethrionomys|Myodes", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Lemmus", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Dicrostonyx", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Spermophilus", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Urocitellus", alldata$herbivore_identity), na.rm=TRUE) 
+
+sum(grepl("Chen", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Branta", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Anser", alldata$herbivore_identity), na.rm=TRUE) 
+
+## invertebrate herbivore genera
+table(alldata$herbivore_identity)
+sum(grepl("Operophtera|Operopthera", alldata$herbivore_identity), na.rm=TRUE) 
+sum(grepl("Epirrita", alldata$herbivore_identity), na.rm=TRUE) 
+
+
+## approaches to study different types of herbivores 
+vert<-filter(alldata, grepl("other vertebrates|waterfowl|small rodents and pikas", alldata$herbivore_type))
+vert2<-filter(alldata, grepl("other vertebrates|waterfowl|small rodents and pikas", alldata$herbivore_type_comments))
+#vert$evidence_point_ID %in% vert2$evidence_point_ID
+#vert2$evidence_point_ID %in% vert$evidence_point_ID
+vert<-rbind.data.frame(vert, vert2)
+
+table(vert$study_method)
+table(vert$study_design)
+table(vert$biological_organization_level_reported)
+
+invert<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type))
+invert2<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type_comments))
+invert<-rbind.data.frame(invert, invert2)
+
+table(invert$study_method)
+table(invert$study_design) # nb quasi-experimental and observational pooled, so total = 56
+table(invert$biological_organization_level_reported)
+
+sev<-filter(alldata, grepl("several", alldata$herbivore_type))
+table(sev$study_method)
+table(sev$study_design) # nb quasi-experimental and observational pooled, so total = 56
+
+# Comparison between levels of herbivore impact (comparator) -----------------------------------------------
+
+## done until here 16.2. Eeva
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tito<-filter(alldata, study_method=="field")
+tito<-filter(tito, study_design=="experimental")
+table(tito$exposure_quantification)
+tito<-filter(tito, exposure_quantification=="several")
+tito$exposure_quantification_comments # 8 additional exclosures, 2 additional simulated herbivory
+
+## approaches to herbivory in observational field studies
+tito<-filter(alldata, study_method=="field")
+tito<-filter(tito, study_design=="observational")
+table(tito$exposure_quantification)
+tito<-filter(tito, exposure_quantification=="several")
+sum(grepl("outbreak",tito$exposure_quantification_comments), na.rm=TRUE) #6
+sum(grepl("spatial contrast/gradient",tito$exposure_quantification_comments), na.rm=TRUE) #4
+sum(grepl("fence",tito$exposure_quantification_comments), na.rm=TRUE) #3
+
+
+
+# Rangifer   -----------------------------------------------
+levels(alldata$herbivore_identity)
+sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
+dim(reindeer)[1]/dim(alldata)[1] #52%
+
+reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
+table(reindeer$country)
+table(reindeer$country_comments)
+# Fennoscandia, Svalbard, Yamal 
+65+85+45+37+22+2+2+5+1
+264/349
+
+#nearctic
+(39+35)/dim(reindeer)[1] #20%
+#scandinavia
+(65+101+24+11)/dim(reindeer)[1]
+
+# Geese -----------------------------------------------
+waterfowl<-droplevels(filter(alldata, herbivore_type=="waterfowl") )
+table(waterfowl$herbivore_identity)
+
+anser<-filter(alldata, grepl("Anser", alldata$herbivore_identity))
+branta<-filter(alldata, grepl("Branta", alldata$herbivore_identity))
+chen<-filter(alldata, grepl("Chen", alldata$herbivore_identity))
+geese<-rbind.data.frame(anser, branta, chen)
+
+table(geese$country)
+dim(geese)[1]
+
+# small rodents and pikas -----------------------------------------------
+sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
+sma_2<-filter(alldata, herbivore_type_comments=="small rodents and pikas") 
+sma<-rbind.data.frame(sma, sma_2)
+
+boxplot(sma$distance_from_coast)
+quantile(sma$distance_from_coast, c(.25, .82, .90), na.rm=TRUE) 
+
+table(sma$country)
+(3+27+32+1+2)/dim(sma)[1]
+
+
+
+
+
 
 
 
@@ -231,139 +408,7 @@ sum(str_count(sev$measured_response_comments, "morphological measure")) #165
 
 
 
-# herbivores  -----------------------------------------------
-table(alldata$herbivore_type)
-dim(alldata)[1]
 
-## no. points per group
-sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 405
-sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 135
-sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 161
-sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
-sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 3
-sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
-sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 1
-sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
-sum(grepl("unknown",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
-
-# sum vertebrates =701
-sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) 
-
-# sum invertebrates = 79
-sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) +
-sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) 
-
-
-79/(701+79)
-
-
-oth<-filter(alldata, herbivore_type=="other vertebrates") 
-wat<-filter(alldata, herbivore_type=="waterfowl") 
-sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
-def<-filter(alldata, herbivore_type=="defoliating invertebrates") 
-
-
-sev<-filter(alldata, herbivore_type=="several") 
-sum(na.omit(str_count(sev$herbivore_type_comments, "other vertebrates"))) #93
-sum(na.omit(str_count(sev$herbivore_type_comments, "waterfowl"))) #22
-sum(na.omit(str_count(sev$herbivore_type_comments, "small rodents and pikas"))) #84
-sum(na.omit(str_count(sev$herbivore_type_comments, "defoliating invertebrates"))) #20
-
-
-(dim(oth)[1]+93)/dim(alldata)[1] #60%
-(dim(wat)[1]+22)/dim(alldata)[1] #19%
-(dim(sma)[1]+84)/dim(alldata)[1] #23%
-(dim(def)[1]+20)/dim(alldata)[1] #10%
-
-
-# total vertebrate herbivore %; thhis many evidence points included vertebrate herbivory
-((dim(oth)[1]+dim(wat)[1]+dim(sma)[1])/dim(alldata))[1]  # 74
-
-# among the "several", how many have vertebates?
-table(sev$herbivore_type_comments)
-1+1+4+42+1+3+8+8+1+23+3+2+1+1
-
-## vertebrate herbivore genera  ---------------------
-herb<-alldata
-levels(as.factor(herb$herbivore_identity))
-
-# explore how to split "other vertebrates"; these were the only genera present, so we use genera 
-herb$Rangifer <- ifelse(grepl("Rangifer" , herb$herbivore_identity) , 1 , 0);sum(herb$Rangifer)
-herb$Lagopus <- ifelse(grepl("Lagopus" , herb$herbivore_identity) , 1 , 0) ; sum(herb$Lagopus)
-herb$Lepus <- ifelse(grepl("Lepus" , herb$herbivore_identity) , 1 , 0); sum(herb$Lepus)
-herb$Alces <- ifelse(grepl("Alces" , herb$herbivore_identity) , 1 , 0); sum(herb$Alces)
-herb$Ovibos <- ifelse(grepl("Ovibos" , herb$herbivore_identity) , 1 , 0); sum(herb$Ovibos)
-herb$Ovis <- ifelse(grepl("Ovis" , herb$herbivore_identity) , 1 , 0); sum(herb$Ovis)
-
-sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
-sma_2<-filter(alldata, herbivore_type_comments=="small rodents and pikas") 
-sma<-rbind.data.frame(sma, sma_2)
-herb<-sma
-herb$Microtus <- ifelse(grepl("Microtus" , herb$herbivore_identity) , 1 , 0); sum(herb$Microtus)
-herb$Myodes <- ifelse(grepl("Myodes" , herb$herbivore_identity) , 1 , 0) 
-herb$Myodes <- ifelse(grepl("Clethrionomus" , herb$herbivore_identity) , 1 , herb$Myodes) 
-herb$Myodes <- ifelse(grepl("Clethrionomys" , herb$herbivore_identity) , 1 , herb$Myodes) ; sum(herb$Myodes)
-herb$Lemmus <- ifelse(grepl("Lemmus" , herb$herbivore_identity) , 1 , 0); sum(herb$Lemmus)
-
-herb$Dicrostonyx <- ifelse(grepl("Dicrostonyx" , herb$herbivore_identity) , 1 , 0); sum(herb$Dicrostonyx)
-herb$Spermophilus <- ifelse(grepl("Spermophilus" , herb$herbivore_identity) , 1 , 0); sum(herb$Spermophilus)
-herb$Marmota <- ifelse(grepl("Marmota" , herb$herbivore_identity) , 1 , 0); sum(herb$Marmota)
-herb$Urocitellus <- ifelse(grepl("Urocitellus" , herb$herbivore_identity) , 1 , 0); sum(herb$Urocitellus)
-
-
-herb$Chen <- ifelse(grepl("Chen" , herb$herbivore_identity) , 1 , 0); sum(herb$Chen)
-herb$Branta <- ifelse(grepl("Branta" , herb$herbivore_identity) , 1 , 0); sum(herb$Branta)
-herb$Anser <- ifelse(grepl("Anser" , herb$herbivore_identity) , 1 , 0); sum(herb$Anser)
-
-sum(herb$Myodes)/dim(alldata)[1]
-sum(herb$Lemmus)/dim(alldata)[1]
-sum(herb$Chen)/dim(alldata)[1]
-
-
-# Rangifer   -----------------------------------------------
-levels(alldata$herbivore_identity)
-sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
-dim(reindeer)[1]/dim(alldata)[1] #52%
-
-reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
-table(reindeer$country)
-table(reindeer$country_comments)
-# Fennoscandia, Svalbard, Yamal 
-65+85+45+37+22+2+2+5+1
-264/349
-
-#nearctic
-(39+35)/dim(reindeer)[1] #20%
-#scandinavia
-(65+101+24+11)/dim(reindeer)[1]
-
-# Geese -----------------------------------------------
-waterfowl<-droplevels(filter(alldata, herbivore_type=="waterfowl") )
-table(waterfowl$herbivore_identity)
-
-anser<-filter(alldata, grepl("Anser", alldata$herbivore_identity))
-branta<-filter(alldata, grepl("Branta", alldata$herbivore_identity))
-chen<-filter(alldata, grepl("Chen", alldata$herbivore_identity))
-geese<-rbind.data.frame(anser, branta, chen)
-
-table(geese$country)
-dim(geese)[1]
-
-# small rodents and pikas -----------------------------------------------
-sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
-sma_2<-filter(alldata, herbivore_type_comments=="small rodents and pikas") 
-sma<-rbind.data.frame(sma, sma_2)
-
-boxplot(sma$distance_from_coast)
-quantile(sma$distance_from_coast, c(.25, .82, .90), na.rm=TRUE) 
-
-table(sma$country)
-(3+27+32+1+2)/dim(sma)[1]
 
 # Take in filtered data with GIS variables  -----------------------------------------------
 
