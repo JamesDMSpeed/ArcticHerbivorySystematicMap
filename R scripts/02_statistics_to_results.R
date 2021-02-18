@@ -8,11 +8,14 @@
 # 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
 
 # I chose file "AllCodedData_withGIScontext.csv" 
-
 # this file is missing variables that area already in the Shiny App
 # bioclimatic zone
 # distance to treeline
 # permafrost
+
+# I also used a file that I downloaded from ShinyApp (now stored in the data folder as "AllCodedData_downloaded_fromEviAtlas_17022021.txt")
+# it has the variables listed above, but some other edits too (combining not relevant and not redundant classes)
+# that make it less practical for this script
 
 # this file is also missing variables that seem not to be in the Shiny App either but were on our original variable list
 # 1) growing_season_productivity (i.e. current NDVI), we had said we take it from the data layers from Taejins paper
@@ -40,13 +43,8 @@ dim(alldata)
 
 # data for plant functional groups
 plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_16022021.txt")
-<<<<<<< HEAD
 #dim(plants)
 #head(plants)  
-=======
-dim(plants)
-head(plants)  
->>>>>>> 4c56a61c98f0fb0e12d8c13006bd25536ee9a15b
 
 # filter plant data so only evidence points in alldata are considered 
 plants<-plants[plants$evidence_point_ID %in% alldata$evidence_point_ID,]
@@ -105,8 +103,6 @@ dim(tito)[1]
 tito<-alldata[alldata$extent_of_temporal_scale>10,]
 dim(tito)[1]
 
-
-
 # Arctic plants and plant communities (population)  -----------------------------------------------
 
 table(alldata$biological_organization_level_reported)
@@ -137,10 +133,7 @@ sum(grepl("yes",plants$evergreen_trees), na.rm=TRUE)
 sum(grepl("yes",plants$evergreen_tall_shrubs), na.rm=TRUE) 
 sum(grepl("yes",plants$decidious_tall_shrubs), na.rm=TRUE) 
 
-<<<<<<< HEAD
 # Herbivores (exposure) -----------------------------------------------
-=======
-# Herbivores(exposure) -----------------------------------------------
 
 table(alldata$herbivore_type)
 levels(as.factor(alldata$herbivore_type_comments))
@@ -215,23 +208,6 @@ table(sev$study_design) # nb quasi-experimental and observational pooled, so tot
 
 # Comparison between levels of herbivore impact (comparator) -----------------------------------------------
 
-## done until here 16.2. Eeva
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 tito<-filter(alldata, study_method=="field")
 tito<-filter(tito, study_design=="experimental")
@@ -248,125 +224,6 @@ sum(grepl("outbreak",tito$exposure_quantification_comments), na.rm=TRUE) #6
 sum(grepl("spatial contrast/gradient",tito$exposure_quantification_comments), na.rm=TRUE) #4
 sum(grepl("fence",tito$exposure_quantification_comments), na.rm=TRUE) #3
 
-
-
-# Rangifer   -----------------------------------------------
-levels(alldata$herbivore_identity)
-sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
-dim(reindeer)[1]/dim(alldata)[1] #52%
-
-reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
-table(reindeer$country)
-table(reindeer$country_comments)
-# Fennoscandia, Svalbard, Yamal 
-65+85+45+37+22+2+2+5+1
-264/349
-
-#nearctic
-(39+35)/dim(reindeer)[1] #20%
-#scandinavia
-(65+101+24+11)/dim(reindeer)[1]
-
-# Geese -----------------------------------------------
-waterfowl<-droplevels(filter(alldata, herbivore_type=="waterfowl") )
-table(waterfowl$herbivore_identity)
-
-anser<-filter(alldata, grepl("Anser", alldata$herbivore_identity))
-branta<-filter(alldata, grepl("Branta", alldata$herbivore_identity))
-chen<-filter(alldata, grepl("Chen", alldata$herbivore_identity))
-geese<-rbind.data.frame(anser, branta, chen)
-
-table(geese$country)
-dim(geese)[1]
-
-# small rodents and pikas -----------------------------------------------
-sma<-filter(alldata, herbivore_type=="small rodents and pikas") 
-sma_2<-filter(alldata, herbivore_type_comments=="small rodents and pikas") 
-sma<-rbind.data.frame(sma, sma_2)
-
-boxplot(sma$distance_from_coast)
-quantile(sma$distance_from_coast, c(.25, .82, .90), na.rm=TRUE) 
-
-table(sma$country)
-(3+27+32+1+2)/dim(sma)[1]
-
-
-
-
-
-
->>>>>>> 4c56a61c98f0fb0e12d8c13006bd25536ee9a15b
-
-table(alldata$herbivore_type)
-levels(as.factor(alldata$herbivore_type_comments))
-
-## no. points per group
-sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 405
-sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 135
-sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 161
-sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
-sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 3
-sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
-sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 1
-sum(grepl("root feeding invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
-sum(grepl("unknown",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
-sum(grepl("several",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 14
-
-
-# in total vertebrates
-sum(grepl("other vertebrates|waterfowl|small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 602
-
-# in total invertebrates
-sum(grepl("invertebrates|insects|feeders|defoliating",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 82
-
-
-## vertebrate herbivore genera
-sum(grepl("Rangifer", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Lagopus", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Lepus", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Alces", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Ovibos", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Ovis", alldata$herbivore_identity), na.rm=TRUE) 
-
-sum(grepl("Microtus", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Clethrionomus|Clethrionomys|Myodes", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Lemmus", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Dicrostonyx", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Spermophilus", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Urocitellus", alldata$herbivore_identity), na.rm=TRUE) 
-
-sum(grepl("Chen", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Branta", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Anser", alldata$herbivore_identity), na.rm=TRUE) 
-
-## invertebrate herbivore genera
-table(alldata$herbivore_identity)
-sum(grepl("Operophtera|Operopthera", alldata$herbivore_identity), na.rm=TRUE) 
-sum(grepl("Epirrita", alldata$herbivore_identity), na.rm=TRUE) 
-
-
-## approaches to study different types of herbivores 
-vert<-filter(alldata, grepl("other vertebrates|waterfowl|small rodents and pikas", alldata$herbivore_type))
-vert2<-filter(alldata, grepl("other vertebrates|waterfowl|small rodents and pikas", alldata$herbivore_type_comments))
-#vert$evidence_point_ID %in% vert2$evidence_point_ID
-#vert2$evidence_point_ID %in% vert$evidence_point_ID
-vert<-rbind.data.frame(vert, vert2)
-
-table(vert$study_method)
-table(vert$study_design)
-table(vert$biological_organization_level_reported)
-
-invert<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type))
-invert2<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type_comments))
-invert<-rbind.data.frame(invert, invert2)
-
-table(invert$study_method)
-table(invert$study_design) # nb quasi-experimental and observational pooled, so total = 56
-table(invert$biological_organization_level_reported)
-
-sev<-filter(alldata, grepl("several", alldata$herbivore_type))
-table(sev$study_method)
-table(sev$study_design) # nb quasi-experimental and observational pooled, so total = 56
 
 # Comparison between levels of herbivore impact (comparator) -----------------------------------------------
 # get experimental field studies
@@ -485,11 +342,8 @@ sum(grepl("pollution",c(alldata$disturbance_comment, alldata$disturbance)), na.r
 sum(grepl("outbreaks",c(alldata$disturbance_comment, alldata$disturbance)), na.rm=TRUE) +sum(grepl("herbivory",c(alldata$disturbance_comment, alldata$disturbance)), na.rm=TRUE) 
 
 
-
-
 # Ecological contexts covered by the evidence base: current climate context   ----------------------------
 
-<<<<<<< HEAD
 names(alldata)
 boxplot(alldata$Annual_Mean_Temperature)
 quantile(alldata$Annual_Mean_Temperature, c(.25, .50, .90), na.rm=TRUE) 
@@ -619,35 +473,6 @@ dim(canada[canada$coordinates_E>-100,])[1]
 
 boxplot(canada$coordinates_E)
 
-# Rangifer   
-levels(alldata$herbivore_identity)
-sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
-dim(reindeer)[1]/dim(alldata)[1] #52%
-
-reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
-table(reindeer$country)
-table(reindeer$country_comments)
-# Fennoscandia, Svalbard, Yamal 
-65+85+45+37+22+2+2+5+1
-264/349
-
-#nearctic
-(39+35)/dim(reindeer)[1] #20%
-#scandinavia
-(65+101+24+11)/dim(reindeer)[1]
-
-=======
-
-
-# Take in filtered data with GIS variables  -----------------------------------------------
-
-
-# Elevation   -----------------------------------------------
-
-boxplot(alldata$elevation_DEM)
-quantile(alldata$elevation_DEM, c(.25, .50, .98), na.rm=TRUE) 
-summary(alldata$elevation_DEM)
->>>>>>> 4c56a61c98f0fb0e12d8c13006bd25536ee9a15b
 
 # Mapping the quality of included studies ----------------------------------
 
@@ -680,32 +505,67 @@ tito<-filter(alldata, biological_organization_level_reported=="individual")
 table(tito$spatial_resolution_reported, tito$extent_of_spatial_scale)
 
 
+## spatial scale of sampling 
+table(alldata$spatial_resolution_reported)
+table(alldata$extent_of_spatial_scale) # data from shinyapp has no category from 10 to 100km. 
+
+
+## areas where long-term studies needed?
+toto<-alldata
+# the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
+toto$extent_of_temporal_scale<-plyr::mapvalues(toto$extent_of_temporal_scale, 0, 1)
+toto$grouped_temp_ext<-toto$extent_of_temporal_scale
+toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(2:5), rep("2-5", times=length(c(2:5))))
+toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(6:10), rep("6-10", times=length(c(6:10))))
+toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(11:20), rep("11-20", times=length(c(11:20))))
+toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
+toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
+
+toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not relevant"))
+toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not reported"))
+toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "I15-I14+1"))
+toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "AH15-AH14+1"))
+
+toto<-toto %>%
+  mutate(grouped_temp_ext = fct_relevel(grouped_temp_ext, 
+                                        "1", "2-5", "6-10", 
+                                        "11-20", "21-45", "longer than 45"))
+
+                              
+ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
+  geom_bar(position="fill")
+
+ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
+  geom_bar()
+
+ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
+  geom_bar(position="fill")
+
+ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
+  geom_bar()
+
+## nb the datafile is missing one category
+ggplot(toto, aes(x=Subzone, fill=extent_of_spatial_scale)) + 
+  geom_bar()
 
 
 
+# Rangifer   
+levels(alldata$herbivore_identity)
+sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
+dim(reindeer)[1]/dim(alldata)[1] #52%
 
-## spatial scale of sampling  -----------------------------------------------
-tito<-filter(alldata, spatial_resolution_reported=="up to  1x1 m (including 1x1 m)") 
-tito<-filter(alldata, spatial_resolution_reported=="from  1x1 m to 10x10 m (including 10x10m)") 
-dim(tito)[1]/dim(alldata)[1]
+reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
+table(reindeer$country)
+table(reindeer$country_comments)
+# Fennoscandia, Svalbard, Yamal 
+65+85+45+37+22+2+2+5+1
+264/349
 
-levels(tito$extent_of_spatial_scale)
-tito<-filter(alldata, extent_of_spatial_scale=="1x1 km or less") 
-tito<-filter(alldata, extent_of_spatial_scale=="from 1x1 km to 10x10 km (including 10x10 km)") 
-tito<-filter(alldata, extent_of_spatial_scale=="from 10x10 km to 100x100 km (including 100x100 km)") 
-tito<-filter(alldata, extent_of_spatial_scale=="not reported") 
-tito<-filter(alldata, extent_of_spatial_scale=="not relevant") 
-dim(tito)[1]/dim(alldata)[1]
-
-# mistakes in temporal extent
-alldata$extent_of_temporal_scale<-as.numeric(alldata$extent_of_temporal_scale)
-tito<-filter(alldata, !is.na(extent_of_temporal_scale))
-tito$evidence_point_ID
-View(tito)
-str(alldata)
-
-
-
+#nearctic
+(39+35)/dim(reindeer)[1] #20%
+#scandinavia
+(65+101+24+11)/dim(reindeer)[1]
 
 
 
