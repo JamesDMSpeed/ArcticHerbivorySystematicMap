@@ -1,11 +1,15 @@
 #Systematic map of herbivory in Arctic tundra
 # script for calculating statistics for the results chapter
 
-### NOTES FROM EEVA TO JAMES --------------------------------------------------------
-# I here take in a file that has 
+# The script takes in a data file that has 
 # 1) filtered away all redundant datapoints
 # 2) filtered away points outside arctic study area
 # 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
+
+# the script also takes in a separatae data file on plant functional groups
+
+
+### NOTES FROM EEVA TO JAMES --------------------------------------------------------
 
 # I chose file "AllCodedData_withGIScontext.csv" 
 # this file is missing variables that area already in the Shiny App
@@ -13,11 +17,7 @@
 # distance to treeline
 # permafrost
 
-# I also used a file that I downloaded from ShinyApp (now stored in the data folder as "AllCodedData_downloaded_fromEviAtlas_17022021.txt")
-# it has the variables listed above, but some other edits too (combining not relevant and not redundant classes)
-# that make it less practical for this script
-
-# this file is also missing variables that seem not to be in the Shiny App either but were on our original variable list
+# this file is also missing three variables that seem not to be in the Shiny App either but were on our original variable list
 # 1) growing_season_productivity (i.e. current NDVI), we had said we take it from the data layers from Taejins paper
 # 2) duration_of_growing_season (i.e. current growing season length),we had said we take it from the data layers from Taejins paper
 # 3) recent_warming; we had listed changes in NDVI, changes in growing season length, and changes in temperature. 
@@ -27,6 +27,10 @@
 # is there another file than "AllCodedData_withGIScontext.csv" that has these? 
 # (i.e. file that has rows= evidence points, columns = variables)
 # if not, can you add these and make such a file?
+
+# PS - I also used a file that I downloaded from ShinyApp (now stored in the data folder as "AllCodedData_downloaded_fromEviAtlas_17022021.txt")
+# it has bioclimatic zone, permafrost, and distance to treeline, but some other edits too (combining not relevant and not redundant classes)
+# that make it less practical for this script
 
 
 # load packages ---------------------------------------------------------

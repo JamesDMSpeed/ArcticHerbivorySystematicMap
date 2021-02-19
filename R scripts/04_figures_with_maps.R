@@ -2,19 +2,39 @@
 # script for making figures 4 and 5
 
 
-### NOTES FROM EEVA TO JAMES --------------------------------------------------------
-# I here take in a file that has 
+# The script takes in a data file that has 
 # 1) filtered away all redundant datapoints
 # 2) filtered away points outside arctic study area
 # 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
 
-# I chose file "AllCodedData_withGIScontext.csv" (see notes in script 02 what it seems to be missing)
+# the script also takes in GIS-data layers for:
+# world map 
+# CAVM arctic subzones
+# worldclim climate data
+# CAFF boundaries
+# elevation
+# human footprint
+# human population density
+# herbivore species richness
+# herbivore functional diversity
+# change in NDVI
+# change in growing season length
 
-# I have sorted this script so that first one reads in the necessary GIS data to make the bakground points
-# and then does the plotting
+# and the layers missing from earlier versions (see notes on script 02)
+# 1) growing_season_productivity
+# 2) duration_of_growing_season 
+# 3) recent_warming
 
-# but I did not really manage to extract from your script which were the GIS data used in Fig 4 and 5
-# can you give it a go?
+
+### NOTES FROM EEVA TO JAMES --------------------------------------------------------
+
+# I chose file "AllCodedData_withGIScontext.csv". It works here, but see comment in script 02.
+
+## for the rest... I did not quite manage to pick the right parts from your original script, and there are many things I was unable to run
+## can you:
+# add clean the section " Get all GIS data and preprocess" so that it takes in all data layers needed for figures 4 and 5?
+# some of these seem to be misisng form the "Data" folder, like the distance to coast
+# 
 
 
 # load packages ---------------------------------------------------------
@@ -34,52 +54,140 @@ library(networkD3) # for sankey diagrams
 library(harrypotter)# color palettes
 library(cowplot) # form plotrring kewrnesl and histograms
 library(magrittr) # for pipes and %<>%
+library(ncdf4) ## needed for NDVI rasters?
 
-# Load data  -----------------------------------------------
-# Take in data that has redundant evidence points removed, spatial filtering done, and spatial variables added
+# Take in filtered evidence point data and preprocess --------------------------------
 
 alldata<-read.csv("Data/AllCodedData_withGIScontext.csv")
-dim(alldataGIS)
+dim(alldata)
 
-# Get additional data needed for figure 5 and preprocess it   --------------------------------------
+#make spatial version of evidence points
+alldatasp1<-alldata
+polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
+alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+alldata_splaea<-spTransform(alldata_sp,polarproj)
+#obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
+#obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
 
 
-## Climate data
+# Get all GIS data and preprocess   --------------------------------------
 
-#Downloading worldclim bioclimate data at 2.5deg resolution
+# human footprint
+# human population density
+# change in NDVI
+# change in growing season length
+
+#World map --- ???
+boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
+IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
+bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
+                             proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+bPolslaea<-spTransform(bPols,polarproj)
+plot(bPolslaea,ylim=c(55,90))
+
+
+#CAVM arctic subzones -- seems to work
+subzones<-readOGR('Data/cp_biozone_la_shp','cavm_all polygon')
+subzones
+## spplot(subzones,zcol=subzones$ZONE) takes forever but appears to work
+
+#Get CAFF boundaries to add -- seems to work
+arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
+arczones_laea<-spTransform(arczones,polarproj)
+subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
+
+#Downloading worldclim data at 2.5deg resolution -- seems to work
 bioclimdat<-getData('worldclim',var='bio',res=2.5)
 
-#Using spatial data to extract
-bioclim_ex<-extract(bioclimdat,alldata_sp)
-#Bind to spatial data
-alldata_sp<-cbind(alldata_sp,bioclim_ex)
-
-# MAT and MAP are bio1 and bio12 respectively
-
-climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
-  ggtitle("Climatic space") + scale_y_reverse()+
-  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
-pdf('Figures/ClimateSpace.pdf')
-climatespace
-dev.off()
-
-#Adding points for total Arctic climate space
-arcclim<-extract(bioclimdat,arczones)
-arcclim_all<-data.frame(do.call(rbind,arcclim))
-arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
-
-#Make this a png due to very many points = large file!
-climatespace2<-ggplot(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10))+geom_point(alpha=1/100,size=0.001)+
-  ggtitle("Climatic space") + scale_y_reverse()+
-  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
-  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
-  geom_point(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))
-png('Figures/ClimateSpace_Available.png')
-climatespace2
-dev.off()
+#Distance from coast --- ??? does not work???
+distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
+distancefromcoast
+plot(distancefromcoast)
 
 
-#Context GIS layers
+#Elevation --- ??? øh, which part here worked???
+#DTM from Guille
+#dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
+#download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
+#dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
+
+#Use raster::getData instead
+charcount <- c('NO', 'SE','FI','CA','IS','GL','SJ') 
+allac2 <- do.call("merge", lapply(charcount, function(x)  raster::getData('alt', country=x)))
+#Issues with USA and Russia (crossing 180deg?)
+rusalt<-getData('alt',country='RU')
+rusalt2<-merge(rusalt[[1]],rusalt[[2]])
+usalt<-getData('alt',country='USA')
+usalt2<-do.call("merge",list(usalt[[1]],usalt[[2]],usalt[[3]],usalt[[4]]))
+plot(usalt2)
+arcelev<-merge(allac2,rusalt2,usalt2)
+arcelev<-crop(arcelev,alldata_sp)
+plot(arcelev)
+
+#Herbivore diversity layers --- seems to work
+vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
+#vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
+vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
+#vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
+vertherb_div<-stack(vertherb_sr,vertherb_fd)
+
+#Human population density --- seems to work
+#GPW:Center for International Earth Science Information Network - CIESIN - Columbia University. 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. Accessed 21.10.2020. 
+#2015 human pop density
+gpwurl<-'https://uitno.box.com/shared/static/u2t8wrffagosabv4k498dh856shzkqyi.zip'
+download.file(gpwurl,'Data/GIS_layers/GPW2015.zip',mode='wb')
+unzip('Data/GIS_layers/GPW2015.zip',exdir='Data/GIS_layers/GPW')
+##
+gpw<-raster('Data/GIS_layers/GPW/gpw_v4_population_density_rev11_2015_2pt5_min.tif')
+levelplot(gpw+1,zscaleLog=T,margin=F,scales=list(draw=F))
+
+#Human footprint --- seems to work
+#Venter, O., E. W. Sanderson, A. Magrach, J. R. Allan, J. Beher, K. R. Jones, H. P. Possingham, W. F. Laurance, P. Wood, B. M. Fekete, M. A. Levy, and J. E. Watson. 2018. Last of the Wild Project, Version 3 (LWP-3): 2009 Human Footprint, 2018 Release. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H46T0JQ4. Accessed 21.10.2020. 
+humfooturl<-'https://uitno.box.com/shared/static/1bjcuidtjis8456locp1rio2ul6a7zi4.zip'
+download.file(humfooturl,'Data/GIS_layers/Humanfootprint.zip')
+unzip('Data/GIS_layers/Humanfootprint.zip',exdir='Data/GIS_layers/HumanFootprint')
+##
+humanfoot<-raster('Data/GIS_layers/HumanFootprint/wildareas-v3-2009-human-footprint.tif')
+levelplot(humanfoot,margin=F)
+
+## stack human context together for Fig 5e --- seems to work
+humanstack1<-stack(gpw,projectRaster(humanfoot,gpw))
+humanstack<-aggregate(mask(crop(humanstack1,spTransform(arczones,gpw@crs)),spTransform(arczones,gpw@crs)),50) # NOTE arczones needed first
+names(humanstack)<-c('GPW','Footprint')
+
+#NDVI trends --- seesm to work
+ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
+download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
+ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend') ## NDVI trend
+lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend') ## GrowingSeasonLength trend
+
+plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
+ndvitrend<-t(flip(ndvitrend,direction=2))
+plot(ndvitrend)
+lostrend<-t(flip(lstrend,direction=2))
+plot(lostrend)
+
+ndvitrend@crs<-bioclimdat@crs
+lostrend@crs<-bioclimdat@crs
+ndvitrend_laea<-projectRaster(ndvitrend,crs=arczones)
+lostrend_laea<-projectRaster(lostrend,crs=arczones)
+#
+plot(ndvitrend_laea)## looks OK 
+points(alldata_splaea,pch=16,cex=0.4,col=2) 
+plot(arczones,add=T)
+#
+plot(lostrend_laea) ## looks OK 
+points(alldata_splaea,pch=16,cex=0.4,col=2) 
+plot(arczones,add=T)
+
+climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+climatechangestack<-mask(climatechangestack,arczones)
+names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
+
+
+
+
+#Context GIS layers -- ??? making a rasterstack of all layers. Needed for figures???
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
 
@@ -94,86 +202,21 @@ context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
-#Soil Legend
-soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=levels(as.factor(dsmw_arc$simplesoilnum)),
-                    SoilType=c('Cambisols','Chernozems','Podsoluvisols','Rendzinas','Gleysols','Phaeozems',
-                               'Lithosols','Fluvisols','Kastanozems','Luvisols','Greyzems','Nitosols','Histosols',
-                               'Podzols','Arenosols','Regosols','Solonetz','Andosols','Rankers','Planosols','Xerosols'))
-write.csv(soilleg,'Data/SoilLegend.csv')
-
-#Herbivore diversity space figure
-alldata_final_sp2$SimpleHerbivore<-as.factor(alldata_final_sp2$herbivore_type)
-levels(alldata_final_sp2$SimpleHerbivore)<-c(
-  rep('Invertebrate',times=3),
-  'Vertebrate',
-  'Invertebrate','Invertebrate','Multiple','Vertebrate','Unknown','Vertebrate')
 
 
-vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
-herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
-  geom_point(size=0.01)+
-  ggtitle("Herbivore space") +
-  xlab("Vertebrate herbivore species richness")+ ylab('Vertebrate herbivore functional diversity')+
-  geom_point(data=alldata_final_sp2@data,aes(x=ArcticHerbivore_Species.richness*70, y=ArcticHerbivore_Functional.diversity,
-                                             colour=SimpleHerbivore))
-png('Figures/HerbivoreSpace_Available.png')
-herbivorespace
+# Figure 4    --------------------------------------
+
+
+plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
+points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
+plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
 dev.off()
 
+plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
+points(alldata_splaea,pch=16,col='red',cex=0.5)
+points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
+plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
-#Geographic space figure
-geogcontextdat<-extract(geographicstack,1:ncell(geographicstack),df=T)
-geospace<-ggplot(data=geogcontextdat,mapping=aes(x=DistancetoCoast,y=Elevation))+
-  geom_point(alpha=2/10,size=0.2)+
-  ggtitle("Geographic space") +
-  xlab("Distance to coast (km)")+ ylab('Elevation (m)')+
-  geom_point(data=alldata_final_sp3@data,aes(x=distance_from_coast, y=elevation_DEM,
-                                             colour=coordinates_N
-  ))
-geospace+theme(legend.position=(c(0.9,0.8)))
-png('Figures/GeographicSpace_Available.png')
-geospace
-dev.off()
-
-
-#Climate change figure
-climcontextdat<-extract(climatechangestack,1:ncell(climatechangestack),df=T)
-climchangespace<-ggplot(data=climcontextdat,mapping=aes(x=GrowingSeasonLength.trend,y=NDVI.trend))+
-  geom_point(alpha=1/10,size=0.1)+
-  ggtitle("Climate change space") +
-  xlab("Change in growing season length (days per decade")+ ylab('Change in NDVI (% per decade)')+
-  geom_point(data=alldata_final_sp3@data,aes(x=GrowingSeasonLength.trend, y=NDVI.trend,
-                                             colour=coordinates_N
-  ))
-png('Figures/ClimateChangeSpace_Available.png')
-climchangespace
-dev.off()
-
-legtit<- "Latitude (°)"
-png('Figures/4contexts.png')
-tiff('Figures/4contexts.tif')
-grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
-             climchangespace+theme(legend.position="none"),
-             geospace+theme(legend.position="none"),
-             herbivorespace+theme(legend.position=c(0.8,0.2))+theme(legend.title=element_blank()),
-             ncol=2)
-dev.off()
-dev.off()
-
-
-#Human context
-humancontextdat<-extract(humanstack,1:ncell(humanstack),df=T)
-humanspace<-ggplot(data=humancontextdat,mapping=aes(x=GPW,y=Footprint))+
-  geom_point(size=0.3)+
-  ggtitle("Human space") +
-  xlab(expression("Human population density" ~(km^-2)))+ ylab('Human footprint')+
-  geom_point(data=alldata_final_sp3@data,aes(x=GPW, y=Footprint,
-                                             colour=coordinates_N))
-
-png('Figures/HumanSpace_Available.png')
-tiff('Figures/HumanSpace_Available.tif',width=6,height=4,units='in',res=150)
-humanspace+scale_x_log10()+scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High')) 
-dev.off()
 
 #Distribution figure
 subzonesR<-rasterize(subzones,bioclimdat_laea,field='ZONE')
@@ -213,10 +256,136 @@ plot(allzones)
 a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
 tapply(a$ZONE_,a$ZONE_,length)
 
-# Figure 4    --------------------------------------
+
 
 
 # Figure 5    --------------------------------------
+
+### I have not worked through this yet. 
+## Need to figure out how to set up the data to match the plot on kernels and histograms
+###  should have data on both evidence points and background points in the same data frame
+### data frame with x-variable, y-variable, z-variable (northing) and grouping variable (used vs available)
+## but a used point is also part of the available data 
+## format both used and available like this and r-bind them, adding grouping variable??
+
+####################### geographic space
+
+#Geographic space figure
+geogcontextdat<-extract(geographicstack,1:ncell(geographicstack),df=T)
+geospace<-ggplot(data=geogcontextdat,mapping=aes(x=DistancetoCoast,y=Elevation))+
+  geom_point(alpha=2/10,size=0.2)+
+  ggtitle("Geographic space") +
+  xlab("Distance to coast (km)")+ ylab('Elevation (m)')+
+  geom_point(data=alldata_final_sp3@data,aes(x=distance_from_coast, y=elevation_DEM,
+                                             colour=coordinates_N
+  ))
+geospace+theme(legend.position=(c(0.9,0.8)))
+png('Figures/GeographicSpace_Available.png')
+geospace
+dev.off()
+
+
+
+####################### climate space
+climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
+  ggtitle("Climatic space") + scale_y_reverse()+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
+climatespace
+
+pdf('Figures/ClimateSpace_toto.pdf')
+climatespace
+dev.off()
+
+#Adding points for total Arctic climate space
+arcclim<-extract(bioclimdat,arczones)
+arcclim_all<-data.frame(do.call(rbind,arcclim))
+arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
+
+#Make this a png due to very many points = large file!
+climatespace2<-ggplot(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10))+geom_point(alpha=1/100,size=0.001)+
+  ggtitle("Climatic space") + scale_y_reverse()+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
+  geom_point(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))
+
+
+png('Figures/ClimateSpace_Available.png')
+climatespace2
+dev.off()
+
+####################### climate change space
+
+
+#Climate change figure ---??? does not work
+climcontextdat<-extract(climatechangestack,1:ncell(climatechangestack),df=T)
+climchangespace<-ggplot(data=climcontextdat,mapping=aes(x=GrowingSeasonLength.trend,y=NDVI.trend))+
+  geom_point(alpha=1/10,size=0.1)+
+  ggtitle("Climate change space") +
+  xlab("Change in growing season length (days per decade")+ ylab('Change in NDVI (% per decade)')+
+  geom_point(data=alldata_final_sp3@data,aes(x=GrowingSeasonLength.trend, y=NDVI.trend,
+                                             colour=coordinates_N
+  ))
+png('Figures/ClimateChangeSpace_Available.png')
+climchangespace
+dev.off()
+
+
+
+####################### herbivore space
+
+
+alldata_final_sp2$SimpleHerbivore<-as.factor(alldata_final_sp2$herbivore_type)
+levels(alldata_final_sp2$SimpleHerbivore)<-c(
+  rep('Invertebrate',times=3),
+  'Vertebrate',
+  'Invertebrate','Invertebrate','Multiple','Vertebrate','Unknown','Vertebrate')
+
+
+vertherbdat<-extract(vertherb_div,1:ncell(vertherb_div),df=T)
+herbivorespace<-ggplot(data=vertherbdat,mapping=aes(x=ArcticHerbivore_Species.richness*70,y=ArcticHerbivore_Functional.diversity))+
+  geom_point(size=0.01)+
+  ggtitle("Herbivore space") +
+  xlab("Vertebrate herbivore species richness")+ ylab('Vertebrate herbivore functional diversity')+
+  geom_point(data=alldata_final_sp2@data,aes(x=ArcticHerbivore_Species.richness*70, y=ArcticHerbivore_Functional.diversity,
+                                             colour=SimpleHerbivore))
+png('Figures/HerbivoreSpace_Available.png')
+herbivorespace
+dev.off()
+
+####################### human space
+
+## need to create data frame where all datapoints are combined?
+## four columns coordinate_E, coordinate_N, evidence_point, background
+
+
+#Human context
+humancontextdat<-extract(humanstack,1:ncell(humanstack),df=T)
+humanspace<-ggplot(data=humancontextdat,mapping=aes(x=GPW,y=Footprint))+
+  geom_point(size=0.3)+
+  ggtitle("Human space") +
+  xlab(expression("Human population density" ~(km^-2)))+ ylab('Human footprint')+
+  geom_point(data=alldata_final_sp3@data,aes(x=GPW, y=Footprint,
+                                             colour=coordinates_N))
+
+png('Figures/HumanSpace_Available.png')
+tiff('Figures/HumanSpace_Available.tif',width=6,height=4,units='in',res=150)
+humanspace+scale_x_log10()+scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High')) 
+dev.off()
+
+
+
+####################### combine to one figure 5
+
+legtit<- "Latitude (°)"
+png('Figures/4contexts.png')
+tiff('Figures/4contexts.tif')
+grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
+             climchangespace+theme(legend.position="none"),
+             geospace+theme(legend.position="none"),
+             herbivorespace+theme(legend.position=c(0.8,0.2))+theme(legend.title=element_blank()),
+             ncol=2)
+dev.off()
+dev.off()
 
 
 

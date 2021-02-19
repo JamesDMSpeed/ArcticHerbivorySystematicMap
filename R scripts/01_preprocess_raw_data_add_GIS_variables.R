@@ -4,6 +4,22 @@
 #Data is spread between multiple sheets with 1000 evidence points per sheet
 
 
+### NOTES FROM EEVA TO JAMES --------------------------------------------------------
+
+# my idea was to collect here only the stuff  that is needed to produce the datafile to-be-used in further analyses
+# so I have made separate scripts for calculating statistics for results (script 02), and for making figures (scripts 03 and 04)
+# I have not deleted anything from here yet.
+
+# can you clean this script so that its only producing and saving the datafile that has:
+# 1) filtered away all redundant datapoints
+# 2) filtered away points outside arctic study area
+# 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
+
+
+# there is something funny with the treeline-variable in the "AllCodedData_withGIScontext.csv" -file
+# quite many sites have NA, should not be possible?
+
+
 # read in libraries -----------------------------------------------
 
 

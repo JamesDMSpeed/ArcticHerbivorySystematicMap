@@ -2,12 +2,16 @@
 # script for producing figures 2 and 3
 
 
-### NOTES FROM EEVA TO JAMES --------------------------------------------------------
-# I here take in a file that has 
+# The script takes in a data file that has 
 # 1) filtered away all redundant datapoints
 # 2) filtered away points outside arctic study area
+# 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
 
-# I chose file "AllCodedData_withGIScontext.csv" - OK?
+# the script also takes in a separatae data file on plant functional groups
+
+### NOTES FROM EEVA TO JAMES --------------------------------------------------------
+
+# I chose file "AllCodedData_withGIScontext.csv". It works here, but see comment in script 02.
 
 
 # load packages ---------------------------------------------------------
