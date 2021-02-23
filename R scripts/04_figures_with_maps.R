@@ -203,6 +203,26 @@ write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
 
+# exploring permafrost
+
+
+#Permafrost
+permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
+download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
+unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+
+permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
+permafrost
+plot(permafrost)
+
+## did not make this to work
+permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb') ## 
+plot(permrast)
+
+perma2<-spTransform(permafrost,polarproj) # permafrost map is 180 degrees different from others, needs to be fixed
+plot(arczones,col="red")
+plot(perma2, add=T)
+
 
 # Figure 4    --------------------------------------
 
