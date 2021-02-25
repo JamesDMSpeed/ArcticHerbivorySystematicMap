@@ -650,6 +650,12 @@ treelinelp<-levelplot(northoftreeline,margin=F,scales=list(draw=F))+
   layer(sp.lines(treelineshp))
 diverge0(treelinelp,'RdBu')
 
+#Herbivore diversity layers
+vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
+vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
+vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
+vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
+
 #Permafrost
 # permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
 # download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
@@ -677,7 +683,7 @@ permrast<-permafrostcode
 levelplot(permrast,margin=F)+
   latticeExtra::layer(sp.polygons(bPolslaea))
 
-
+perm2<-resample(permrast,vertherb_div,method='ngb')
 
 #Soils
 #soilras<-raster('Data/GIS_layers/Soils/sq1.asc')
@@ -695,11 +701,6 @@ levels(as.factor(dsmw$SimpleSoilUnit))
 dsmw_arc<-crop(dsmw,alldata_sp)
 
 
-#Herbivore diversity layers
-vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
-vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
-vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
-vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
 
 #Human context
 #GPW:Center for International Earth Science Information Network - CIESIN - Columbia University. 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. Accessed 21.10.2020. 
@@ -781,14 +782,15 @@ alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_fin
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
 alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
-alldata_final_sp1$permafrost<-raster::extract(permrast,alldata_final_sp1)
+alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
 alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
 head(alldata_final_sp3a)
+names(alldata_final_sp3a)
 
 #Remove empty columns
-na_count <-sapply(alldata_final_sp3a@data, function(y) sum(length(which(is.na(y))))/length(y))
+na_count <-sapply(alldata_final_sp3@data, function(y) sum(length(which(is.na(y))))/length(y))
 alldata_final_sp3<-alldata_final_sp3a[,na_count<1]
 
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
