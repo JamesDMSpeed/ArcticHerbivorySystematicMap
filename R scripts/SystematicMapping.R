@@ -770,6 +770,21 @@ climatechangestack<-stack(ndvitrend_laea,losc_laea,ndvitrend_laea,lostrend_laea,
 climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
 
+#Zones
+subzonesR<-rasterize(subzones,bioclimdat_laea,field='ZONE')
+#Simplify CAVM zones
+agzones<-aggregate(subzones,by=list(subzones$ZONE),dissolve=T,FUN='mean')
+#Set ice to NA
+agzones$ZONE[agzones$ZONE==0]<-NA
+
+agzone1<-spTransform(agzones,alldata_splaea@proj4string)
+names(agzone1)[7]<-'ZONE_'
+allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
+plot(allzones)
+
+allzonesR<-rasterize(allzones,bioclimdat_laea,field='ZONE_')
+allzonesR[allzonesR==0]<-7
+plot(allzonesR)
 
 # GIS data extraction -----------------------------------------------------
 
@@ -782,7 +797,9 @@ alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_fin
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
 alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
-alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
+#alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
+alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
+alldata_final_sp1$Subzone<-raster::extract(projectRaster(allzonesR,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
 alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
@@ -926,7 +943,9 @@ names(agzone1)[7]<-'ZONE_'
 allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
 plot(allzones)
 
-
-a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
-tapply(a$ZONE_,a$ZONE_,length)
+allzonesR<-rasterize(allzones,bioclimdat_laea,field='ZONE_')
+allzonesR[allzonesR==0]<-7
+plot(allzonesR)
+#a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
+#tapply(a$ZONE_,a$ZONE_,length)
 
