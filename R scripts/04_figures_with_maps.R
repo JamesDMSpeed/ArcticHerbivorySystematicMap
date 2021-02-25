@@ -78,7 +78,7 @@ alldata_splaea<-spTransform(alldata_sp,polarproj)
 # change in growing season length
 
 #World map --- ???
-boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
+boundaries <- maps::map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
 IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
                              proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
@@ -155,73 +155,98 @@ humanstack1<-stack(gpw,projectRaster(humanfoot,gpw))
 humanstack<-aggregate(mask(crop(humanstack1,spTransform(arczones,gpw@crs)),spTransform(arczones,gpw@crs)),50) # NOTE arczones needed first
 names(humanstack)<-c('GPW','Footprint')
 
-#NDVI trends --- seesm to work
+#NDVI trends
 ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
 download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
-ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend') ## NDVI trend
-lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend') ## GrowingSeasonLength trend
+ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend')
+lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
+
+#Current 1982-2014
+currentndvi<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi')
+currentlos<- raster('Data/GIS_layers/NDVItrend.nc',varname='los')
 
 plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
 ndvitrend<-t(flip(ndvitrend,direction=2))
 plot(ndvitrend)
 lostrend<-t(flip(lstrend,direction=2))
 plot(lostrend)
+plot(currentndvi)
+ndvi<-t(flip(currentndvi,direction=2))
+plot(ndvi)
+plot(currentlos)
+losc<-t(flip(currentlos,direction=2))
+plot(losc)
 
 ndvitrend@crs<-bioclimdat@crs
 lostrend@crs<-bioclimdat@crs
+ndvi@crs<-bioclimdat@crs
+losc@crs<-bioclimdat@crs
 ndvitrend_laea<-projectRaster(ndvitrend,crs=arczones)
 lostrend_laea<-projectRaster(lostrend,crs=arczones)
-#
-plot(ndvitrend_laea)## looks OK 
-points(alldata_splaea,pch=16,cex=0.4,col=2) 
-plot(arczones,add=T)
-#
-plot(lostrend_laea) ## looks OK 
-points(alldata_splaea,pch=16,cex=0.4,col=2) 
+ndvitrend_laea<-projectRaster(ndvi,crs=arczones)
+losc_laea<-projectRaster(losc,crs=arczones)
+plot(ndvitrend_laea)
+plot(lostrend_laea)
+points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
-climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+#Temperature change 
+#GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345. https://data.giss.nasa.gov/gistemp/maps/)
+tempdiff<-raster('Data/GIS_layers/amaps.nc')
+tempdiffpp<-resample(projectRaster(tempdiff,crs=ndvitrend_laea),ndvitrend_laea,method='bilinear')
+
+climatechangestack<-stack(ndvitrend_laea,losc_laea,ndvitrend_laea,lostrend_laea,tempdiffpp)
 climatechangestack<-mask(climatechangestack,arczones)
-names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
+names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
 
+#Soils
+soilurl<-'https://ntnu.box.com/shared/static/rr5yqlplu3lwhu19kc855a69rbtaj1as.zip'
+download.file(soilurl,'Data/GIS_layers/Soils/DSMW.zip')
+unzip('Data/GIS_layers/DSMW.zip',exdir='Data/GIS_layers/DSMW')
+dsmw<-readOGR('Data/GIS_layers/Soils/DSMW','DSMW')#http://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/faounesco-soil-map-of-the-world/en/
+dsmw$SimpleSoilUnit<-substr(dsmw$DOMSOI,1,1)
+#Legend http://www.fao.org/fileadmin/user_upload/soils/docs/Soil_map_FAOUNESCO/images/Legend_I.jpg 
+levels(as.factor(dsmw$SimpleSoilUnit))
+#spplot(dsmw,'SimpleSoilUnit')
+dsmw_arc<-crop(dsmw,alldata_sp)
+crs(dsmw_arc)<-crs(bioclimdat)
+dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
+soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
+plot(soiltyperast)
 
-
+# exploring permafrost
+#Permafrost
+#Instead using 12.5km grid dataset
+pm<-raster('Data/GIS_layers/nhipa.byte')
+crs(pm)<-polarproj
+permafrostcode<-raster(pm)
+values(permafrostcode)<-NA
+permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
+permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
+permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
+permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
+plot(permafrostcode)
+permrast<-permafrostcode
+levelplot(permrast,margin=F)+
+  latticeExtra::layer(sp.polygons(bPolslaea))
 
 #Context GIS layers -- ??? making a rasterstack of all layers. Needed for figures???
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
 
-crs(dsmw_arc)<-crs(bioclimdat)
-dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
-soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
-plot(soiltyperast)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'))
-names(context_stack)[c(23,26,27,28)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type')
+arcelev_laea<-projectRaster(arcelev,vertherb_sr)
+arcelev_laea
+arcelev_laea<-mask(arcelev_laea,vertherb_sr)
+plot(arcelev_laea)
+
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'),projectRaster(permrast,bioclimdat_laea))
+names(context_stack)[c(23,29:32)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type','Permafrost')
 
 context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
 
-# exploring permafrost
-
-
-#Permafrost
-permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
-download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
-unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
-
-permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
-permafrost
-plot(permafrost)
-
-## did not make this to work
-permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb') ## 
-plot(permrast)
-
-perma2<-spTransform(permafrost,polarproj) # permafrost map is 180 degrees different from others, needs to be fixed
-plot(arczones,col="red")
-plot(perma2, add=T)
 
 
 # Figure 4    --------------------------------------

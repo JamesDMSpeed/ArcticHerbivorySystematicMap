@@ -682,6 +682,10 @@ levelplot(permrast,margin=F)+
 #Soils
 #soilras<-raster('Data/GIS_layers/Soils/sq1.asc')
 #hswd<-stack('Data/GIS_layers/Soils/HWSD_RASTER/hwsd')
+
+soilurl<-'https://ntnu.box.com/shared/static/rr5yqlplu3lwhu19kc855a69rbtaj1as.zip'
+download.file(soilurl,'Data/GIS_layers/Soils/DSMW.zip')
+unzip('Data/GIS_layers/DSMW.zip',exdir='Data/GIS_layers/DSMW')
 dsmw<-readOGR('Data/GIS_layers/Soils/DSMW','DSMW')#http://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/faounesco-soil-map-of-the-world/en/
 dsmw$SimpleSoilUnit<-substr(dsmw$DOMSOI,1,1)
 #Legend http://www.fao.org/fileadmin/user_upload/soils/docs/Soil_map_FAOUNESCO/images/Legend_I.jpg 
@@ -798,8 +802,8 @@ crs(dsmw_arc)<-crs(bioclimdat)
 dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
 soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
 plot(soiltyperast)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'))
-names(context_stack)[c(23,26,27,28)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type')
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'),projectRaster(permrast,bioclimdat_laea))
+names(context_stack)[c(23,29:32)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type','Permafrost')
 
 context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
