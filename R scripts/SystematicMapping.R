@@ -85,7 +85,7 @@ levels(alldata$extent_of_spatial_scale)<-
     "not relevant"                         ,                   
     "not reported"  )
 levels(alldata$extent_of_spatial_scale)
-
+alldata$extent_of_spatial_scale<-factor(alldata$extent_of_spatial_scale,ordered = T)
 
 # Mapping -----------------------------------------------------------------
 
@@ -105,7 +105,7 @@ dev.off()
 #Across biome
 #World map
 polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
-boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
+boundaries <- maps::map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
 IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
                              proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
@@ -651,16 +651,33 @@ treelinelp<-levelplot(northoftreeline,margin=F,scales=list(draw=F))+
 diverge0(treelinelp,'RdBu')
 
 #Permafrost
-permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
-download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
-unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+# permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
+# download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
+# unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+# 
+# permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
+# permafrost
+# plot(permafrost)
+# 
+# permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb')
+# plot(permrast)
+# 
 
-permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
-permafrost
-plot(permafrost)
+#Instead using 12.5km grid dataset
+pm<-raster('Data/GIS_layers/nhipa.byte')
+crs(pm)<-polarproj
+permafrostcode<-raster(pm)
+values(permafrostcode)<-NA
+permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
+permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
+permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
+permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
+plot(permafrostcode)
+permrast<-permafrostcode
+levelplot(permrast,margin=F)+
+  latticeExtra::layer(sp.polygons(bPolslaea))
 
-permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb')
-plot(permrast)
+
 
 #Soils
 #soilras<-raster('Data/GIS_layers/Soils/sq1.asc')
