@@ -171,7 +171,7 @@ write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names
 alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(x)(gsub("\r\n", " ", x))))
 alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
-#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv.
+#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF AllCodedDataEncoded.csv.
 
 
 # Mapping in time ---------------------------------------------------------
@@ -724,45 +724,64 @@ names(humanstack)<-c('GPW','Footprint')
 #NDVI trends
 ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
 download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
-ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend')#Can't open
+ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend')
 lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
+
+#Current 1982-2014
+currentndvi<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi')
+currentlos<- raster('Data/GIS_layers/NDVItrend.nc',varname='los')
 
 plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
 ndvitrend<-t(flip(ndvitrend,direction=2))
 plot(ndvitrend)
 lostrend<-t(flip(lstrend,direction=2))
 plot(lostrend)
+plot(currentndvi)
+ndvi<-t(flip(currentndvi,direction=2))
+plot(ndvi)
+plot(currentlos)
+losc<-t(flip(currentlos,direction=2))
+plot(losc)
 
 ndvitrend@crs<-bioclimdat@crs
 lostrend@crs<-bioclimdat@crs
+ndvi@crs<-bioclimdat@crs
+losc@crs<-bioclimdat@crs
 ndvitrend_laea<-projectRaster(ndvitrend,crs=arczones)
 lostrend_laea<-projectRaster(lostrend,crs=arczones)
+ndvitrend_laea<-projectRaster(ndvi,crs=arczones)
+losc_laea<-projectRaster(losc,crs=arczones)
 plot(ndvitrend_laea)
 plot(lostrend_laea)
 points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
-#Temperature change
+#Temperature change 
+#GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345. https://data.giss.nasa.gov/gistemp/maps/)
 tempdiff<-raster('Data/GIS_layers/amaps.nc')
 tempdiffpp<-resample(projectRaster(tempdiff,crs=ndvitrend_laea),ndvitrend_laea,method='bilinear')
 
-climatechangestack<-stack(ndvitrend_laea,lostrend_laea,tempdiffpp)
+climatechangestack<-stack(ndvitrend_laea,losc_laea,ndvitrend_laea,lostrend_laea,tempdiffpp)
 climatechangestack<-mask(climatechangestack,arczones)
-names(climatechangestack)[1:2]<-c('NDVI trend','GrowingSeasonLength trend')
+names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
+
+
+# GIS data extraction -----------------------------------------------------
 
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
 
-alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
-alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
-alldata_final_sp1$distance_from_coast<-extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
-alldata_final_sp1$soil_type.<-extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
-alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
-alldata_final_sp2a<-cbind(alldata_final_sp2,extract(humanstack,alldata_final_sp2))
-alldata_final_sp3a<-cbind(alldata_final_sp2a,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
-head(alldata_final_sp3)
+alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
+alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
+alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
+alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
+alldata_final_sp1$permafrost<-raster::extract(permrast,alldata_final_sp1)
+alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
+alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
+alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
+head(alldata_final_sp3a)
 
 #Remove empty columns
 na_count <-sapply(alldata_final_sp3a@data, function(y) sum(length(which(is.na(y))))/length(y))
