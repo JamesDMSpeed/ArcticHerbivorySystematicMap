@@ -730,7 +730,7 @@ lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
 plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
 ndvitrend<-t(flip(ndvitrend,direction=2))
 plot(ndvitrend)
-lostrend<-(flip(lstrend,direction=1))
+lostrend<-t(flip(lstrend,direction=2))
 plot(lostrend)
 
 ndvitrend@crs<-bioclimdat@crs
@@ -742,9 +742,14 @@ plot(lostrend_laea)
 points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
-climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+#Temperature change
+tempdiff<-raster('Data/GIS_layers/amaps.nc')
+tempdiffpp<-resample(projectRaster(tempdiff,crs=ndvitrend_laea),ndvitrend_laea,method='bilinear')
+
+climatechangestack<-stack(ndvitrend_laea,lostrend_laea,tempdiffpp)
 climatechangestack<-mask(climatechangestack,arczones)
-names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
+names(climatechangestack)[1:2]<-c('NDVI trend','GrowingSeasonLength trend')
+
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
