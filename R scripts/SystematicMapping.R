@@ -780,12 +780,15 @@ agzones$ZONE[agzones$ZONE==0]<-NA
 agzone1<-spTransform(agzones,alldata_splaea@proj4string)
 names(agzone1)[7]<-'ZONE_'
 allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
-plot(allzones)
+allzones$ZONE_<-as.factor(allzones$ZONE_)
+levels(allzones$ZONE_)<-c('Subarctic','A','B','C','D','E','Subarctic')
+spplot(allzones)+
+latticeExtra::layer(sp.points(alldata_splaea_removeoutsidearctic))
 
-allzonesR<-rasterize(allzones,bioclimdat_laea,field='ZONE_')
-allzonesR[allzonesR==0]<-7
-plot(allzonesR)
-
+#allzonesR<-rasterize(allzones,arcelev,field='ZONE_')
+#allzonesR[allzonesR==0]<-7
+#plot(allzonesR)+
+ 
 # GIS data extraction -----------------------------------------------------
 
 
@@ -799,7 +802,7 @@ alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefro
 alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
 #alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
 alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
-alldata_final_sp1$Subzone<-raster::extract(projectRaster(allzonesR,crs=crs(bioclimdat)),alldata_final_sp1)
+alldata_final_sp1$Subzone<-over(alldata_splaea_removeoutsidearctic,allzones[,'ZONE_'])$ZONE_
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
 alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
