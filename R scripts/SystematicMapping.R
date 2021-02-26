@@ -683,7 +683,7 @@ permrast<-permafrostcode
 levelplot(permrast,margin=F)+
   latticeExtra::layer(sp.polygons(bPolslaea))
 
-perm2<-resample(permrast,vertherb_div,method='ngb')
+#perm2<-resample(permrast,vertherb_div,method='ngb')
 
 #Soils
 #soilras<-raster('Data/GIS_layers/Soils/sq1.asc')

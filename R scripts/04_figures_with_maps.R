@@ -225,9 +225,8 @@ permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
 permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
 permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
 permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
-plot(permafrostcode)
-permrast<-resample(permafrostcode,vertherb_div,method='ngb')
-levelplot(permrast,margin=F)+
+permrast<-permafrostcode
+  plot(permafrostcode)
   latticeExtra::layer(sp.polygons(bPolslaea))
 
 
