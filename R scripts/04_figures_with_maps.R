@@ -340,47 +340,39 @@ names(data_eco_cont)
 
 used<-cbind.data.frame("MAP"=alldata$bio12, "MAT" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
 head(used)
-#used<-used[1:50,]; dim(used)
 available<-cbind.data.frame("MAP"=data_eco_cont$bio12, "MAT" = data_eco_cont$bio1/10, "group" =rep("available", times=length(data_eco_cont$bio12)))
 head(available)
-#available<-na.omit(available)
-#available<-available[1:50,]; dim(available)
 
 data<-rbind.data.frame(used, available)
-
 
 # create plot with kernels density distribution
 cbPalette <- c("#999999", "#E69F00")
 
-pal <- hp(n = 42, house = "Ravenclaw")
+pal <- hp(n = 7, house = "Ravenclaw")
 image(volcano, col = pal)
+pal[7]
 
 palette_points<-c("#006699FF", "#B35900FF")
 
-col_points_available<-c("#006699FF")
 col_points_used<-c("#B35900FF")
+col_points_available<-c("#006699FF")
 
+#col_kernel_used<-c("#D9924DFF")
+#col_kernel_available<-c("#0F75A8FF")
 
-col_kernel_used<-c("#D9924DFF")
-col_kernel_available<-c("#0F75A8FF")
-
+col_kernel_used<-c("#D9AC82FF")
+col_kernel_available<-c("#98C2D9FF")
 
 ## kernel on background
 first_plot<-data %>%
-  #ggplot(aes(MAP, MAT, color=group)) +
   ggplot(aes(MAP, MAT)) +
-  #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group)) +
-  #stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(fill = ..level..)) +
- #stat_density_2d(data=subset(data, group == "used"), geom = "polygon", aes(fill = ..level..)) +
-  #stat_density_2d(aes(fill = ..level..), geom = "polygon") 
   stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
- scale_alpha_continuous(range = c(0, 0.8))+
+ scale_alpha_continuous(range = c(0, 1))+
  scale_fill_manual(values=c(col_kernel_available,col_kernel_used))+
   geom_point(data=subset(data, group == "available"), alpha = 3/10, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 3/10, color=col_points_used)+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
   theme_light()
-    #geom_point() +
-
 first_plot
 
 
@@ -397,11 +389,10 @@ first_plot
 # #geom_point() +
 # 
 # first_plot
-
   
-  #stat_density_2d(data = subset(data, group == "used"), geom = "raster", aes(alpha = ..density..), fill = "#E69F00" , contour = FALSE) +
-  #stat_density_2d(data = subset(data, group == "available"), geom = "raster", aes(alpha = ..density..), fill = "#999999" , contour = FALSE) +
-  #scale_alpha(range = c(0, 1)) 
+#stat_density_2d(data = subset(data, group == "used"), geom = "raster", aes(alpha = ..density..), fill = "#E69F00" , contour = FALSE) +
+#stat_density_2d(data = subset(data, group == "available"), geom = "raster", aes(alpha = ..density..), fill = "#999999" , contour = FALSE) +
+#scale_alpha(range = c(0, 1)) 
   
 # ## kernel on foreground
 # first_plot<-data %>%
@@ -415,10 +406,6 @@ first_plot
 # #geom_point() +
 # #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 20) +
 
-
-
-  
-
 # ## kernel on background
 # first_plot<-data %>%
 #   #ggplot(aes(MAP, MAT, color=group)) +
@@ -430,8 +417,6 @@ first_plot
 #   geom_point(data=subset(data, group == "used"), alpha = 5/10, color=col_points_used)+
 #   theme_light()
 # first_plot
-
-
 
 #create y-axis histogram
 y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
@@ -445,11 +430,9 @@ x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
   scale_fill_manual(values=palette_points)+
   coord_flip()
 
-
 # create the combined plot
 combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
 combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
-
 
 # show the result
 ggdraw(combined_plot)
