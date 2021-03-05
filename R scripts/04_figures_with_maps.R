@@ -77,7 +77,7 @@ alldata_splaea<-spTransform(alldata_sp,polarproj)
 # change in NDVI
 # change in growing season length
 
-#World map --- ???
+#World map --- seems to work
 boundaries <- maps::map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
 IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
@@ -95,22 +95,19 @@ subzones
 arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
 subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
+subarcbound
+plot(subarcbound)
 
 #Downloading worldclim data at 2.5deg resolution -- seems to work
 bioclimdat<-getData('worldclim',var='bio',res=2.5)
 
-#Distance from coast --- ??? does not work???
+#Distance from coast -- seems to work
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
 distancefromcoast
 plot(distancefromcoast)
 
 
-#Elevation --- ??? øh, which part here worked???
-#DTM from Guille
-#dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
-#download.file(dtmurl,'Data/GIS layeres/DTM.rrd')
-#dtm<-raster('Data/GIS layeres/DTM.rrd')#Canæ't open
-
+#Elevation --- seems to work
 #Use raster::getData instead
 charcount <- c('NO', 'SE','FI','CA','IS','GL','SJ') 
 allac2 <- do.call("merge", lapply(charcount, function(x)  raster::getData('alt', country=x)))
@@ -134,18 +131,18 @@ vertherb_div<-stack(vertherb_sr,vertherb_fd)
 #Human population density --- seems to work
 #GPW:Center for International Earth Science Information Network - CIESIN - Columbia University. 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. Accessed 21.10.2020. 
 #2015 human pop density
-gpwurl<-'https://uitno.box.com/shared/static/u2t8wrffagosabv4k498dh856shzkqyi.zip'
-download.file(gpwurl,'Data/GIS_layers/GPW2015.zip',mode='wb')
-unzip('Data/GIS_layers/GPW2015.zip',exdir='Data/GIS_layers/GPW')
+#gpwurl<-'https://uitno.box.com/shared/static/u2t8wrffagosabv4k498dh856shzkqyi.zip'
+#download.file(gpwurl,'Data/GIS_layers/GPW2015.zip',mode='wb')
+#unzip('Data/GIS_layers/GPW2015.zip',exdir='Data/GIS_layers/GPW')
 ##
 gpw<-raster('Data/GIS_layers/GPW/gpw_v4_population_density_rev11_2015_2pt5_min.tif')
 levelplot(gpw+1,zscaleLog=T,margin=F,scales=list(draw=F))
 
 #Human footprint --- seems to work
 #Venter, O., E. W. Sanderson, A. Magrach, J. R. Allan, J. Beher, K. R. Jones, H. P. Possingham, W. F. Laurance, P. Wood, B. M. Fekete, M. A. Levy, and J. E. Watson. 2018. Last of the Wild Project, Version 3 (LWP-3): 2009 Human Footprint, 2018 Release. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H46T0JQ4. Accessed 21.10.2020. 
-humfooturl<-'https://uitno.box.com/shared/static/1bjcuidtjis8456locp1rio2ul6a7zi4.zip'
-download.file(humfooturl,'Data/GIS_layers/Humanfootprint.zip')
-unzip('Data/GIS_layers/Humanfootprint.zip',exdir='Data/GIS_layers/HumanFootprint')
+#humfooturl<-'https://uitno.box.com/shared/static/1bjcuidtjis8456locp1rio2ul6a7zi4.zip'
+#download.file(humfooturl,'Data/GIS_layers/Humanfootprint.zip')
+#unzip('Data/GIS_layers/Humanfootprint.zip',exdir='Data/GIS_layers/HumanFootprint')
 ##
 humanfoot<-raster('Data/GIS_layers/HumanFootprint/wildareas-v3-2009-human-footprint.tif')
 levelplot(humanfoot,margin=F)
@@ -156,8 +153,8 @@ humanstack<-aggregate(mask(crop(humanstack1,spTransform(arczones,gpw@crs)),spTra
 names(humanstack)<-c('GPW','Footprint')
 
 #NDVI trends
-ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
-download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
+#ndvitrend_url<-'https://uitno.box.com/shared/static/2vw9e99myxjzj08t8p2rkc1mmxxopmno.nc'
+#download.file(ndvitrend_url,'Data/GIS_layers/NDVItrend.nc',mode='wb')
 ndvitrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi_trend')
 lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
 
@@ -187,7 +184,8 @@ ndvitrend_laea<-projectRaster(ndvi,crs=arczones)
 losc_laea<-projectRaster(losc,crs=arczones)
 plot(ndvitrend_laea)
 plot(lostrend_laea)
-points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
+#points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
+points(alldata_splaea,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
 #Temperature change 
@@ -199,39 +197,38 @@ climatechangestack<-stack(ndvitrend_laea,losc_laea,ndvitrend_laea,lostrend_laea,
 climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
 
-#Soils
-soilurl<-'https://ntnu.box.com/shared/static/rr5yqlplu3lwhu19kc855a69rbtaj1as.zip'
-download.file(soilurl,'Data/GIS_layers/Soils/DSMW.zip')
-unzip('Data/GIS_layers/DSMW.zip',exdir='Data/GIS_layers/DSMW')
-dsmw<-readOGR('Data/GIS_layers/Soils/DSMW','DSMW')#http://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/faounesco-soil-map-of-the-world/en/
-dsmw$SimpleSoilUnit<-substr(dsmw$DOMSOI,1,1)
-#Legend http://www.fao.org/fileadmin/user_upload/soils/docs/Soil_map_FAOUNESCO/images/Legend_I.jpg 
-levels(as.factor(dsmw$SimpleSoilUnit))
-#spplot(dsmw,'SimpleSoilUnit')
-dsmw_arc<-crop(dsmw,alldata_sp)
-crs(dsmw_arc)<-crs(bioclimdat)
-dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
-soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
-plot(soiltyperast)
+# #Soils
+# soilurl<-'https://ntnu.box.com/shared/static/rr5yqlplu3lwhu19kc855a69rbtaj1as.zip'
+# download.file(soilurl,'Data/GIS_layers/Soils/DSMW.zip')
+# unzip('Data/GIS_layers/DSMW.zip',exdir='Data/GIS_layers/DSMW')
+# dsmw<-readOGR('Data/GIS_layers/Soils/DSMW','DSMW')#http://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/faounesco-soil-map-of-the-world/en/
+# dsmw$SimpleSoilUnit<-substr(dsmw$DOMSOI,1,1)
+# #Legend http://www.fao.org/fileadmin/user_upload/soils/docs/Soil_map_FAOUNESCO/images/Legend_I.jpg 
+# levels(as.factor(dsmw$SimpleSoilUnit))
+# #spplot(dsmw,'SimpleSoilUnit')
+# dsmw_arc<-crop(dsmw,alldata_sp)
+# crs(dsmw_arc)<-crs(bioclimdat)
+# dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
+# soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
+# plot(soiltyperast)
 
-# exploring permafrost
-#Permafrost
-#Instead using 12.5km grid dataset
-pm<-raster('Data/GIS_layers/nhipa.byte')
-crs(pm)<-polarproj
-permafrostcode<-raster(pm)
-values(permafrostcode)<-NA
-permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
-permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
-permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
-permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
-permrast<-permafrostcode
-  plot(permafrostcode)
-  latticeExtra::layer(sp.polygons(bPolslaea))
+# # exploring permafrost
+# #Permafrost
+# #Instead using 12.5km grid dataset
+# pm<-raster('Data/GIS_layers/nhipa.byte')
+# crs(pm)<-polarproj
+# permafrostcode<-raster(pm)
+# values(permafrostcode)<-NA
+# permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
+# permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
+# permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
+# permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
+# permrast<-permafrostcode
+#   plot(permafrostcode)
+#   latticeExtra::layer(sp.polygons(bPolslaea))
 
 
-
-#Context GIS layers -- ??? making a rasterstack of all layers. Needed for figures???
+#Context GIS layers -- making a rasterstack of all layers
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
 
@@ -247,22 +244,21 @@ context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
-
+data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
 
 
 # Figure 4    --------------------------------------
 
 
-plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
-points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
-plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
-dev.off()
+# plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
+# points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
+# plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
+# dev.off()
 
-plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
-points(alldata_splaea,pch=16,col='red',cex=0.5)
-points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
-plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
-
+# plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
+# points(alldata_splaea,pch=16,col='red',cex=0.5)
+# points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
+# plot(subarcbound,border='blue',lwd=2,lty=2,add=T) 
 
 #Distribution figure
 subzonesR<-rasterize(subzones,bioclimdat_laea,field='ZONE')
@@ -273,6 +269,7 @@ agzones$ZONE[agzones$ZONE==0]<-NA
 
 pdf('Figures/SpatialDistribution.pdf')
 tiff('Figures/SpatialDistribution.tif')
+#
 colzones<-brewer.pal(6,'YlGn')
 
 myColorkey <- list(space='right',
@@ -286,8 +283,9 @@ levelplot(projectRaster(blankras,crs=alldata_splaea@proj4string),
   layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
                     fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
-  layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+ 
-  layer(sp.points(alldata_splaea_removeoutsidearctic,col=1,pch=16,cex=0.4))
+  layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
+  layer(sp.points(alldata_splaea,col=1,pch=16,cex=0.4))
+
 dev.off()
 dev.off()
 
@@ -301,7 +299,6 @@ plot(allzones)
 
 a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
 tapply(a$ZONE_,a$ZONE_,length)
-
 
 
 
@@ -333,6 +330,135 @@ dev.off()
 
 
 ####################### climate space
+
+## need to create data frame where all datapoints are combined?
+## four columns coordinate_E, coordinate_N, evidence_point, background
+
+names(alldata) 
+names(data_eco_cont)
+#x=bio12, y=bio1/10
+
+used<-cbind.data.frame("MAP"=alldata$bio12, "MAT" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
+head(used)
+#used<-used[1:50,]; dim(used)
+available<-cbind.data.frame("MAP"=data_eco_cont$bio12, "MAT" = data_eco_cont$bio1/10, "group" =rep("available", times=length(data_eco_cont$bio12)))
+head(available)
+#available<-na.omit(available)
+#available<-available[1:50,]; dim(available)
+
+data<-rbind.data.frame(used, available)
+
+
+# create plot with kernels density distribution
+cbPalette <- c("#999999", "#E69F00")
+
+pal <- hp(n = 42, house = "Ravenclaw")
+image(volcano, col = pal)
+
+palette_points<-c("#006699FF", "#B35900FF")
+
+col_points_available<-c("#006699FF")
+col_points_used<-c("#B35900FF")
+
+
+col_kernel_used<-c("#D9924DFF")
+col_kernel_available<-c("#0F75A8FF")
+
+
+## kernel on background
+first_plot<-data %>%
+  #ggplot(aes(MAP, MAT, color=group)) +
+  ggplot(aes(MAP, MAT)) +
+  #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group)) +
+  #stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(fill = ..level..)) +
+ #stat_density_2d(data=subset(data, group == "used"), geom = "polygon", aes(fill = ..level..)) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon") 
+  stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
+ scale_alpha_continuous(range = c(0, 0.8))+
+ scale_fill_manual(values=c(col_kernel_available,col_kernel_used))+
+  geom_point(data=subset(data, group == "available"), alpha = 3/10, color=col_points_available)+
+  geom_point(data=subset(data, group == "used"), alpha = 3/10, color=col_points_used)+
+  theme_light()
+    #geom_point() +
+
+first_plot
+
+
+# ## kernel on background
+# first_plot<-data %>%
+#   #ggplot(aes(MAP, MAT, color=group)) +
+#   ggplot(aes(MAP, MAT)) +
+#   stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(fill = ..level..), show.legend=FALSE) +
+#   stat_density_2d(data=subset(data, group == "used"), geom = "polygon", aes(fill = ..level..),show.legend=FALSE) +
+#   #   scale_fill_manual(values=cbPalette)+
+#   geom_point(data=subset(data, group == "available"), alpha = 5/10, color="#999999")+
+#   geom_point(data=subset(data, group == "used"), alpha = 5/10, color="#E69F00")+
+#   theme_light()
+# #geom_point() +
+# 
+# first_plot
+
+  
+  #stat_density_2d(data = subset(data, group == "used"), geom = "raster", aes(alpha = ..density..), fill = "#E69F00" , contour = FALSE) +
+  #stat_density_2d(data = subset(data, group == "available"), geom = "raster", aes(alpha = ..density..), fill = "#999999" , contour = FALSE) +
+  #scale_alpha(range = c(0, 1)) 
+  
+# ## kernel on foreground
+# first_plot<-data %>%
+#   #ggplot(aes(MAP, MAT, color=group)) +
+#   ggplot(aes(MAP, MAT)) +
+#   # scale_alpha_continuous(range = c(0, 1))+
+#   scale_fill_manual(values=cbPalette)+
+#   geom_point(data=subset(data, group == "available"), alpha = 5/10, color="#999999")+
+#   geom_point(data=subset(data, group == "used"), alpha = 5/10, color="#E69F00")+
+#   stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group)) 
+# #geom_point() +
+# #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 20) +
+
+
+
+  
+
+# ## kernel on background
+# first_plot<-data %>%
+#   #ggplot(aes(MAP, MAT, color=group)) +
+#   ggplot(aes(MAP, MAT)) +
+#   stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins=20) +
+#   # scale_alpha_continuous(range = c(0, 1))+
+#   scale_fill_manual(values=cbPalette)+
+#   geom_point(data=subset(data, group == "available"), alpha = 5/10, color=col_points_available)+
+#   geom_point(data=subset(data, group == "used"), alpha = 5/10, color=col_points_used)+
+#   theme_light()
+# first_plot
+
+
+
+#create y-axis histogram
+y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
+  geom_density(data = data, aes(x = MAT,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+#create x-axis histogram
+x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
+  geom_density(data = data, aes(y = MAP,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+
+# create the combined plot
+combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
+combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
+
+
+# show the result
+ggdraw(combined_plot)
+
+
+
+
+
+
 climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
   ggtitle("Climatic space") + scale_y_reverse()+
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
@@ -403,9 +529,69 @@ dev.off()
 ## need to create data frame where all datapoints are combined?
 ## four columns coordinate_E, coordinate_N, evidence_point, background
 
+names(alldata) 
+names(data_eco_cont)
 
-#Human context
+
+used<-cbind.data.frame("GPW"=alldata$GPW, "Footprint" = alldata$Footprint, "group" =rep("used", times=length(alldata$GPW)))
+head(used)
+#used<-used[1:50,]; dim(used)
+available<-cbind.data.frame("GPW"=data_eco_cont$HumanPopulationDensity, "Footprint" = data_eco_cont$Human.footprint, "group" =rep("available", times=length(data_eco_cont$Human.footprint)))
+head(available)
+#available<-na.omit(available)
+#available<-available[1:50,]; dim(available)
+
+data<-rbind.data.frame(used, available)
+
+
+# create plot with kernels density distribution
+cbPalette <- c("#999999", "#E69F00")
+
+
+first_plot<-data %>%
+  ggplot(aes(GPW, Footprint, color=group)) +
+  geom_point() +
+  #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 20) +
+  stat_density_2d(data = subset(data, group == "used"), geom = "raster", aes(alpha = ..density..), fill = "#E69F00" , contour = FALSE) +
+  stat_density_2d(data = subset(data, group == "available"), geom = "raster", aes(alpha = ..density..), fill = "#999999" , contour = FALSE) +
+  scale_alpha(range = c(0, 1)) +
+      scale_x_log10()+
+  scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High'))+
+  scale_color_manual(values=cbPalette)
+
+
+first_plot
+
+#create y-axis histogram
+y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
+  geom_density(data = data, aes(x = Footprint,fill = group), color = NA, alpha = 0.5) +
+  #scale_fill_manual(values=cbPalette)+
+  coord_flip()
+
+#create x-axis histogram
+x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
+  geom_density(data = data, aes(y = GPW,fill = group), color = NA, alpha = 0.5) +
+  #scale_fill_manual(values=cbPalette)+
+  coord_flip()
+
+
+# create the combined plot
+combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
+combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
+
+
+# show the result
+ggdraw(combined_plot)
+
+
+
+
+
+
+
+#Human context old
 humancontextdat<-extract(humanstack,1:ncell(humanstack),df=T)
+
 humanspace<-ggplot(data=humancontextdat,mapping=aes(x=GPW,y=Footprint))+
   geom_point(size=0.3)+
   ggtitle("Human space") +
