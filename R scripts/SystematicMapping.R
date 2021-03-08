@@ -145,7 +145,7 @@ alldata_splaea_removeredundant<-alldata_splaea[alldata_splaea$redundancy!='redun
 arczones_buffer<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
 plot(arczones_laea)
 plot(arczones_buffer,border=2,add=T)
-
+points(alldata_splaea,col=3,pch=16,cex=0.4)
 #Remove evidence points outside of buffered polygon
 alldata_splaea_removeoutsidearctic<-alldata_splaea_removeredundant[arczones_buffer,]
 dim(alldata_splaea)
@@ -803,6 +803,7 @@ alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$Simple
 #alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
 alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
 alldata_final_sp1$Subzone<-over(alldata_splaea_removeoutsidearctic,allzones[,'ZONE_'])$ZONE_
+alldata_final_sp1$north_of_treeline<-raster::extract(northoftreeline,alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
 alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
