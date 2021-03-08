@@ -55,6 +55,7 @@ library(harrypotter)# color palettes
 library(cowplot) # form plotrring kewrnesl and histograms
 library(magrittr) # for pipes and %<>%
 library(ncdf4) ## needed for NDVI rasters?
+library(ks)
 
 # Take in filtered evidence point data and preprocess --------------------------------
 
@@ -69,6 +70,10 @@ alldata_splaea<-spTransform(alldata_sp,polarproj)
 #obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
 #obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
 
+# Take in pre-processed ecological context data
+data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
+
+source("Functions.R") 
 
 # Get all GIS data and preprocess   --------------------------------------
 
@@ -244,7 +249,7 @@ context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
-data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
+
 
 
 # Figure 4    --------------------------------------
@@ -304,14 +309,76 @@ tapply(a$ZONE_,a$ZONE_,length)
 
 # Figure 5    --------------------------------------
 
-### I have not worked through this yet. 
-## Need to figure out how to set up the data to match the plot on kernels and histograms
-###  should have data on both evidence points and background points in the same data frame
-### data frame with x-variable, y-variable, z-variable (northing) and grouping variable (used vs available)
-## but a used point is also part of the available data 
-## format both used and available like this and r-bind them, adding grouping variable??
 
 ####################### geographic space
+
+names(alldata) 
+names(data_eco_cont)
+
+used<-cbind.data.frame("Dist"=alldata$distance_from_coast, "Elevation" = alldata$elevation_DEM, "group" =rep("used", times=length(alldata$bio12)))
+head(used)
+available<-cbind.data.frame("MAP"=data_eco_cont$bio12, "Elevation" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
+head(available)
+
+data<-rbind.data.frame(used, available)
+
+# create plot with kernels density distribution
+cbPalette <- c("#999999", "#E69F00")
+
+pal <- hp(n = 7, house = "Ravenclaw")
+image(volcano, col = pal)
+pal[7]
+
+palette_points<-c("#006699FF", "#B35900FF")
+
+col_points_used<-c("#B35900FF")
+col_points_available<-c("#006699FF")
+
+#col_kernel_used<-c("#D9AC82FF")
+#col_kernel_available<-c("#98C2D9FF")
+
+first_plot<-data %>%
+  ggplot(aes(MAP, MAT)) +
+  #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
+  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1) +
+  #scale_alpha_continuous(range = c(0, 1))+
+  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  theme_light()
+first_plot
+
+
+#create y-axis histogram
+y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
+  geom_density(data = data, aes(x = MAT,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+#create x-axis histogram
+x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
+  geom_density(data = data, aes(y = MAP,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+# create the combined plot
+combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
+combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
+
+# show the result
+ggdraw(combined_plot_geo_space)
+
+
+
+
+
+
+
+
+
+
+
 
 #Geographic space figure
 geogcontextdat<-extract(geographicstack,1:ncell(geographicstack),df=T)
@@ -372,6 +439,21 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 3/10, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 3/10, color=col_points_used)+
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  theme_light()
+first_plot
+
+
+first_plot<-data %>%
+  ggplot(aes(MAP, MAT)) +
+  #stat_density_2d(geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
+  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1) +
+  #scale_alpha_continuous(range = c(0, 1))+
+  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  #labs(fill = "Dose (mg)")+
+  #scale_fill_discrete(name = "Data", labels = c("The Arctic", "Evidence points"))+
   theme_light()
 first_plot
 
