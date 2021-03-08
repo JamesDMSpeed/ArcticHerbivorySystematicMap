@@ -86,8 +86,8 @@ data<-rbind.data.frame(used, available)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend = FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used))+
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend = FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
@@ -131,8 +131,8 @@ data<-rbind.data.frame(used, available)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
@@ -181,8 +181,8 @@ data<-rbind.data.frame(used, available)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Change in growing season length (days per decade)")+ ylab("Change in NDVI (% per decade)")+
@@ -231,8 +231,8 @@ data<-rbind.data.frame(used, available)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Vertebrate herbivore species richness")+ ylab("Vertebrate herbivore functional diversity")+
@@ -283,8 +283,8 @@ data<-rbind.data.frame(used, available)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend=FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Human populatin density")+ ylab("Human footprint")+
@@ -322,18 +322,24 @@ ggdraw(combined_plot_humans)
 
 #legtit<- "Latitude (°)"
 #png('Figures/5_contexts.png')
-tiff('Figures/5_contexts.tif')
+#tiff('Figures/5_contexts.tif')
+tiff('Figures/5_contexts_no_kernel.tif',height=10,width=9,units = 'in',res=150)
+
+
 # grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
 #              climchangespace+theme(legend.position="none"),
 #              geospace+theme(legend.position="none"),
 #              herbivorespace+theme(legend.position=c(0.8,0.2))+theme(legend.title=element_blank()),
 #              ncol=2)
-grid.arrange(combined_plot_geo_space,
-             combined_plot_climate,
-             combined_plot_climate_change,
-             combined_plot_richness,
-             combined_plot_humans,
-             ncol=2)
+
+
+print(grid.arrange(combined_plot_geo_space,
+                   combined_plot_climate,
+                   combined_plot_climate_change,
+                   combined_plot_richness,
+                   combined_plot_humans,
+                   ncol=2))
+
 dev.off()
 dev.off()
 
