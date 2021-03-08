@@ -54,6 +54,18 @@ names(data_eco_cont)
 
 source("Functions.R") 
 
+sum(na.omit(alldata$NDVI.trend)-na.omit(alldata$Current.NDVI))
+sum(na.omit(data_eco_cont$NDVI.trend)-na.omit(data_eco_cont$Current.NDVI))
+
+toto<-cbind(alldata$GrowingSeasonLength.trend, alldata$CurrentGrowingSeasonLength)
+toto<-cbind(data_eco_cont$GrowingSeasonLength.trend, data_eco_cont$CurrentGrowingSeasonLength)
+
+
+sum(na.omit(data_eco_cont$GrowingSeasonLength.trend)-na.omit(data_eco_cont$CurrentGrowingSeasonLength))
+
+
+
+
 # Figure 5    --------------------------------------
 
 ## geo, climate, climate change, food web, human
@@ -363,22 +375,29 @@ available<-cbind.data.frame("x_variable"=data_eco_cont$Current.NDVI, "y_variable
 used<-cbind.data.frame("x_variable"=alldata$CurrentGrowingSeasonLength, "y_variable" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
 available<-cbind.data.frame("x_variable"=data_eco_cont$CurrentGrowingSeasonLength, "y_variable" = data_eco_cont$bio1/10, "group" =rep("available", times=length(data_eco_cont$bio12)))
 #
+used<-cbind.data.frame("x_variable"=alldata$CurrentGrowingSeasonLength, "y_variable" = alldata$Current.NDVI, "group" =rep("used", times=length(alldata$bio12)))
+available<-cbind.data.frame("x_variable"=data_eco_cont$CurrentGrowingSeasonLength, "y_variable" = data_eco_cont$Current.NDVI, "group" =rep("available", times=length(data_eco_cont$bio12)))
+#
 used<-cbind.data.frame("x_variable"=alldata$CurrentGrowingSeasonLength, "y_variable" = alldata$GrowingSeasonLength.trend, "group" =rep("used", times=length(alldata$bio12)))
 available<-cbind.data.frame("x_variable"=data_eco_cont$CurrentGrowingSeasonLength, "y_variable" = data_eco_cont$GrowingSeasonLength.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
 #
 used<-cbind.data.frame("x_variable"=alldata$Current.NDVI, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
 available<-cbind.data.frame("x_variable"=data_eco_cont$Current.NDVI, "y_variable" = data_eco_cont$NDVI.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
 #
+used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$Temperature.anomaly, "group" =rep("used", times=length(alldata$bio12)))
+available<-cbind.data.frame("x_variable"=data_eco_cont$GrowingSeasonLength.trend, "y_variable" = data_eco_cont$Temperature.anomaly, "group" =rep("available", times=length(data_eco_cont$bio12)))
+#
+
+
 data<-rbind.data.frame(used, available)
-
-
+#
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
   stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
-  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+ scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  #xlab("Temperature anomaly")+ ylab("Mean annual temperature")+
+  xlab("Growing season length trend")+ ylab("Temprature anomaly")+
   theme_light()
 first_plot
 
