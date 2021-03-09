@@ -397,7 +397,7 @@ first_plot<-data %>%
  scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Growing season length trend")+ ylab("Temprature anomaly")+
+  xlab("Growing season length")+ ylab("Annual temperature")+
   theme_light()
 first_plot
 
@@ -419,8 +419,10 @@ combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
 combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
 
 # show the result
+tiff('Figures/current_growing_season_MAT.tif',height=5,width=5,units = 'in',res=150)
 ggdraw(combined_plot)
-
+dev.off()
+dev.off()
 
 ####################### various versions before final figure  -------------------
 
@@ -754,3 +756,60 @@ combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
 
 # show the result
 ggdraw(combined_plot)
+
+
+####################### statistics to results  -------------
+
+## mean annual temp across study area
+mean(na.omit(data_eco_cont$bio1/10))
+
+## mean annual precipitation 
+mean(na.omit(data_eco_cont$bio12))
+boxplot(na.omit(data_eco_cont$bio12))
+#
+mean(na.omit(alldata$bio12))
+boxplot(na.omit(alldata$bio12))
+quantile(alldata$bio12, c(.25, .50, .90), na.rm=TRUE) 
+quantile(data_eco_cont$bio12, c(.25, .50, .90), na.rm=TRUE) 
+
+
+
+## annual range of temprature
+mean(na.omit(data_eco_cont$bio7/10)) # 48
+## 90% of evidence points had less than 49C annual range. 
+quantile(alldata$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
+quantile(data_eco_cont$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
+
+## how large part of the study area had larger annual range than this
+## BIO7 = Temperature Annual Range (BIO5-BIO6)
+boxplot(data_eco_cont$bio7/10)
+hist(data_eco_cont$bio7/10)
+toto<-c(na.omit(data_eco_cont$bio7/10))
+test<-toto>49
+test<-as.numeric(test)
+sum(test)/length(test) ## 48% of data_eco_cont$bio7/10 has larger values than 49!
+
+## NDVI 
+mean(na.omit(data_eco_cont$Current.NDVI)) 
+mean(na.omit(alldata$Current.NDVI)) 
+quantile(data_eco_cont$Current.NDVI, c(.25, .50, .90), na.rm=TRUE) 
+quantile(alldata$Current.NDVI, c(.25, .50, .90), na.rm=TRUE) 
+
+## soil types
+names(alldata)
+names(data_eco_cont)
+table(alldata$soil_type.)
+table(data_eco_cont$Soil.Type)
+
+## permafrost
+names(alldata)
+names(data_eco_cont)
+table(alldata$permafrost)
+summary(alldata$permafrost)
+summary(as.factor(data_eco_cont$Permafrost))
+par(mfrow=c(1,2))
+hist(data_eco_cont$Permafrost, main="arctic")
+hist(alldata$permafrost, main="evidence base")
+
+#treeline
+summary(alldata$north_of_treeline)
