@@ -105,22 +105,9 @@ levels(alldata$extent_of_spatial_scale)<-
 levels(alldata$extent_of_spatial_scale)
 
 
-# Mapping -----------------------------------------------------------------
+# Removing redundant studies and those outside arctic ---------------------
 
 
-# Mapping in space --------------------------------------------------------
-
-#Evidence points
-
-#By country
-eps_country<-tapply(alldata$country,alldata$country,length)
-pdf('Figures/Countries.pdf')
-ggplot(data=alldata,aes(x=country))+geom_bar()+  
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Countries")+ theme(axis.title.x = element_blank()) 
-dev.off()
-
-#Across biome
 #World map
 polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
 boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
@@ -151,12 +138,11 @@ subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
-dev.off()
+
 
 
 #Remove redundant studies
 alldata_splaea_removeredundant<-alldata_splaea[alldata_splaea$redundancy!='redundant',]
-
 
 #Remove evidence points outside of arctic
 #Buffer the Arctic polygons by 10000m to get sites with coordinate inaccuracies offshore
@@ -178,8 +164,6 @@ points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
-
-
 #Save filtered data
 #Write data
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
@@ -191,108 +175,7 @@ alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
 #Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv.
 
-
-# Mapping in time ---------------------------------------------------------
-
-
-#Evidence points - year of publication
-pub<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("Publication year")+xlab('Publication year')
-#Evidence points - year of study start
-alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not available"]<-NA
-alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not relevant"]<-NA
-alldata_splaea_removeoutsidearctic$year_start[alldata_splaea_removeoutsidearctic$year_start=="not reported" ]<-NA
-alldata_splaea_removeoutsidearctic$year_start<-droplevels(alldata_splaea_removeoutsidearctic$year_start)
-
-startyr<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(as.character(year_start))))+geom_histogram()+ggtitle("Study start year")+xlab('Study start year')
-
-pdf('Figures/Time.pdf')
-tiff('Figures/Time.tif',width=6,height=4,units='in',res=150)
-grid.arrange(pub,startyr,ncol=2)
-dev.off()
-
-
-# Mapping study types -----------------------------------------------------
-
-#Study design
-
-studdes<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=study_design))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Study design")+ theme(axis.title.x = element_blank()) 
-exdes<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=experimental_design))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Experimental design")+ theme(axis.title.x = element_blank()) 
-studmeth<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=study_method))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Study method")+ theme(axis.title.x = element_blank()) 
-expquant<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=exposure_quantification))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Exposure quantification")+ theme(axis.title.x = element_blank()) 
-
-pdf('Figures/StudyDesign.pdf',width=6,height=10)
-grid.arrange(studdes,studmeth,exdes,expquant,ncol=2)
-dev.off()
-
-#Herbivore type
-pdf('Figures/HerbivoreType.pdf')
-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=herbivore_type))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Herbivore type")+ theme(axis.title.x = element_blank()) 
-dev.off()
-
-
-# Mapping temporal and spatial resolutions & extents --------------------------------
-
-tr1<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=as.numeric(extent_of_temporal_scale)))+geom_histogram()+scale_x_log10()+
-  ggtitle("Extent of temporal scale") +
-  xlab("Temporal scale (years)")
-
-tr2<-ggplot(alldata_splaea_removeoutsidearctic@data,aes(x=temporal_resolution))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Temporal resolution")+ theme(axis.title.x = element_blank()) 
-
-pdf('Figures/TempRes.pdf',width=8,height=6)
-grid.arrange(tr1,tr2,ncol=2)
-dev.off()
-
-#Contingency tables
-
-ct1<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = study_design, x = herbivore_type)) + geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Herbivore type and study design")+ theme(axis.title.x = element_blank()) 
-
-
-ct2<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = biological_organization_level_reported, x = herbivore_type)) + geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle("Herbivore type and plant level")+ theme(axis.title.x = element_blank()) 
-
-pdf('Figures/ContingencyFigs.pdf',height=6,width=10)
-tiff('Figures/ContingencyFigs.tif',height=6,width=10,units = 'in',res=150)
-grid.arrange(ct1,ct2,ncol=2)
-dev.off()
-
-
-#Simplified herbivores
-alldata_splaea_removeoutsidearctic$SimpleHerbivore<-alldata_splaea_removeoutsidearctic$herbivore_type
-levels(alldata_splaea_removeoutsidearctic$SimpleHerbivore)<-c(
-  rep('Invertebrate',times=3),
-  'Vertebrate','Invertebrate','Invertebrate','Multiple','Vertebrate','Unknown','Vertebrate')
-
-ct1a<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = study_design, x = SimpleHerbivore)) + geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  theme(legend.position=c(0.8,0.8))+ theme(legend.text=element_text(size=10))+labs(fill='Study design')+
-  ggtitle("Herbivore type and study design")+ theme(axis.title.x = element_blank()) 
-
-ct2a<-ggplot(alldata_splaea_removeoutsidearctic@data, aes(fill = biological_organization_level_reported, x = SimpleHerbivore)) + geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  theme(legend.position=c(0.8,0.8))+ theme(legend.text=element_text(size=10))+labs(fill='Plant level')+
-  ggtitle("Herbivore type and plant level")+ theme(axis.title.x = element_blank()) 
-
-tiff('Figures/AltGroups.tif',width=6,height=10,units='in',res=150)
-grid.arrange(ct1a,ct2a,ncol=1)
-dev.off()
-#NB: Identity of biology organization unit too many levels
-
-# Temperature and precipitation axes --------------------------------------
+# Context data --------------------------------------
 
 #Downloading worldclim bioclimate data at 2.5deg resolution
 bioclimdat<-getData('worldclim',var='bio',res=2.5)
@@ -315,16 +198,6 @@ dev.off()
 arcclim<-extract(bioclimdat,arczones)
 arcclim_all<-data.frame(do.call(rbind,arcclim))
 arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
-
-#Make this a png due to very many points = large file!
-climatespace2<-ggplot(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10))+geom_point(alpha=1/100,size=0.001)+
-  ggtitle("Climatic space") + scale_y_reverse()+
-  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
-  #geom_point(data=arcclim_all,mapping=aes(x=bio12,y=bio1/10,colour=grey(0.5),size=0.1))+
-  geom_point(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))
-png('Figures/ClimateSpace_Available.png')
-climatespace2
-dev.off()
 
 #Elevation
 #DTM from Guille
@@ -465,42 +338,66 @@ lstrend<-raster('Data/GIS_layers/NDVItrend.nc',varname='los_trend')
 plot(ndvitrend)#Need to do some gymnastics here to get this correct orientation
 ndvitrend<-t(flip(ndvitrend,direction=2))
 plot(ndvitrend)
-lostrend<-(flip(lstrend,direction=1))
+lostrend<-flip(t(lstrend),direction=1)
 plot(lostrend)
 
-ndvitrend@crs<-bioclimdat@crs
-lostrend@crs<-bioclimdat@crs
-ndvitrend_laea<-projectRaster(ndvitrend,crs=arczones)
-lostrend_laea<-projectRaster(lostrend,crs=arczones)
-plot(ndvitrend_laea)
-plot(lostrend_laea)
+#Current 1982-2014
+currentndvi<-raster('Data/GIS_layers/NDVItrend.nc',varname='gssndvi')
+currentlos<- raster('Data/GIS_layers/NDVItrend.nc',varname='los')
+plot(currentndvi)
+ndvi<-t(flip(currentndvi,direction=2))
+plot(ndvi)
+plot(currentlos)
+losc<-t(flip(currentlos,direction=2))
+plot(losc)
+
+climatestack<-stack(ndvi,losc,ndvitrend,lostrend)
+
+climatestack@crs<-bioclimdat@crs
+climatec_laea<-projectRaster(climatestack,crs=arczones)
+plot(climatec_laea[[1]])
 points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
 
-climatechangestack<-stack(ndvitrend_laea,lostrend_laea)
+#Temperature change 
+#GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345. https://data.giss.nasa.gov/gistemp/maps/)
+tempdiff<-raster('Data/GIS_layers/amaps.nc')
+tempdiffpp<-resample(projectRaster(tempdiff,crs=ndvitrend_laea),ndvitrend_laea,method='bilinear')
+
+climatechangestack<-stack(climatec_laea,tempdiffpp)
 climatechangestack<-mask(climatechangestack,arczones)
-names(climatechangestack)<-c('NDVI trend','GrowingSeasonLength trend')
+names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
+
+# Extracting context data to evidence points ------------------------------
+
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
 
-alldata_final_sp1<-cbind(alldata_final_sp,extract(bioclimdat,alldata_final_sp))
-alldata_final_sp1$elevation_DEM<-extract(arcelev,alldata_final_sp1)
-alldata_final_sp1$distance_from_coast<-extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
-alldata_final_sp1$soil_type.<-extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
-alldata_final_sp2<-cbind(alldata_final_sp1,extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
-alldata_final_sp2a<-cbind(alldata_final_sp2,extract(humanstack,alldata_final_sp2))
-alldata_final_sp3a<-cbind(alldata_final_sp2a,extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
-head(alldata_final_sp3)
+alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
+alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
+alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
+alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
+#alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
+alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
+alldata_final_sp1$Subzone<-over(alldata_splaea_removeoutsidearctic,allzones[,'ZONE_'])$ZONE_
+alldata_final_sp1$north_of_treeline<-raster::extract(northoftreeline,alldata_final_sp1)
+alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
+alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
+alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
+head(alldata_final_sp3a)
+names(alldata_final_sp3a)
 
 #Remove empty columns
-na_count <-sapply(alldata_final_sp3a@data, function(y) sum(length(which(is.na(y))))/length(y))
+na_count <-sapply(alldata_final_sp3@data, function(y) sum(length(which(is.na(y))))/length(y))
 alldata_final_sp3<-alldata_final_sp3a[,na_count<1]
 
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
 write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 
+
+# Range of contexts across study region -----------------------------------
 #Context GIS layers
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
@@ -509,8 +406,15 @@ crs(dsmw_arc)<-crs(bioclimdat)
 dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
 soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
 plot(soiltyperast)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,projectRaster(climatechangestack,bioclimdat_laea),projectRaster(humanstack,bioclimdat_laea),projectRaster(soiltyperast,bioclimdat_laea,method='ngb'))
-names(context_stack)[c(23,26,27,28)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type')
+context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,
+                     projectRaster(climatechangestack,bioclimdat_laea),
+                     projectRaster(humanstack,bioclimdat_laea),
+                     projectRaster(soiltyperast,bioclimdat_laea,method='ngb'),
+                     projectRaster(permafrostcode,bioclimdat_laea,method='ngb'),
+                     projectRaster(northoftreeline,bioclimdat_laea,method='ngb'),
+                     projectRaster(distancefromcoast,bioclimdat_laea,method='ngb'))
+
+names(context_stack)[c(23,29:33)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type','Permafrost',"NorthofTreeline")
 
 context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
@@ -522,6 +426,11 @@ soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=lev
                                'Lithosols','Fluvisols','Kastanozems','Luvisols','Greyzems','Nitosols','Histosols',
                                'Podzols','Arenosols','Regosols','Solonetz','Andosols','Rankers','Planosols','Xerosols'))
 write.csv(soilleg,'Data/SoilLegend.csv')
+
+
+
+
+
 
 #Herbivore diversity space figure
 alldata_final_sp2$SimpleHerbivore<-as.factor(alldata_final_sp2$herbivore_type)
