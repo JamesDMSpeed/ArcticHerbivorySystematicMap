@@ -54,16 +54,20 @@ names(data_eco_cont)
 
 source("Functions.R") 
 
-sum(na.omit(alldata$NDVI.trend)-na.omit(alldata$Current.NDVI))
-sum(na.omit(data_eco_cont$NDVI.trend)-na.omit(data_eco_cont$Current.NDVI))
 
-toto<-cbind(alldata$GrowingSeasonLength.trend, alldata$CurrentGrowingSeasonLength)
-toto<-cbind(data_eco_cont$GrowingSeasonLength.trend, data_eco_cont$CurrentGrowingSeasonLength)
+names(alldata)
+alldata$elevation_DEM
+alldata$distance_to_treeline
+alldata$north_of_treeline
+alldata$distance_from_coast
+alldata$Subzone
+summary(alldata)
 
-
-sum(na.omit(data_eco_cont$GrowingSeasonLength.trend)-na.omit(data_eco_cont$CurrentGrowingSeasonLength))
-
-
+data_eco_cont$Elevation
+data_eco_cont$NorthofTreeline
+data_eco_cont$DistancetoCoast
+data_eco_cont$Current.NDVI
+data_eco_cont$NDVI.trend
 
 
 # Figure 5    --------------------------------------
@@ -90,7 +94,7 @@ names(data_eco_cont)
 
 used<-cbind.data.frame("x_variable"=alldata$distance_from_coast, "y_variable" = alldata$elevation_DEM, "group" =rep("used", times=length(alldata$bio12)))
 head(used)
-available<-cbind.data.frame("x_variable"=data_eco_cont$bio12, "y_variable" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
+available<-cbind.data.frame("x_variable"=data_eco_cont$DistancetoCoast, "y_variable" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
 head(available)
 
 data<-rbind.data.frame(used, available)
@@ -103,6 +107,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+  ggtitle("A)")+
   theme_light()
 first_plot
 
@@ -126,12 +131,11 @@ combined_plot_geo_space %<>% insert_xaxis_grob(., x_density, position = "top")
 # show the result
 ggdraw(combined_plot_geo_space)
 
-####################### climate space -------------
+####################### climate space 1 -------------
 
 names(alldata) 
 names(data_eco_cont)
-# Current.NDVI
-# CurrentGrowingSeasonLength
+
 
 used<-cbind.data.frame("x_variable"=alldata$bio12, "y_variable" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
 head(used)
@@ -147,7 +151,8 @@ first_plot<-data %>%
   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))+
+  xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature ' (degree~C)))+
+  ggtitle("B)")+
   theme_light()
 first_plot
 
@@ -171,6 +176,50 @@ combined_plot_climate %<>% insert_xaxis_grob(., x_density, position = "top")
 # show the result
 ggdraw(combined_plot_climate)
 
+####################### climate space 2 -------------
+
+names(alldata) 
+names(data_eco_cont)
+
+used<-cbind.data.frame("x_variable"=alldata$Current.NDVI, "y_variable" = alldata$CurrentGrowingSeasonLength, "group" =rep("used", times=length(alldata$bio12)))
+head(used)
+available<-cbind.data.frame("x_variable"=data_eco_cont$Current.NDVI, "y_variable" = data_eco_cont$CurrentGrowingSeasonLength, "group" =rep("available", times=length(data_eco_cont$bio12)))
+head(available)
+
+data<-rbind.data.frame(used, available)
+
+
+first_plot<-data %>%
+  ggplot(aes(x_variable, y_variable)) +
+  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
+  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+  xlab("Growing season summed NDVI")+ ylab("Growing season length (days)")+
+  ggtitle("C)")+
+  theme_light()
+first_plot
+
+
+#create y-axis histogram
+y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
+  geom_density(data = data, aes(x = y_variable,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+#create x-axis histogram
+x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
+  geom_density(data = data, aes(y = x_variable,fill = group), color = NA, alpha = 0.5) +
+  scale_fill_manual(values=palette_points)+
+  coord_flip()
+
+# create the combined plot
+combined_plot_climate_2 <- insert_yaxis_grob(first_plot, y_density, position = "right")
+combined_plot_climate_2 %<>% insert_xaxis_grob(., x_density, position = "top")
+
+# show the result
+ggdraw(combined_plot_climate_2)
+
 ####################### climate change -------------
 
 # NDVI.trend
@@ -179,6 +228,13 @@ ggdraw(combined_plot_climate)
 
 summary(alldata)
 summary(data_eco_cont)
+summary(alldata$NDVI.trend)
+summary(alldata$Current.NDVI)
+
+summary(alldata$GrowingSeasonLength.trend)
+summary(alldata$CurrentGrowingSeasonLength)
+
+summary(alldata$Temperature.anomaly)
 
 names(alldata) 
 names(data_eco_cont)
@@ -186,6 +242,12 @@ names(data_eco_cont)
 used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
 head(used)
 available<-cbind.data.frame("x_variable"=data_eco_cont$GrowingSeasonLength.trend, "y_variable" = data_eco_cont$NDVI.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
+head(available)
+
+
+used<-cbind.data.frame("x_variable"=alldata$Temperature.anomaly, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
+head(used)
+available<-cbind.data.frame("x_variable"=data_eco_cont$Temperature.anomaly, "y_variable" = data_eco_cont$NDVI.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
 head(available)
 
 data<-rbind.data.frame(used, available)
@@ -197,7 +259,9 @@ first_plot<-data %>%
   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Change in growing season length (days per decade)")+ ylab("Change in NDVI (% per decade)")+
+  #xlab("Change in growing season length (days per decade)")+ ylab("Change in NDVI (% per decade)")+
+  xlab("Change in temperature (ADD UNIT HERE)")+ ylab("Change in NDVI (% per decade)")+
+  ggtitle("D) ")+
   theme_light()
 first_plot
 
@@ -220,6 +284,7 @@ combined_plot_climate_change %<>% insert_xaxis_grob(., x_density, position = "to
 
 # show the result
 ggdraw(combined_plot_climate_change)
+
 
 
 
@@ -248,6 +313,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Vertebrate herbivore species richness")+ ylab("Vertebrate herbivore functional diversity")+
+  ggtitle("E) ")+
   theme_light()
 first_plot
 
@@ -299,7 +365,8 @@ first_plot<-data %>%
   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Human populatin density")+ ylab("Human footprint")+
+  xlab("Human populatin density")+ ylab("Human footprint index")+
+  ggtitle("F)")+
   #scale_x_log10()+
   #scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High'))+
   theme_light()
@@ -329,14 +396,13 @@ ggdraw(combined_plot_humans)
 
 ###### combine to one figure -------------
 
-## geo, climate, climate change, food web, human
+## geo, climate, climate 2, climate change, food web, human
 
 
 #legtit<- "Latitude (°)"
 #png('Figures/5_contexts.png')
 #tiff('Figures/5_contexts.tif')
-tiff('Figures/5_contexts_no_kernel.tif',height=10,width=9,units = 'in',res=150)
-
+tiff('Figures/5_contexts_no_kernel_6_plots.tif',height=10,width=9,units = 'in',res=150)
 
 # grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
 #              climchangespace+theme(legend.position="none"),
@@ -347,6 +413,7 @@ tiff('Figures/5_contexts_no_kernel.tif',height=10,width=9,units = 'in',res=150)
 
 print(grid.arrange(combined_plot_geo_space,
                    combined_plot_climate,
+                   combined_plot_climate_2,
                    combined_plot_climate_change,
                    combined_plot_richness,
                    combined_plot_humans,
