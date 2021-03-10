@@ -930,6 +930,8 @@ myColorkey <- list(space='right',
                   labels=list(labels=c('Subarctic','E','D','C','B','A'),at=1:6))
 blankras<-vertherb_sr*0
 
+
+
 levelplot(projectRaster(blankras,crs=alldata_splaea@proj4string),
           margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
    layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+

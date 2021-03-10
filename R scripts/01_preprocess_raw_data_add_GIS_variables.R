@@ -142,29 +142,39 @@ plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CA
 
 
 #Remove redundant studies
+dim(alldata) #705
 alldata_splaea_removeredundant<-alldata_splaea[alldata_splaea$redundancy!='redundant',]
+dim(alldata_splaea_removeredundant)#686
 
 #Remove evidence points outside of arctic
-#Buffer the Arctic polygons by 10000m to get sites with coordinate inaccuracies offshore
-arczones_buffer<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
+#Buffer the Arctic polygons by 100000m to get sites with coordinate inaccuracies offshore
+arczones_buffer100<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
 plot(arczones_laea)
-plot(arczones_buffer,border=2,add=T)
+plot(arczones_buffer100,border=2,add=T)
 
 #Remove evidence points outside of buffered polygon
-alldata_splaea_removeoutsidearctic<-alldata_splaea_removeredundant[arczones_buffer,]
+alldata_splaea_removeoutsidearctic100<-alldata_splaea_removeredundant[arczones_buffer100,]
 dim(alldata_splaea)
-dim(alldata_splaea_removeoutsidearctic)
+dim(alldata_splaea_removeoutsidearctic100)#678
 
 #List removed studies
-removedstudies<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic$evidence_point_ID==F,]
-write.csv(removedstudies@data,'Data/StudiesOutsideCAFFBound.csv')
+removedstudies100<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic100$evidence_point_ID==F,]
+write.csv(removedstudies100@data,'Data/StudiesOutsideCAFFBound100.csv')
+
+#Studies removed with no buffer
+alldata_splaea_removeoutsidearctic0<-alldata_splaea_removeredundant[arczones_laea,]
+removedstudies0<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic0$evidence_point_ID==F,]
+write.csv(removedstudies0@data,'Data/StudiesOutsideCAFFBound0.csv')
+
 
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
-points(alldata_splaea_removeoutsidearctic,pch=16,col='darkgreen',cex=0.5)
+points(alldata_splaea_removeoutsidearctic100,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
 #Save filtered data
+#Final selection of buffer distance
+alldata_splaea_removeoutsidearctic<-alldata_splaea_removeoutsidearctic100
 #Write data
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
 

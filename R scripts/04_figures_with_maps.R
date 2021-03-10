@@ -110,9 +110,7 @@ bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
                              proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 bPolslaea<-spTransform(bPols,polarproj)
 
-#pdf('Figures/SpatialDistribution.pdf')
-#tiff('Figures/SpatialDistribution.tif')
-#
+
 colzones<-brewer.pal(6,'YlGn')
 
 myColorkey <- list(space='right',
@@ -121,16 +119,27 @@ myColorkey <- list(space='right',
                    labels=list(labels=c('Subarctic','E','D','C','B','A'),at=1:6))
 
 #blankras<-vertherb_sr*0
+
+pts=SpatialPoints(rbind(c(-180,35),c(0,35),c(180,90),c(180,90)), CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+gl = gridlines(pts, #easts = seq(-180,180,90),
+               norths = c(66.7), ndiscr = 100)
+glp<-spTransform(gl,polarproj)
+
 values(blankras)<-0
+
+#pdf('Figures/SpatialDistribution.pdf')
+tiff('Figures/SpatialDistribution.tif',units='in',width=6,height=5,res=200)
+
 levelplot(blankras,
           margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
   layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
                     fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
   layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
+  layer(sp.lines(glp,col=grey(0.7),lwd=0.5))+
   layer(sp.points(alldata_splaea,col=1,pch=16,cex=0.4))
 
-#dev.off()
+dev.off()
 #dev.off()
 
 #Summarize by subzone
