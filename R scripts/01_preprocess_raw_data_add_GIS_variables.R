@@ -420,6 +420,9 @@ context_range<-extract(context_stack,1:ncell(context_stack),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
+#Save context stack for further use
+writeRaster(context_stack,'Data/GISContext/',bylayer=T,suffix=names(context_stack),format='GTiff')
+
 #Soil Legend
 soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=levels(as.factor(dsmw_arc$simplesoilnum)),
                     SoilType=c('Cambisols','Chernozems','Podsoluvisols','Rendzinas','Gleysols','Phaeozems',
