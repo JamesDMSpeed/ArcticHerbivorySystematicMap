@@ -259,8 +259,9 @@ treelinedist<-mask(distanceFromPoints(arczonesT,treelinepts),arczonesT)
 plot(treelinedist)
 
 #Set subarctic (S of treeline) to negative 
-northoftreeline<-treelinedist
-northoftreeline[arczonesT==0]<-0-treelinedist[arczonesT==0] 
+northoftreeline<-treelinedist/1000
+northoftreeline[arczonesT==0]<-0-treelinedist[arczonesT==0]/1000
+northoftreeline
 plot(northoftreeline)
 diverge0 <- function(p, ramp) {
   require(RColorBrewer)
@@ -392,7 +393,7 @@ alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$Simple
 #alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
 alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
 alldata_final_sp1$Subzone<-over(alldata_splaea_removeoutsidearctic,allzones[,'ZONE_'])$ZONE_
-alldata_final_sp1$north_of_treeline<-raster::extract(northoftreeline,alldata_final_sp1)
+alldata_final_sp1$north_of_treeline<-raster::extract(projectRaster(northoftreeline,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
 alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
@@ -402,6 +403,7 @@ names(alldata_final_sp3a)
 #Remove empty columns
 na_count <-sapply(alldata_final_sp3@data, function(y) sum(length(which(is.na(y))))/length(y))
 alldata_final_sp3<-alldata_final_sp3a[,na_count<1]
+summary(alldata_final_sp3)
 
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
 write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
