@@ -144,8 +144,22 @@ dev.off()
 
 #Summarising point density
 #Hexbin
-hb<-hexbin(alldata_splaea@coords)
+hb<-hexbin(alldata_splaea@coords,xbins=50)
 plot(hb)
+
+points<-cbind.data.frame("xcoord"=hb@xcm, "ycoord"=hb@ycm, "count"=hb@count)
+sppoints<-SpatialPointsDataFrame(points[,1:2],points,proj4string = crs(alldata_splaea))
+
+levelplot(blankras,
+          margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
+  latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+  latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
+                                  fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
+  latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
+  latticeExtra::layer(sp.lines(glp,col=grey(0.7),lwd=0.5))+
+  latticeExtra::layer(sp.points(sppoints,cex=sppoints$count/5,pch=1,col=1))
+
+
 #Not sure how to combine this with other map types
 
 #Simple number of evidence points per raster cell
