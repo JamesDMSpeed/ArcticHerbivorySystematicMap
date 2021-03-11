@@ -435,7 +435,7 @@ points(removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ],col='bl
 
 retainstudies_elev<-removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ]
 notretained_elev  <-removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ]
-write.csv(notretained_elev,'Data/CheckTheseforLocalityInclusion.csv')
+write.csv2(notretained_elev,'Data/CheckTheseforLocalityInclusion.csv')
 
 retained<-rbind(retainstudies_elev,notretained_elev[notretained_elev$locality=='Rideout Island',])
 
