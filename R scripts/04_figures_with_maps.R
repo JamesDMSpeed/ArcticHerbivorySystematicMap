@@ -142,6 +142,23 @@ levelplot(blankras,
 dev.off()
 #dev.off()
 
+#Summarising point density
+#Hexbin
+hb<-hexbin(alldata_splaea@coords)
+plot(hb)
+#Not sure how to combine this with other map types
+
+#Simple number of evidence points per raster cell
+#Points per cell
+pointdens<-rasterize(alldata_splaea,blankras,field=1,fun='count')
+levelplot(pointdens,scales=list(draw=F),margin=F,par.settings='YlOrRdTheme')+
+ # latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+ # latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
+ #                               fill=NA,col=1,colorkey=myColorkey))+
+  latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
+  latticeExtra::layer(sp.lines(glp,col=grey(0.7),lwd=0.5))#+
+ # latticeExtra::layer(sp.points(alldata_splaea,col=1,pch=16,cex=0.4))
+
 #Summarize by subzone
 
 agzone1<-spTransform(agzones,alldata_splaea@proj4string)
