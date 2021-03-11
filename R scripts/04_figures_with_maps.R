@@ -56,7 +56,7 @@ library(cowplot) # form plotrring kewrnesl and histograms
 library(magrittr) # for pipes and %<>%
 library(ncdf4) ## needed for NDVI rasters?
 library(ks)
-
+library(spatialEco)#For hexbin mappoing
 
 # Take in filtered evidence point data and preprocess --------------------------------
 
@@ -144,7 +144,8 @@ dev.off()
 
 #Summarising point density
 #Hexbin
-hb<-hexbin(alldata_splaea@coords,xbins=50)
+hb<-hexbin(alldata_splaea@coords,xbins=60)
+hb
 plot(hb)
 
 points<-cbind.data.frame("xcoord"=hb@xcm, "ycoord"=hb@ycm, "count"=hb@count)
@@ -157,10 +158,14 @@ levelplot(blankras,
                                   fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
   latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
   latticeExtra::layer(sp.lines(glp,col=grey(0.7),lwd=0.5))+
-  latticeExtra::layer(sp.points(sppoints,cex=sppoints$count/5,pch=1,col=1))
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count==1,],pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>1 &sppoints$count<11,],cex=2,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
+  latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16)) +
+  latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2))
 
-
-#Not sure how to combine this with other map types
 
 #Simple number of evidence points per raster cell
 #Points per cell
@@ -173,17 +178,22 @@ levelplot(pointdens,scales=list(draw=F),margin=F,par.settings='YlOrRdTheme')+
   latticeExtra::layer(sp.lines(glp,col=grey(0.7),lwd=0.5))#+
  # latticeExtra::layer(sp.points(alldata_splaea,col=1,pch=16,cex=0.4))
 
-#Summarize by subzone
-
-agzone1<-spTransform(agzones,alldata_splaea@proj4string)
-names(agzone1)[7]<-'ZONE_'
-allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
-plot(allzones)
 
 
-a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
-tapply(a$ZONE_,a$ZONE_,length)
 
+#Trying  hexagons in SpatialEco package
+a<-sp.kde(alldata_splaea)
+plot(a)
+h<-hexagons(alldata_splaea,res=100000)
+hex.pts <- (over(alldata_splaea,h))
+h$count<-rep(0,times=dim(h)[1])
+pinp<-data.frame(table(hex.pts[,1]))
+h$count[h$HEXID%in%pinp$Var1]<-pinp$Freq
+
+my.palette <- c('white',brewer.pal(n = 5, name = "OrRd"))
+breaks<-c(0,1,2,5,10,20,50)
+spplot(h, "count", col.regions = my.palette, cuts = 5,at=breaks, col = "transparent")+
+  latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))
 
 
 # Figure 5    --------------------------------------
