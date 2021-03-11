@@ -122,6 +122,9 @@ subzones<-readOGR('Data/cp_biozone_la_shp','cavm_all polygon')
 subzones
 #spplot(subzones,zcol=subzones$ZONE)
 
+
+
+
 #Spatial evidence points
 alldatasp1<-alldata
 #Change to spatial points df
@@ -172,18 +175,25 @@ points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidearctic100,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
-#Save filtered data
+# Saved filtered data -----------------------------------------------------
 #Final selection of buffer distance
-alldata_splaea_removeoutsidearctic<-alldata_splaea_removeoutsidearctic100
+alldata_splaea_removeoutsidearctic<-alldata_splaea_removeoutsidearctic0
 #Write data
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
+
+
 
 #Write data to be imported to EviAtlas
 #Need to solve more link break and quote issues
 alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(x)(gsub("\r\n", " ", x))))
 alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
-#Open this in excel - set coordinates to be imported as text. Replace ; with ..  Save as UTF csv.
+#Open this in excel 
+#semi-colon sep
+#set coordinates to be imported as text
+#Replace ; with .. 
+#Save as AllDataEncoded.csv (UTF csv).
+
 
 # Context data --------------------------------------
 
@@ -209,6 +219,13 @@ arcclim<-extract(bioclimdat,arczones)
 arcclim_all<-data.frame(do.call(rbind,arcclim))
 arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
 
+
+#Herbivore diversity layers
+vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
+vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
+vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
+vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
+
 #Elevation
 #DTM from Guille
 #dtmurl<-'https://uitno.box.com/shared/static/gw986nzxvif3cx6hhsqryjk1xzsdie5c.rrd'
@@ -232,6 +249,26 @@ arcelev_laea<-projectRaster(arcelev,vertherb_sr)
 arcelev_laea
 arcelev_laea<-mask(arcelev_laea,vertherb_sr)
 plot(arcelev_laea)
+
+
+
+#Arctic subzones
+#Zones
+subzonesR<-rasterize(subzones,arcelev_laea,field='ZONE')
+#Simplify CAVM zones
+agzones<-aggregate(subzones,by=list(subzones$ZONE),dissolve=T,FUN='mean')
+#Set ice to NA
+agzones$ZONE[agzones$ZONE==0]<-NA
+
+agzone1<-spTransform(agzones,alldata_splaea@proj4string)
+names(agzone1)[7]<-'ZONE_'
+allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
+allzones$ZONE_<-as.factor(allzones$ZONE_)
+levels(allzones$ZONE_)<-c('Subarctic','A','B','C','D','E','Subarctic')
+spplot(allzones)+
+  latticeExtra::layer(sp.points(alldata_splaea_removeoutsidearctic))
+
+
 
 #Distance from coast
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
@@ -287,16 +324,26 @@ treelinelp<-levelplot(northoftreeline,margin=F,scales=list(draw=F))+
 diverge0(treelinelp,'RdBu')
 
 #Permafrost
-permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
-download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
-unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+# permafrosturl<-'https://uitno.box.com/shared/static/mftidvyo8z2tkyqq1aivhbbg6y2339hz.zip'
+# download.file(permafrosturl,'Data/GIS_layers/Permafrost.zip')
+# unzip('Data/GIS_layers/Permafrost.zip',exdir='Data/GIS_layers/Permafrost')
+# 
+# permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
+# permafrost
+# plot(permafrost)
+# 
+# permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb')
+# plot(permrast)
 
-permafrost<-readOGR('Data/GIS_layers/Permafrost','permaice')
-permafrost
-plot(permafrost)
-
-permrast<-rasterize(permafrost,arczonesT,field='EXTENT',method='ngb')
-plot(permrast)
+pm<-raster('Data/GIS_layers/nhipa.byte')
+crs(pm)<-polarproj
+permafrostcode<-raster(pm)
+values(permafrostcode)<-NA
+permafrostcode[pm%in%c(1,5,9,13,17)]<-4 #Continuous
+permafrostcode[pm%in%c(2,6,10,14,18)]<-3 #Discontinuous
+permafrostcode[pm%in%c(3,7,11,15,19)]<-2 #Sporadic
+permafrostcode[pm%in%c(4,8,12,16,20)]<-1 #Isolated
+plot(permafrostcode)
 
 #Soils
 #soilras<-raster('Data/GIS_layers/Soils/sq1.asc')
@@ -309,12 +356,6 @@ levels(as.factor(dsmw$SimpleSoilUnit))
 
 dsmw_arc<-crop(dsmw,alldata_sp)
 
-
-#Herbivore diversity layers
-vertherb_sr<-raster('Data/GIS_layers/ArcticHerbivore_Species.richness.tif')
-vertherb_pd<-raster('Data/GIS_layers/ArcticHerbivore_Phylogenetic.diversity.tif')
-vertherb_fd<-raster('Data/GIS_layers/ArcticHerbivore_Functional.diversity.tif')
-vertherb_div<-stack(vertherb_sr,vertherb_pd,vertherb_fd)
 
 #Human context
 #GPW:Center for International Earth Science Information Network - CIESIN - Columbia University. 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. Palisades, NY: NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. Accessed 21.10.2020. 
@@ -373,18 +414,39 @@ plot(arczones,add=T)
 #Temperature change 
 #GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345. https://data.giss.nasa.gov/gistemp/maps/)
 tempdiff<-raster('Data/GIS_layers/amaps.nc')
-tempdiffpp<-resample(projectRaster(tempdiff,crs=ndvitrend_laea),ndvitrend_laea,method='bilinear')
+tempdiffpp<-(resample(projectRaster(tempdiff,crs=climatec_laea),climatec_laea,method='ngb'))
 
 climatechangestack<-stack(climatec_laea,tempdiffpp)
-climatechangestack<-mask(climatechangestack,arczones)
+#climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
 
 # Extracting context data to evidence points ------------------------------
 
+#Checking the removed studies
+#Remove reundant studies
+removedstudies_notredund<-removedstudies0[removedstudies0$redundancy!='redundant',]
+#Add elevation and subzone
+removedstudies_zone_elev<-cbind(elev=raster::extract(arcelev,removedstudies_notredund),over(removedstudies_notredund,allzones[,'ZONE_']))
+removedstudies_zone_elev
+plot(arczones)
+points(removedstudies_notredund,cex=0.2,col=2,pch=16)
+points(removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ],col=3,pch=16,cex=0.2)
+points(removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ],col='blue',pch=16,cex=0.2)
+
+retainstudies_elev<-removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ]
+notretained_elev  <-removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ]
+write.csv(notretained_elev,'Data/CheckTheseforLocalityInclusion.csv')
+
+retained<-rbind(retainstudies_elev,notretained_elev[notretained_elev$locality=='Rideout Island',])
+
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
-alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
+dim(alldata_final)
+names(alldata_final)[1]<-"author_list"
+alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
+dim(alldata_finalr)
+alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_finalr$coordinates_E,alldata_finalr$coordinates_N),alldata_finalr)
 
 alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
@@ -401,6 +463,7 @@ head(alldata_final_sp3a)
 names(alldata_final_sp3a)
 
 #Remove empty columns
+alldata_final_sp3<-alldata_final_sp3a
 na_count <-sapply(alldata_final_sp3@data, function(y) sum(length(which(is.na(y))))/length(y))
 alldata_final_sp3<-alldata_final_sp3a[,na_count<1]
 summary(alldata_final_sp3)
@@ -549,12 +612,6 @@ dev.off()
 dev.off()
 
 #Summarize by subzone
-
-agzone1<-spTransform(agzones,alldata_splaea@proj4string)
-names(agzone1)[7]<-'ZONE_'
-allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
-plot(allzones)
-
 
 a<-extract(spTransform(allzones,crs(bioclimdat)),alldata_final_sp3)
 tapply(a$ZONE_,a$ZONE_,length)
