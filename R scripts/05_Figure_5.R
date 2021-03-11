@@ -9,13 +9,11 @@
 # and a file "RangeofEcoContexts.csv"
 # including ecological context variable data for entire arctic study area polygon
 
-
-### NOTES FROM EEVA TO JAMES --------------------------------------------------------
-
-#  "AllCodedData_withGIScontext.csv". Seems to still have points outside the arctic study are polygon included?
-# RangeofEcoContexts.csv is missing distance to coast??
-
 # load packages ---------------------------------------------------------
+
+rm(list=ls())
+objects()
+
 
 library(mapdata)#World map
 library(maptools)#Playing with maps
@@ -52,7 +50,7 @@ alldata_splaea<-spTransform(alldata_sp,polarproj)
 data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
 names(data_eco_cont)
 
-source("Functions.R") 
+#source("Functions.R") 
 
 
 names(alldata)
@@ -107,7 +105,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
-  ggtitle("A)")+
+  ggtitle("A) Geographic space")+
   theme_light()
 first_plot
 
@@ -152,7 +150,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature ' (degree~C)))+
-  ggtitle("B)")+
+  ggtitle("B) Climate space")+
   theme_light()
 first_plot
 
@@ -196,7 +194,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Growing season summed NDVI")+ ylab("Growing season length (days)")+
-  ggtitle("C)")+
+  ggtitle("C) Climate space")+
   theme_light()
 first_plot
 
@@ -260,8 +258,8 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   #xlab("Change in growing season length (days per decade)")+ ylab("Change in NDVI (% per decade)")+
-  xlab("Change in temperature (ADD UNIT HERE)")+ ylab("Change in NDVI (% per decade)")+
-  ggtitle("D) ")+
+  xlab("Change in temperature")+ ylab("Change in NDVI (% per decade)")+
+  ggtitle("D) Climate change space")+
   theme_light()
 first_plot
 
@@ -313,7 +311,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Vertebrate herbivore species richness")+ ylab("Vertebrate herbivore functional diversity")+
-  ggtitle("E) ")+
+  ggtitle("E) Food web space")+
   theme_light()
 first_plot
 
@@ -347,17 +345,21 @@ summary(data_eco_cont)
 names(alldata) 
 names(data_eco_cont)
 
-## seems to be necessary to log the variables before plotting, otherwise the histogram plotting becomes complex
-## maybe posisble to modify the histograms as well
+## seems to be necessary to log the variables before plotting, otherwise the histogram plotting messes up
 
 used<-cbind.data.frame("x_variable"=log(alldata$GPW), "y_variable" = log(alldata$Footprint), "group" =rep("used", times=length(alldata$bio12)))
 head(used)
 available<-cbind.data.frame("x_variable"=log(data_eco_cont$HumanPopulationDensity), "y_variable" = log(data_eco_cont$Human.footprint), "group" =rep("available", times=length(data_eco_cont$bio12)))
 head(available)
 
-
 data<-rbind.data.frame(used, available)
+summary(data)
 
+exp(c(-20, -15, -10, -5, 0, 5))
+round(exp(c(-20, -15, -10, -5, 0, 5)), digits=3)
+round(exp(c(-20, -15, -10, -5, 0, 5)), digits=6)
+
+labels_x<-round(exp(c(-20, -15, -10, -5, 0, 5)), digits=8)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
@@ -366,11 +368,12 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Human populatin density")+ ylab("Human footprint index")+
-  ggtitle("F)")+
-  #scale_x_log10()+
-  #scale_y_log10(breaks=c(0.0001,100),labels=c('Low','High'))+
+  ggtitle("F) Human space")+
+  scale_y_continuous(breaks=c(-10, 5),labels=c('Low','High'))+
+  scale_x_continuous(breaks=c(-20, -15, -10, -5, 0, 5),labels=labels_x)+
   theme_light()
 first_plot
+
 
 
 
