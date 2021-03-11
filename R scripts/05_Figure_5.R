@@ -15,23 +15,23 @@ rm(list=ls())
 objects()
 
 
-library(mapdata)#World map
-library(maptools)#Playing with maps
-library(sp)#Spatial data
-library(rgdal)#Spatial data
-library(raster)#Climate data
-library(rasterVis)#Visualisations
+#library(mapdata)#World map
+#library(maptools)#Playing with maps
+#library(sp)#Spatial data
+#library(rgdal)#Spatial data
+#library(raster)#Climate data
+#library(rasterVis)#Visualisations
 library(ggplot2)
 library(gridExtra)
-library(rgeos)
-library(RColorBrewer)#Colours 
+#library(rgeos)
+#library(RColorBrewer)#Colours 
 library(tidyverse) #data wrangling
-library(networkD3) # for sankey diagrams
+#library(networkD3) # for sankey diagrams
 library(harrypotter)# color palettes
 library(cowplot) # form plotrring kewrnesl and histograms
 library(magrittr) # for pipes and %<>%
-library(ncdf4) ## needed for NDVI rasters?
-library(ks)
+#library(ncdf4) ## needed for NDVI rasters?
+#library(ks)
 
 # Take in filtered evidence point data and preprocess --------------------------------
 
@@ -39,10 +39,10 @@ alldata<-read.csv("Data/AllCodedData_withGIScontext.csv")
 dim(alldata)
 
 #make spatial version of evidence points
-alldatasp1<-alldata
-polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
-alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
-alldata_splaea<-spTransform(alldata_sp,polarproj)
+#alldatasp1<-alldata
+#polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
+#alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldatasp1$coordinates_N),data=alldatasp1,proj4string = CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+#alldata_splaea<-spTransform(alldata_sp,polarproj)
 #obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
 #obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
 
@@ -52,20 +52,20 @@ names(data_eco_cont)
 
 #source("Functions.R") 
 
-
-names(alldata)
-alldata$elevation_DEM
-alldata$distance_to_treeline
-alldata$north_of_treeline
-alldata$distance_from_coast
-alldata$Subzone
-summary(alldata)
-
-data_eco_cont$Elevation
-data_eco_cont$NorthofTreeline
-data_eco_cont$DistancetoCoast
-data_eco_cont$Current.NDVI
-data_eco_cont$NDVI.trend
+# 
+# names(alldata)
+# alldata$elevation_DEM
+# alldata$distance_to_treeline
+# alldata$north_of_treeline
+# alldata$distance_from_coast
+# alldata$Subzone
+# summary(alldata)
+# 
+# data_eco_cont$Elevation
+# data_eco_cont$NorthofTreeline
+# data_eco_cont$DistancetoCoast
+# data_eco_cont$Current.NDVI
+# data_eco_cont$NDVI.trend
 
 
 # Figure 5    --------------------------------------
@@ -80,6 +80,7 @@ image(volcano, col = pal)
 pal[7]
 
 palette_points<-c("#006699FF", "#B35900FF")
+palette_points_2<-c("#B35900FF", "#006699FF")
 
 col_points_used<-c("#B35900FF")
 col_points_available<-c("#006699FF")
@@ -90,36 +91,59 @@ col_points_available<-c("#006699FF")
 names(alldata) 
 names(data_eco_cont)
 
-used<-cbind.data.frame("x_variable"=alldata$distance_from_coast, "y_variable" = alldata$elevation_DEM, "group" =rep("used", times=length(alldata$bio12)))
-head(used)
-available<-cbind.data.frame("x_variable"=data_eco_cont$DistancetoCoast, "y_variable" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
-head(available)
+used<-cbind.data.frame("x_variable"=alldata$distance_from_coast, "y_variable" = alldata$elevation_DEM, "group" =rep("Evidence base", times=length(alldata$bio12)))
+available<-cbind.data.frame("x_variable"=data_eco_cont$DistancetoCoast, "y_variable" = data_eco_cont$Elevation, "group" =rep("Study area", times=length(data_eco_cont$bio12)))
+#
+#used<-cbind.data.frame("x_variable"=alldata$north_of_treeline, "y_variable" = alldata$elevation_DEM, "group" =rep("used", times=length(alldata$bio12)))
+#available<-cbind.data.frame("x_variable"=data_eco_cont$NorthofTreeline/1000, "y_variable" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
+#
+#used<-cbind.data.frame("x_variable"=alldata$north_of_treeline, "y_variable" = alldata$distance_from_coast, "group" =rep("used", times=length(alldata$bio12)))
+#available<-cbind.data.frame("x_variable"=data_eco_cont$NorthofTreeline/1000, "y_variable" = data_eco_cont$DistancetoCoast, "group" =rep("available", times=length(data_eco_cont$bio12)))
 
-data<-rbind.data.frame(used, available)
+data<-rbind.data.frame(available, used)
+#data <- data[order(data$group, decreasing=TRUE),]
 
+# first_plot<-data %>%
+#   ggplot(aes(x_variable, y_variable)) +
+#   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend = FALSE) +
+#   #scale_fill_manual(values=c(col_points_available,col_points_used))+
+#   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+#   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+#   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+#   theme(legend.position = c(0.8, 0.8))+
+#  # xlab("Distance to treeline (km)")+ ylab("Elevation (m)")+
+#   #xlab("Distance to treeline (km)")+ ylab("Distance to coast (km)")+
+#   ggtitle("A) Geographic space")+
+#   theme_light()
+# first_plot
+
+legend_title <- "Data source"
 
 first_plot<-data %>%
-  ggplot(aes(x_variable, y_variable)) +
-  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend = FALSE) +
-  #scale_fill_manual(values=c(col_points_available,col_points_used))+
-  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
-  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+  ggplot(aes(x=x_variable, y=y_variable, group=group))+
+  geom_point(aes(color=group), alpha = 0.3, show.legend = TRUE)+
+  scale_color_manual(legend_title, values=c("Evidence base"=col_points_used,"Study area"=col_points_available))+
+  #geom_point(data=subset(data, group == "available"), aes(alpha = 0.3, color=col_points_available))+
+  #geom_point(data=subset(data, group == "used"), aes(alpha = 0.3, color=col_points_used))+
   ggtitle("A) Geographic space")+
-  theme_light()
-first_plot
+  xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+  theme_light()+
+   theme(legend.position = c(0.8, 0.8))
+first_plot  
+
+
 
 
 #create y-axis histogram
 y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
   geom_density(data = data, aes(x = y_variable,fill = group), color = NA, alpha = 0.5) +
-  scale_fill_manual(values=palette_points)+
+  scale_fill_manual(values=palette_points_2)+
   coord_flip()
 
 #create x-axis histogram
 x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
   geom_density(data = data, aes(y = x_variable,fill = group), color = NA, alpha = 0.5) +
-  scale_fill_manual(values=palette_points)+
+  scale_fill_manual(values=palette_points_2)+
   coord_flip()
 
 # create the combined plot
@@ -355,11 +379,8 @@ head(available)
 data<-rbind.data.frame(used, available)
 summary(data)
 
-exp(c(-20, -15, -10, -5, 0, 5))
-round(exp(c(-20, -15, -10, -5, 0, 5)), digits=3)
-round(exp(c(-20, -15, -10, -5, 0, 5)), digits=6)
-
-labels_x<-round(exp(c(-20, -15, -10, -5, 0, 5)), digits=8)
+labels_x<-c(2.06e-09, 0.0000003, 0.00005, 0.007,1, 140)
+breaks_x<-c(-20,  -15, -10, -5, 0,  4.941642)
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
@@ -367,13 +388,12 @@ first_plot<-data %>%
   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Human populatin density")+ ylab("Human footprint index")+
+  xlab(expression("Human population density" ~(km^-2)))+ ylab("Human footprint index")+
   ggtitle("F) Human space")+
   scale_y_continuous(breaks=c(-10, 5),labels=c('Low','High'))+
-  scale_x_continuous(breaks=c(-20, -15, -10, -5, 0, 5),labels=labels_x)+
+  scale_x_continuous(breaks=breaks_x,labels=labels_x)+
   theme_light()
 first_plot
-
 
 
 
@@ -405,7 +425,7 @@ ggdraw(combined_plot_humans)
 #legtit<- "Latitude (°)"
 #png('Figures/5_contexts.png')
 #tiff('Figures/5_contexts.tif')
-tiff('Figures/5_contexts_no_kernel_6_plots.tif',height=10,width=9,units = 'in',res=150)
+tiff('Figures/5_contexts_11032021.tif',height=10,width=9,units = 'in',res=150)
 
 # grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
 #              climchangespace+theme(legend.position="none"),
@@ -881,5 +901,8 @@ par(mfrow=c(1,2))
 hist(data_eco_cont$Permafrost, main="arctic")
 hist(alldata$permafrost, main="evidence base")
 
-#treeline
-summary(alldata$north_of_treeline)
+# subarctic studies done at higher elevations than arctic studies
+suba<-filter(alldata, north_of_treeline<0)
+summary(suba$elevation_DEM)
+arct<-filter(alldata, north_of_treeline>0)
+summary(arct$elevation_DEM)
