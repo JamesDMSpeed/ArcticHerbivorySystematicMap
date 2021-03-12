@@ -110,7 +110,7 @@ levels(alldata$extent_of_spatial_scale)
 
 #World map
 polarproj<-CRS('+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 ')
-boundaries <- map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
+boundaries <- maps::map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
 IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
                              proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
@@ -122,7 +122,12 @@ subzones<-readOGR('Data/cp_biozone_la_shp','cavm_all polygon')
 subzones
 #spplot(subzones,zcol=subzones$ZONE)
 
-
+# CAFF boundary 
+caff<-readOGR("Data/CAFF_boundary", "CAFF_Boundary_Polygon_4326")
+caff_line<-readOGR("Data/CAFF_boundary", "CAFF_Boundary_Line_4326")
+caff_laea<-spTransform(caff,polarproj)
+caff_spline<-spTransform(caff_line,polarproj)
+plot(caff_laea)
 
 
 #Spatial evidence points
@@ -132,7 +137,8 @@ alldata_sp<-SpatialPointsDataFrame(coords=cbind(alldatasp1$coordinates_E,alldata
 alldata_splaea<-spTransform(alldata_sp,polarproj)
 #obs<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_sp$evidence_point_ID==F,]
 #obsRa<-alldata_splaea[alldata_sp$evidence_point_ID%in%alldata_splaea$evidence_point_ID==F,]
-#Get CAFF boundaries to add
+
+#Get CAVM boundaries to add
 arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
 subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
@@ -141,7 +147,7 @@ subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='darkgreen',cex=0.5)
 plot(subarcbound,border='red',lwd=2,lty=2,add=T)#Some coordinates outside the CAFF limit
-
+plot(caff_laea,add=T,border='blue',col=NA)
 
 
 #Remove redundant studies
@@ -151,29 +157,32 @@ dim(alldata_splaea_removeredundant)#686
 
 #Remove evidence points outside of arctic
 #Buffer the Arctic polygons by 100000m to get sites with coordinate inaccuracies offshore
-arczones_buffer100<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
-plot(arczones_laea)
-plot(arczones_buffer100,border=2,add=T)
+# arczones_buffer100<-gBuffer(arczones_laea,100000,byid=T,id=c('a','b','c'))
+# plot(arczones_laea)
+# plot(arczones_buffer100,border=2,add=T)
+# 
+# #Remove evidence points outside of buffered polygon
+# alldata_splaea_removeoutsidearctic100<-alldata_splaea_removeredundant[arczones_buffer100,]
+# dim(alldata_splaea)
+# dim(alldata_splaea_removeoutsidearctic100)#678
+# 
+# #List removed studies
+# removedstudies100<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic100$evidence_point_ID==F,]
+# write.csv(removedstudies100@data,'Data/StudiesOutsideCAFFBound100.csv')
+# 
+# #Studies removed with no buffer
+# alldata_splaea_removeoutsidearctic0<-alldata_splaea_removeredundant[arczones_laea,]
+# removedstudies0<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic0$evidence_point_ID==F,]
+# write.csv(removedstudies0@data,'Data/StudiesOutsideCAFFBound0.csv')
 
-#Remove evidence points outside of buffered polygon
-alldata_splaea_removeoutsidearctic100<-alldata_splaea_removeredundant[arczones_buffer100,]
-dim(alldata_splaea)
-dim(alldata_splaea_removeoutsidearctic100)#678
-
-#List removed studies
-removedstudies100<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic100$evidence_point_ID==F,]
-write.csv(removedstudies100@data,'Data/StudiesOutsideCAFFBound100.csv')
-
-#Studies removed with no buffer
-alldata_splaea_removeoutsidearctic0<-alldata_splaea_removeredundant[arczones_laea,]
-removedstudies0<-alldata_splaea[alldata_splaea$evidence_point_ID%in%alldata_splaea_removeoutsidearctic0$evidence_point_ID==F,]
-write.csv(removedstudies0@data,'Data/StudiesOutsideCAFFBound0.csv')
-
+#Studies outside CAFF
+alldata_splaea_removeoutsidecaff<-alldata_splaea_removeredundant[caff_laea,]
+dim(alldata_splaea_removeoutsidecaff)
 
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
-points(alldata_splaea_removeoutsidearctic100,pch=16,col='darkgreen',cex=0.5)
-plot(subarcbound,border='blue',lwd=2,lty=2,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
+points(alldata_splaea_removeoutsidecaff,pch=16,col='darkgreen',cex=0.5)
+plot(caff_laea,border='blue',lwd=0.5,lty=1,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
 # Saved filtered data -----------------------------------------------------
 #Final selection of buffer distance
