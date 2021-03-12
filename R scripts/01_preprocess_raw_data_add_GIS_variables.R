@@ -277,7 +277,21 @@ levels(allzones$ZONE_)<-c('Subarctic','A','B','C','D','E','Subarctic')
 spplot(allzones)+
   latticeExtra::layer(sp.points(alldata_splaea_removeoutsidearctic))
 
+#Merge CAFF with CAVM?
+gIsValid(caff_laea)#Not valid due to line that goes to North pole
+caffbuff<-gBuffer(caff_laea,width=0)#Apply a 0 buffer to fix that point
+caffbuff
+plot(caffbuff)
+cavm_caff<-gIntersection(caffbuff,allzones,byid = F)
 
+plot(cavm_caff)
+plot(caff_laea,add=T,border='blue')
+plot(subarcbound,add=T,border='red')
+plot(cavm_caff,add=T,col=1)
+points(alldata_splaea_removeoutsidecaff,cex=0.2,col='darkgreen')
+
+pointsoutside_intersection<-alldata_splaea_removeredundant[cavm_caff,]
+dim(pointsoutside_intersection)
 
 #Distance from coast
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
