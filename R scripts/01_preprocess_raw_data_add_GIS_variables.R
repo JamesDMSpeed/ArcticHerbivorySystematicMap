@@ -290,8 +290,11 @@ plot(subarcbound,add=T,border='red')
 plot(cavm_caff,add=T,col=1)
 points(alldata_splaea_removeoutsidecaff,cex=0.2,col='darkgreen')
 
-pointsoutside_intersection<-alldata_splaea_removeredundant[cavm_caff,]
+pointsinside_intersection<-alldata_splaea_removeredundant[cavm_caff,]
+pointsoutside_intersection<-alldata_splaea_removeredundant[alldata_splaea_removeredundant$evidence_point_ID%in%pointsinside_intersection$evidence_point_ID==F,]
 dim(pointsoutside_intersection)
+dim(pointsinside_intersection)
+write_csv2(pointsoutside_intersection@data,'Data/EviPointsOutsideCAFFCAVMintersection.csv')
 
 #Distance from coast
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
