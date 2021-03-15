@@ -184,6 +184,47 @@ points(alldata_splaea,pch=16,col='red',cex=0.5)
 points(alldata_splaea_removeoutsidecaff,pch=16,col='darkgreen',cex=0.5)
 plot(caff_laea,border='blue',lwd=0.5,lty=1,add=T)#Seems better - may have included some non arctic sites in N. Fennoscandia...
 
+#Simplify CAVM zones
+agzones<-aggregate(subzones,by=list(subzones$ZONE),dissolve=T,FUN='mean')
+#Set ice to NA
+agzones$ZONE[agzones$ZONE==0]<-NA
+
+agzone1<-spTransform(agzones,alldata_splaea@proj4string)
+names(agzone1)[7]<-'ZONE_'
+allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
+allzones$ZONE_<-as.factor(allzones$ZONE_)
+levels(allzones$ZONE_)<-c('Subarctic','A','B','C','D','E','Subarctic')
+spplot(allzones)+
+  latticeExtra::layer(sp.points(alldata_splaea_removeoutsidearctic))
+
+#Merge CAFF with CAVM?
+gIsValid(caff_laea)#Not valid due to line that goes to North pole
+caffbuff<-gBuffer(caff_laea,width=0)#Apply a 0 buffer to fix that point
+caffbuff
+plot(caffbuff)
+cavm_caff<-gIntersection(caffbuff,allzones,byid = F)
+
+plot(cavm_caff)
+plot(caff_laea,add=T,border='blue')
+plot(subarcbound,add=T,border='red')
+plot(cavm_caff,add=T,col=1)
+points(alldata_splaea_removeoutsidecaff,cex=0.2,col='darkgreen')
+
+pointsinside_intersection<-alldata_splaea_removeredundant[cavm_caff,]
+pointsoutside_intersection<-alldata_splaea_removeredundant[alldata_splaea_removeredundant$evidence_point_ID%in%pointsinside_intersection$evidence_point_ID==F,]
+dim(pointsoutside_intersection)
+dim(pointsinside_intersection)
+write_csv2(pointsoutside_intersection@data,'Data/EviPointsOutsideCAFFCAVMintersection.csv')
+
+
+#Eeva checked studies outside CAFF&CAVM
+removedstudies_checked<-read.table('Data/EviPointsOutsideCAFFCAVMintersection_checked.txt',header=T,sep=';')
+
+#Combine studies to be retained with those inside CAFFCAVM
+summary(removedstudies_checked$include)
+
+spatialfilterdata<-rbind(pointsinside_intersection@data,removedstudies_checked[,1:85])
+dim(spatialfilterdata)
 # Saved filtered data -----------------------------------------------------
 #Final selection of buffer distance
 alldata_splaea_removeoutsidearctic<-alldata_splaea_removeoutsidearctic0
@@ -264,37 +305,6 @@ plot(arcelev_laea)
 #Arctic subzones
 #Zones
 subzonesR<-rasterize(subzones,arcelev_laea,field='ZONE')
-#Simplify CAVM zones
-agzones<-aggregate(subzones,by=list(subzones$ZONE),dissolve=T,FUN='mean')
-#Set ice to NA
-agzones$ZONE[agzones$ZONE==0]<-NA
-
-agzone1<-spTransform(agzones,alldata_splaea@proj4string)
-names(agzone1)[7]<-'ZONE_'
-allzones<-rbind(agzone1[,7],subarcbound[,2],makeUniqueIDs = TRUE)
-allzones$ZONE_<-as.factor(allzones$ZONE_)
-levels(allzones$ZONE_)<-c('Subarctic','A','B','C','D','E','Subarctic')
-spplot(allzones)+
-  latticeExtra::layer(sp.points(alldata_splaea_removeoutsidearctic))
-
-#Merge CAFF with CAVM?
-gIsValid(caff_laea)#Not valid due to line that goes to North pole
-caffbuff<-gBuffer(caff_laea,width=0)#Apply a 0 buffer to fix that point
-caffbuff
-plot(caffbuff)
-cavm_caff<-gIntersection(caffbuff,allzones,byid = F)
-
-plot(cavm_caff)
-plot(caff_laea,add=T,border='blue')
-plot(subarcbound,add=T,border='red')
-plot(cavm_caff,add=T,col=1)
-points(alldata_splaea_removeoutsidecaff,cex=0.2,col='darkgreen')
-
-pointsinside_intersection<-alldata_splaea_removeredundant[cavm_caff,]
-pointsoutside_intersection<-alldata_splaea_removeredundant[alldata_splaea_removeredundant$evidence_point_ID%in%pointsinside_intersection$evidence_point_ID==F,]
-dim(pointsoutside_intersection)
-dim(pointsinside_intersection)
-write_csv2(pointsoutside_intersection@data,'Data/EviPointsOutsideCAFFCAVMintersection.csv')
 
 #Distance from coast
 distancefromcoast<-raster('Data/GIS_layers/DistancetoCoast.tif')
