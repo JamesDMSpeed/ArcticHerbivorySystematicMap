@@ -9,30 +9,6 @@
 # the script also takes in a separatae data file on plant functional groups
 
 
-### NOTES FROM EEVA TO JAMES --------------------------------------------------------
-
-# I chose file "AllCodedData_withGIScontext.csv" 
-# this file is missing variables that area already in the Shiny App
-# bioclimatic zone
-# distance to treeline
-# permafrost
-
-# this file is also missing three variables that seem not to be in the Shiny App either but were on our original variable list
-# 1) growing_season_productivity (i.e. current NDVI), we had said we take it from the data layers from Taejins paper
-# 2) duration_of_growing_season (i.e. current growing season length),we had said we take it from the data layers from Taejins paper
-# 3) recent_warming; we had listed changes in NDVI, changes in growing season length, and changes in temperature. 
-# we planned to use this: GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345.
-# from https://data.giss.nasa.gov/gistemp/maps/
-
-# is there another file than "AllCodedData_withGIScontext.csv" that has these? 
-# (i.e. file that has rows= evidence points, columns = variables)
-# if not, can you add these and make such a file?
-
-# PS - I also used a file that I downloaded from ShinyApp (now stored in the data folder as "AllCodedData_downloaded_fromEviAtlas_17022021.txt")
-# it has bioclimatic zone, permafrost, and distance to treeline, but some other edits too (combining not relevant and not redundant classes)
-# that make it less practical for this script
-
-
 # load packages ---------------------------------------------------------
 
 library(tidyverse) #data wrangling
@@ -480,16 +456,95 @@ boxplot(canada$coordinates_E)
 
 # Mapping the quality of included studies ----------------------------------
 
-table(alldata$experimental_design)
+# study type
+names(alldata)
+table(alldata$study_design)
+#211+113
 
+## experimental design types
 tito<-filter(alldata, study_design=="experimental")
 table(tito$experimental_design)
 
+# missing information
 table(alldata$year_start)
 table(alldata$temporal_resolution)
 table(alldata$extent_of_spatial_scale) # not reported and not relevant pooled in data from shinyapp. see raw data
 table(alldata$spatial_resolution_recorded)
 table(alldata$spatial_resolution_reported)
+
+# temporal trend in  misisng information of start year
+toto<-cbind.data.frame("year"=levels(as.factor(alldata$year)), "evi_points"=as.vector(table(alldata$year)))
+tito<-filter(alldata, year_start=="not reported") 
+tito<-as.data.frame(table(tito$year))
+names(tito)<-c("year", "evi_points_missing")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_missing_prop<-prop_table$evi_points_missing/prop_table$evi_points
+plot(prop_table$year, prop_table$evi_points_missing_prop)
+summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+
+
+# temporal trend in  misisng information of temporal resolution
+toto<-cbind.data.frame("year"=levels(as.factor(alldata$year)), "evi_points"=as.vector(table(alldata$year)))
+tito<-filter(alldata, temporal_resolution=="not reported") 
+tito<-as.data.frame(table(tito$year))
+names(tito)<-c("year", "evi_points_missing")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_missing_prop<-prop_table$evi_points_missing/prop_table$evi_points
+plot(prop_table$year, prop_table$evi_points_missing_prop)
+summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+
+
+# temporal trend in  misisng information spatial_resolution_recorded
+toto<-cbind.data.frame("year"=levels(as.factor(alldata$year)), "evi_points"=as.vector(table(alldata$year)))
+tito<-filter(alldata, spatial_resolution_recorded=="not reported") 
+tito<-as.data.frame(table(tito$year))
+names(tito)<-c("year", "evi_points_missing")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_missing_prop<-prop_table$evi_points_missing/prop_table$evi_points
+plot(prop_table$year, prop_table$evi_points_missing_prop)
+summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+
+
+# temporal trend in  misisng information spatial_resolution_reported
+toto<-cbind.data.frame("year"=levels(as.factor(alldata$year)), "evi_points"=as.vector(table(alldata$year)))
+tito<-filter(alldata, spatial_resolution_reported=="not reported") 
+tito<-as.data.frame(table(tito$year))
+names(tito)<-c("year", "evi_points_missing")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_missing_prop<-prop_table$evi_points_missing/prop_table$evi_points
+plot(prop_table$year, prop_table$evi_points_missing_prop)
+summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+
+
+# temporal trend in  misisng information extent_of_spatial_scale
+toto<-cbind.data.frame("year"=levels(as.factor(alldata$year)), "evi_points"=as.vector(table(alldata$year)))
+tito<-filter(alldata, extent_of_spatial_scale=="not reported") 
+tito<-as.data.frame(table(tito$year))
+names(tito)<-c("year", "evi_points_missing")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_missing_prop<-prop_table$evi_points_missing/prop_table$evi_points
+plot(prop_table$year, prop_table$evi_points_missing_prop)
+summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
+
+# Mapping the quality of included studies, study types across ecological contexts ----------------------------------
+
+## short-term studies over MAT
+toto<-cbind.data.frame("MAT"=levels(as.factor(alldata$bio1)), "evi_points"=as.vector(table(alldata$bio1)))
+tito<-filter(alldata, extent_of_spatial_scale=="1x1 km or less"|extent_of_spatial_scale=="from 1x1 km to 10x10 km") 
+tito<-as.data.frame(table(tito$bio1))
+names(tito)<-c("MAT", "evi_points_local")
+prop_table<-left_join(toto, tito)
+prop_table[is.na(prop_table)] <- 0
+prop_table$evi_points_local_prop<-prop_table$evi_points_local/prop_table$evi_points
+plot(prop_table$MAT, prop_table$evi_points_local_prop)
+
+
 
 
 # extent of spatial scale not relevant?
@@ -507,6 +562,10 @@ table(tito$experimental_design)
 
 tito<-filter(alldata, biological_organization_level_reported=="individual") 
 table(tito$spatial_resolution_reported, tito$extent_of_spatial_scale)
+
+
+
+
 
 
 ## spatial scale of sampling 
