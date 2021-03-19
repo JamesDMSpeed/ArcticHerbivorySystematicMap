@@ -12,7 +12,7 @@
 # load packages ---------------------------------------------------------
 
 library(tidyverse) #data wrangling
-
+library(ggplot2) # exploring "study quality" across ecol contexts
 
 # Load data  -----------------------------------------------
 # Take in data that has redundant evidence points removed, spatial filtering done, and spatial variables added
@@ -533,105 +533,127 @@ summary(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 
 # Mapping the quality of included studies, study types across ecological contexts ----------------------------------
-
-## short-term studies over MAT
-toto<-cbind.data.frame("MAT"=levels(as.factor(alldata$bio1)), "evi_points"=as.vector(table(alldata$bio1)))
-tito<-filter(alldata, extent_of_spatial_scale=="1x1 km or less"|extent_of_spatial_scale=="from 1x1 km to 10x10 km") 
-tito<-as.data.frame(table(tito$bio1))
-names(tito)<-c("MAT", "evi_points_local")
-prop_table<-left_join(toto, tito)
-prop_table[is.na(prop_table)] <- 0
-prop_table$evi_points_local_prop<-prop_table$evi_points_local/prop_table$evi_points
-plot(prop_table$MAT, prop_table$evi_points_local_prop)
-
-
-
-
-# extent of spatial scale not relevant?
-tito<-filter(alldata, extent_of_spatial_scale=="not relevant") 
-tito<-filter(tito, study_method!="greenhouse") 
-tito<-filter(tito, study_method!="modelling") 
-
-tito$evidence_point_ID
-View(tito)
-
-## study type 
-tito<-filter(alldata, study_design=="experimental")
-table(tito$experimental_design)
-
-
-tito<-filter(alldata, biological_organization_level_reported=="individual") 
-table(tito$spatial_resolution_reported, tito$extent_of_spatial_scale)
-
-
-
-
-
-
-## spatial scale of sampling 
-table(alldata$spatial_resolution_reported)
-table(alldata$extent_of_spatial_scale) # data from shinyapp has no category from 10 to 100km. 
-
-
-## areas where long-term studies needed?
+## extent of spatial scale; are there ecol-contexts that 
 toto<-alldata
-# the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
-toto$extent_of_temporal_scale<-plyr::mapvalues(toto$extent_of_temporal_scale, 0, 1)
-toto$grouped_temp_ext<-toto$extent_of_temporal_scale
-toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(2:5), rep("2-5", times=length(c(2:5))))
-toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(6:10), rep("6-10", times=length(c(6:10))))
-toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(11:20), rep("11-20", times=length(c(11:20))))
-toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
-toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
+names(toto)
 
-toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not relevant"))
-toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not reported"))
-toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "I15-I14+1"))
-toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "AH15-AH14+1"))
+toto$grouped_spat_ext<-toto$extent_of_spatial_scale
+levels(as.factor(toto$grouped_spat_ext))
 
-toto<-toto %>%
-  mutate(grouped_temp_ext = fct_relevel(grouped_temp_ext, 
-                                        "1", "2-5", "6-10", 
-                                        "11-20", "21-45", "longer than 45"))
+library(plyr)
+toto$grouped_spat_ext<- revalue(toto$extent_of_spatial_scale, c("1x1 km or less"="small", "from 1x1 km to 10x10 km"="local", "from 10x10 km to 100x100 km"="large",
+             "from 100x100 km to 1000x1000 km" = "large", "larger than 1000x1000 km" ="large"))
 
-                              
-ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
-  geom_bar(position="fill")
-
-ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
-  geom_bar()
-
-ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
-  geom_bar(position="fill")
-
-ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
-  geom_bar()
-
-## nb the datafile is missing one category
-ggplot(toto, aes(x=Subzone, fill=extent_of_spatial_scale)) + 
-  geom_bar()
-
-
-
-# Rangifer   
-levels(alldata$herbivore_identity)
-sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
-dim(reindeer)[1]/dim(alldata)[1] #52%
-
-reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
-table(reindeer$country)
-table(reindeer$country_comments)
-# Fennoscandia, Svalbard, Yamal 
-65+85+45+37+22+2+2+5+1
-264/349
-
-#nearctic
-(39+35)/dim(reindeer)[1] #20%
-#scandinavia
-(65+101+24+11)/dim(reindeer)[1]
+ggplot(data=toto, aes(x=grouped_spat_ext, y=bio1/10))+
+  geom_boxplot()
+ggplot(data=toto, aes(x=grouped_spat_ext, y=bio7))+
+  geom_boxplot()
+ggplot(data=toto, aes(x=grouped_spat_ext, y=bio12))+
+  geom_boxplot()
 
 
 
 
 
-
+# 
+# ## short-term studies over MAT
+# toto<-cbind.data.frame("MAT"=levels(as.factor(alldata$bio1)), "evi_points"=as.vector(table(alldata$bio1)))
+# tito<-filter(alldata, extent_of_spatial_scale=="1x1 km or less"|extent_of_spatial_scale=="from 1x1 km to 10x10 km") 
+# tito<-as.data.frame(table(tito$bio1))
+# names(tito)<-c("MAT", "evi_points_local")
+# prop_table<-left_join(toto, tito)
+# prop_table[is.na(prop_table)] <- 0
+# prop_table$evi_points_local_prop<-prop_table$evi_points_local/prop_table$evi_points
+# plot(prop_table$MAT, prop_table$evi_points_local_prop)
+# 
+# 
+# 
+# 
+# # extent of spatial scale not relevant?
+# tito<-filter(alldata, extent_of_spatial_scale=="not relevant") 
+# tito<-filter(tito, study_method!="greenhouse") 
+# tito<-filter(tito, study_method!="modelling") 
+# 
+# tito$evidence_point_ID
+# View(tito)
+# 
+# ## study type 
+# tito<-filter(alldata, study_design=="experimental")
+# table(tito$experimental_design)
+# 
+# 
+# tito<-filter(alldata, biological_organization_level_reported=="individual") 
+# table(tito$spatial_resolution_reported, tito$extent_of_spatial_scale)
+# 
+# 
+# 
+# 
+# 
+# 
+# ## spatial scale of sampling 
+# table(alldata$spatial_resolution_reported)
+# table(alldata$extent_of_spatial_scale) # data from shinyapp has no category from 10 to 100km. 
+# 
+# 
+# ## areas where long-term studies needed?
+# toto<-alldata
+# # the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
+# toto$extent_of_temporal_scale<-plyr::mapvalues(toto$extent_of_temporal_scale, 0, 1)
+# toto$grouped_temp_ext<-toto$extent_of_temporal_scale
+# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(2:5), rep("2-5", times=length(c(2:5))))
+# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(6:10), rep("6-10", times=length(c(6:10))))
+# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(11:20), rep("11-20", times=length(c(11:20))))
+# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
+# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
+# 
+# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not relevant"))
+# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not reported"))
+# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "I15-I14+1"))
+# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "AH15-AH14+1"))
+# 
+# toto<-toto %>%
+#   mutate(grouped_temp_ext = fct_relevel(grouped_temp_ext, 
+#                                         "1", "2-5", "6-10", 
+#                                         "11-20", "21-45", "longer than 45"))
+# 
+#                               
+# ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
+#   geom_bar(position="fill")
+# 
+# ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
+#   geom_bar()
+# 
+# ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
+#   geom_bar(position="fill")
+# 
+# ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
+#   geom_bar()
+# 
+# ## nb the datafile is missing one category
+# ggplot(toto, aes(x=Subzone, fill=extent_of_spatial_scale)) + 
+#   geom_bar()
+# 
+# 
+# 
+# # Rangifer   
+# levels(alldata$herbivore_identity)
+# sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
+# dim(reindeer)[1]/dim(alldata)[1] #52%
+# 
+# reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
+# table(reindeer$country)
+# table(reindeer$country_comments)
+# # Fennoscandia, Svalbard, Yamal 
+# 65+85+45+37+22+2+2+5+1
+# 264/349
+# 
+# #nearctic
+# (39+35)/dim(reindeer)[1] #20%
+# #scandinavia
+# (65+101+24+11)/dim(reindeer)[1]
+# 
+# 
+# 
+# 
+# 
+# 
