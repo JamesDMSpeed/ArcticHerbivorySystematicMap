@@ -223,11 +223,12 @@ removedstudies_checked<-read.table('Data/EviPointsOutsideCAFFCAVMintersection_ch
 #Combine studies to be retained with those inside CAFFCAVM
 summary(removedstudies_checked$include)
 
-spatialfilterdata<-rbind(pointsinside_intersection@data,removedstudies_checked[,1:85])
+spatialfilterdata<-rbind(pointsinside_intersection@data,removedstudies_checked[removedstudies_checked$include=='yes',1:85])
 dim(spatialfilterdata)
+length(levels(droplevels(spatialfilterdata$title)))
+
 # Saved filtered data -----------------------------------------------------
-#Final selection of buffer distance
-alldata_splaea_removeoutsidearctic<-alldata_splaea_removeoutsidearctic0
+alldata_splaea_removeoutsidearctic<-spatialfilterdata
 #Write data
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
 
