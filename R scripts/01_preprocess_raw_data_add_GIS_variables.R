@@ -233,10 +233,9 @@ alldata_splaea_removeoutsidearctic<-spatialfilterdata
 write.table(alldata_splaea_removeoutsidearctic,'Data/AllCodedData.txt',row.names = F,sep=';',quote=F,dec='.')
 
 
-
 #Write data to be imported to EviAtlas
 #Need to solve more link break and quote issues
-alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic@data,function(x)(gsub("\r\n", " ", x))))
+alldataW<-as.data.frame(sapply(alldata_splaea_removeoutsidearctic,function(x)(gsub("\r\n", " ", x))))
 alldataW1<-as.data.frame(sapply(alldataW,function(x)(gsub("\"","",x))))
 write.table(alldataW1,'Data/AllCodedDataW.txt',row.names = F,sep=';',dec='.')
 #Open this in excel 
