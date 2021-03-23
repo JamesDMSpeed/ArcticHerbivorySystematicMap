@@ -18,6 +18,7 @@ library(RColorBrewer)#Colours
 library(tidyverse) #data wrangling
 library(networkD3) # for sankey diagrams
 library(harrypotter)# color palettes
+library(htmlwidgets) # to add title in sankeydiagram
 
 # Load data  -----------------------------------------------
 # Take in data that has redundant evidence points removed, and a spatial filtering re-done
@@ -294,23 +295,46 @@ links$IDsource <- match(links$source, nodes$name)-1
 links$IDtarget <- match(links$target, nodes$name)-1
 
 
-       
-# prepare color scale: I give one specific color for each node.
-#my_color <- 'd3.scaleOrdinal() .domain(["group_A", "group_B","group_C", "group_D", "group_E", "group_F", "group_G", "group_H"]) .range(["blue", "blue" , "blue", "red", "red", "yellow", "purple", "purple"])'
+## color alternatives to play with
+pal <- hp(n = 8, house = "Sprout")
+image(volcano, col = pal)
+pal
 
+pal <- hp(n = 11, house = "Ravenclaw")
+image(volcano, col = pal)
+pal
 
+pal <- hp(n = 10, house = "Mischief")
+image(volcano, col = pal)
+pal
 
-# Make the Network. I call my colour scale with the colourScale argument
+    
+
+# example from Isabell E.
+#color_scale <- 
+#  "d3.scaleOrdinal()
+#.range(['#a4ff73', '#bee8ff', '#38a800', '#ffbebe', '#00734d', '#ff5500', '#e1e1e1', '#701e07', '#d7b09e', '#828282', '#005ce6', '#ffffff']);
+#"
+
+color_scale <- 
+  "d3.scaleOrdinal()
+.range(['#e7e3af', '#daca92','#ceb176','#b18e5b','#8e6841','#774c2e','#6d3b22','#672c19','#6e2219','#761919','#808080',
+'#76653b', '#bcb259', '#eaeb6d','#cee363','#b3d759','#9bc750','#89b14b','#7b9948']);
+"
+
+# Make the Network. 
 p <- sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
                    Value = "value", NodeID = "name", 
                    fontSize = 15, fontFamily = "Arial",
                    nodeWidth=40, nodePadding = 10,
-                   iterations = 0)
-#fontFamily = "serif")
-#colourScale=my_color)
-#?sankeyNetwork
-# dev.new() # does not plot in th enew window
+                   iterations = 0,
+                  colourScale=color_scale,
+                  width=700, height=690)
+
+p <- htmlwidgets::prependContent(p, htmltools::tags$h1("A) Herbivore groups and plant groups", style="font-family: Arial; font-size:20px"))
 p
+
+
 
 # Figure 3B --------------------------------------------------------
 # use same grouping for herbivores as done above 
