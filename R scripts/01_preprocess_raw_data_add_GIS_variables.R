@@ -257,17 +257,17 @@ alldata_sp<-cbind(alldata_sp,bioclim_ex)
 
 # MAT and MAP are bio1 and bio12 respectively
 
-climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
-  ggtitle("Climatic space") + scale_y_reverse()+
-  xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
-pdf('Figures/ClimateSpace.pdf')
-climatespace
-dev.off()
-
-#Adding points for total Arctic climate space
-arcclim<-extract(bioclimdat,arczones)
-arcclim_all<-data.frame(do.call(rbind,arcclim))
-arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
+# climatespace<-ggplot(data=alldata_sp@data,aes(x=bio12, y=bio1/10,colour=coordinates_N))+geom_point()+
+#   ggtitle("Climatic space") + scale_y_reverse()+
+#   xlab("MAP (mm)")+ ylab(expression('MAT ' (degree~C)))
+# pdf('Figures/ClimateSpace.pdf')
+# climatespace
+# dev.off()
+# 
+# #Adding points for total Arctic climate space
+# arcclim<-extract(bioclimdat,arczones)
+# arcclim_all<-data.frame(do.call(rbind,arcclim))
+# arcclim_all$zone<-c(rep(1,times=nrow(arcclim[[1]])),rep(2,times=nrow(arcclim[[2]])),rep(3,times=nrow(arcclim[[3]])))
 
 
 #Herbivore diversity layers
@@ -455,34 +455,35 @@ tempdiffpp<-(resample(projectRaster(tempdiff,crs=climatec_laea),climatec_laea,me
 climatechangestack<-stack(climatec_laea,tempdiffpp)
 #climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
-
+plot(climatechangestack)
 # Extracting context data to evidence points ------------------------------
 
 #Checking the removed studies
 #Remove reundant studies
-removedstudies_notredund<-removedstudies0[removedstudies0$redundancy!='redundant',]
+#removedstudies_notredund<-removedstudies0[removedstudies0$redundancy!='redundant',]
 #Add elevation and subzone
-removedstudies_zone_elev<-cbind(elev=raster::extract(arcelev,removedstudies_notredund),over(removedstudies_notredund,allzones[,'ZONE_']))
-removedstudies_zone_elev
-plot(arczones)
-points(removedstudies_notredund,cex=0.2,col=2,pch=16)
-points(removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ],col=3,pch=16,cex=0.2)
-points(removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ],col='blue',pch=16,cex=0.2)
+#removedstudies_zone_elev<-cbind(elev=raster::extract(arcelev,removedstudies_notredund),over(removedstudies_notredund,allzones[,'ZONE_']))
+#removedstudies_zone_elev
+#plot(arczones)
+#points(removedstudies_notredund,cex=0.2,col=2,pch=16)
+#points(removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ],col=3,pch=16,cex=0.2)
+#points(removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ],col='blue',pch=16,cex=0.2)
 
-retainstudies_elev<-removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ]
-notretained_elev  <-removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ]
-write.csv2(notretained_elev,'Data/CheckTheseforLocalityInclusion.csv')
+#retainstudies_elev<-removedstudies_notredund[is.na(removedstudies_zone_elev$elev), ]
+#notretained_elev  <-removedstudies_notredund[!is.na(removedstudies_zone_elev$elev), ]
+#write.csv2(notretained_elev,'Data/CheckTheseforLocalityInclusion.csv')
 
-retained<-rbind(retainstudies_elev,notretained_elev[notretained_elev$locality=='Rideout Island',])
+#retained<-rbind(retainstudies_elev,notretained_elev[notretained_elev$locality=='Rideout Island',])
 
 
 #Extract variables
 alldata_final<-read.csv('Data/AllCodedDataEncoded.csv',header=T,sep=';')
 dim(alldata_final)
 names(alldata_final)[1]<-"author_list"
-alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
-dim(alldata_finalr)
-alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_finalr$coordinates_E,alldata_finalr$coordinates_N),alldata_finalr)
+#alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
+#dim(alldata_finalr)
+alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
+alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic,proj4string = polarproj)
 
 alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
