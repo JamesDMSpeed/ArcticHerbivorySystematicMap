@@ -512,7 +512,7 @@ write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 # Range of contexts across study region -----------------------------------
 #Context GIS layers
 bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
-bioclimdat_laea<-mask(crop(bioclimdat_laea,vertherb_sr),vertherb_sr)
+bioclimdat_laea<-mask(crop(bioclimdat_laea,cavm_caff),cavm_caff)
 
 crs(dsmw_arc)<-crs(bioclimdat)
 dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
@@ -528,12 +528,15 @@ context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,
 
 names(context_stack)[c(23,29:33)]<-c('Elevation','HumanPopulationDensity','Human footprint','Soil Type','Permafrost',"NorthofTreeline")
 
-context_range<-extract(context_stack,1:ncell(context_stack),df=T)
+#Mask to CAFF-CAVM
+context_stack_m<-mask(context_stack,cavm_caff)
+
+context_range<-extract(context_stack_m,1:ncell(context_stack_m),df=T)
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
 #Save context stack for further use
-writeRaster(context_stack,'Data/GISContext/',bylayer=T,suffix=names(context_stack),format='GTiff')
+writeRaster(context_stack_m,'Data/GISContext/',bylayer=T,suffix=names(context_stack),format='GTiff')
 
 #Soil Legend
 soilleg<-data.frame(Letter=levels(as.factor(dsmw_arc$SimpleSoilUnit)),Number=levels(as.factor(dsmw_arc$simplesoilnum)),
