@@ -484,15 +484,14 @@ names(alldata_final)[1]<-"author_list"
 #alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
 #dim(alldata_finalr)
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
-alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic,proj4string = polarproj)
+alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic,proj4string = bioclimdat@crs)
 
 alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
 alldata_final_sp1$distance_from_coast<-raster::extract(projectRaster(distancefromcoast,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp1$soil_type.<-raster::extract(dsmw_arc,alldata_final_sp1)$SimpleSoilUnit
-#alldata_final_sp1$permafrost<-raster::extract(projectRaster(perm2,crs=crs(bioclimdat),method='ngb'),alldata_final_sp1)
-alldata_final_sp1$permafrost<-raster::extract(permafrostcode,alldata_splaea_removeoutsidearctic)
-alldata_final_sp1$Subzone<-over(alldata_splaea_removeoutsidearctic,allzones[,'ZONE_'])$ZONE_
+alldata_final_sp1$permafrost<-raster::extract(permafrostcode,spTransform(alldata_splaea_removeoutsidearctic,CRS=polarproj))
+alldata_final_sp1$Subzone<-over(spTransform(alldata_splaea_removeoutsidearctic,CRS=polarproj),allzones[,'ZONE_'])$ZONE_
 alldata_final_sp1$north_of_treeline<-raster::extract(projectRaster(northoftreeline,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
