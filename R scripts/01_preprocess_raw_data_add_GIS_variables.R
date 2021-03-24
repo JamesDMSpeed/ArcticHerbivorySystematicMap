@@ -511,14 +511,16 @@ write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 
 # Range of contexts across study region -----------------------------------
 #Context GIS layers
-bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
+bioclimdat_laea<-projectRaster(bioclimdat,permafrostcode)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,cavm_caff),cavm_caff)
 
 crs(dsmw_arc)<-crs(bioclimdat)
 dsmw_arc$simplesoilnum<-as.numeric(as.factor(dsmw_arc$SimpleSoilUnit))
 soiltyperast<-rasterize(dsmw_arc,bioclimdat,field='simplesoilnum',fun=function(x, ...) modal(x,na.rm=T))
 plot(soiltyperast)
-context_stack<-stack(vertherb_div,bioclimdat_laea,arcelev_laea,
+context_stack<-stack(projectRaster(vertherb_div,bioclimdat_laea),
+                     bioclimdat_laea,
+                     projectRaster(arcelev_laea,bioclimdat_laea),
                      projectRaster(climatechangestack,bioclimdat_laea),
                      projectRaster(humanstack,bioclimdat_laea),
                      projectRaster(soiltyperast,bioclimdat_laea,method='ngb'),
@@ -532,6 +534,8 @@ names(context_stack)[c(23,29:33)]<-c('Elevation','HumanPopulationDensity','Human
 context_stack_m<-mask(context_stack,cavm_caff)
 
 context_range<-extract(context_stack_m,1:ncell(context_stack_m),df=T)
+summary(context_range)
+
 write.csv(context_range,'Data/RangeofEcoContexts.csv')
 write.csv(context_range,'shiny/RangeofEcoContexts.csv')
 
