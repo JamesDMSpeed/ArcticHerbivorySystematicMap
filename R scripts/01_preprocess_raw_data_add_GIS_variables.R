@@ -44,6 +44,7 @@ library(harrypotter)# color palettes
 
 #Download coded data from box
 link2coded_data <- paste(tempfile(),".xlsx",sep = "")
+link2coded_data <- paste("Data/ImportCodedDataBox.xlsx",sep = "")
 download.file("https://uitno.box.com/shared/static/4s5aet6g7qnpk4mpsa64a1v75t7ksbla.xlsx", link2coded_data, mode = "wb")
 
 #Read in sheets with coded data
@@ -84,9 +85,9 @@ View(alldata)#Looks good!
 
 
 #Number of studies
-length(levels(as.factor(alldata$title)))  #328
+length(levels(as.factor(alldata$title)))  #329
 #Number of evidence points
-length(levels(as.factor(alldata$evidence_point_ID)))  #705
+length(levels(as.factor(alldata$evidence_point_ID)))  #706
 
 #Fix issue with different levels for extent of spatial scale
 levels(as.factor(alldata$extent_of_spatial_scale))
@@ -151,9 +152,9 @@ plot(caff_laea,add=T,border='blue',col=NA)
 
 
 #Remove redundant studies
-dim(alldata) #705
+dim(alldata) #706
 alldata_splaea_removeredundant<-alldata_splaea[alldata_splaea$redundancy!='redundant',]
-dim(alldata_splaea_removeredundant)#686
+dim(alldata_splaea_removeredundant)#687
 
 #Remove evidence points outside of arctic
 #Buffer the Arctic polygons by 100000m to get sites with coordinate inaccuracies offshore
@@ -177,7 +178,7 @@ dim(alldata_splaea_removeredundant)#686
 
 #Studies outside CAFF
 alldata_splaea_removeoutsidecaff<-alldata_splaea_removeredundant[caff_laea,]
-dim(alldata_splaea_removeoutsidecaff)
+dim(alldata_splaea_removeoutsidecaff)#681
 
 plot(bPolslaea,ylim=c(55,90),main='Spatial distribution of evidence points')
 points(alldata_splaea,pch=16,col='red',cex=0.5)
@@ -224,8 +225,8 @@ removedstudies_checked<-read.table('Data/EviPointsOutsideCAFFCAVMintersection_ch
 summary(removedstudies_checked$include)
 
 spatialfilterdata<-rbind(pointsinside_intersection@data,removedstudies_checked[removedstudies_checked$include=='yes',1:85])
-dim(spatialfilterdata)
-length(levels(droplevels(spatialfilterdata$title)))
+dim(spatialfilterdata)#662
+length(levels(droplevels(spatialfilterdata$title)))#310
 
 # Saved filtered data -----------------------------------------------------
 alldata_splaea_removeoutsidearctic<-spatialfilterdata
