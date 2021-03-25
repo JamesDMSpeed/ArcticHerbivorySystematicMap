@@ -57,6 +57,7 @@ library(magrittr) # for pipes and %<>%
 library(ncdf4) ## needed for NDVI rasters?
 library(ks)
 library(spatialEco)#For hexbin mappoing
+library(hexbin)
 
 # Take in filtered evidence point data and preprocess --------------------------------
 
@@ -151,6 +152,7 @@ plot(hb)
 points<-cbind.data.frame("xcoord"=hb@xcm, "ycoord"=hb@ycm, "count"=hb@count)
 sppoints<-SpatialPointsDataFrame(points[,1:2],points,proj4string = crs(alldata_splaea))
 
+tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=6,height=5,res=200)
 levelplot(blankras,
           margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
   latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
@@ -165,7 +167,7 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16)) +
   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2))
-
+dev.off()
 
 #Simple number of evidence points per raster cell
 #Points per cell

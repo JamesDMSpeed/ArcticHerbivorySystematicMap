@@ -450,6 +450,7 @@ plot(arczones,add=T)
 
 #Temperature change 
 #GISTEMP Team, 2016: GISS Surface Temperature Analysis (GISTEMP). NASA Goddard Institute for Space Studies.     Hansen, J., R. Ruedy, M. Sato, and K. Lo, 2010: Global surface temperature change, Rev. Geophys., 48, RG4004, doi:10.1029/2010RG000345. https://data.giss.nasa.gov/gistemp/maps/)
+#Sources and parameters: GHCNv4_ERSSTv5_1200km_Anom_112_2000_2020_1951_1980_100_180_90_0_2_
 tempdiff<-raster('Data/GIS_layers/amaps.nc')
 tempdiffpp<-(resample(projectRaster(tempdiff,crs=climatec_laea),climatec_laea,method='ngb'))
 
