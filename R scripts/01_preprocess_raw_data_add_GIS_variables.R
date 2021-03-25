@@ -511,7 +511,7 @@ write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 
 # Range of contexts across study region -----------------------------------
 #Context GIS layers
-bioclimdat_laea<-projectRaster(bioclimdat,permafrostcode)
+bioclimdat_laea<-projectRaster(bioclimdat,vertherb_sr)
 bioclimdat_laea<-mask(crop(bioclimdat_laea,cavm_caff),cavm_caff)
 
 crs(dsmw_arc)<-crs(bioclimdat)
