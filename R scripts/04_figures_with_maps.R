@@ -166,6 +166,7 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16)) +
+  latticeExtra::layer(sp.polygons(subarcbound,col=grey(0.5)))+
   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2))
 dev.off()
 

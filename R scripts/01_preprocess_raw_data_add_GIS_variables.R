@@ -509,6 +509,7 @@ summary(alldata_final_sp3)
 write.csv(alldata_final_sp3,'Data/AllCodedData_withGIScontext.csv')
 write.csv(alldata_final_sp3,'shiny/AllCodedData_withGIScontext.csv')
 
+sapply(alldata_final_sp3@data,function(x)sum(is.na(x)))
 
 # Range of contexts across study region -----------------------------------
 #Context GIS layers
