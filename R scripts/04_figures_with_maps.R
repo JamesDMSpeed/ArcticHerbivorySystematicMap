@@ -104,6 +104,18 @@ arczones<-readOGR('Data/ABA-Boundaries','Arctic_Zones')
 arczones_laea<-spTransform(arczones,polarproj)
 subarcbound<-arczones_laea[arczones_laea@data$Zone=='Sub arctic',]
 
+#CAFF+CAVM
+# CAFF boundary 
+caff<-readOGR("Data/CAFF_boundary", "CAFF_Boundary_Polygon_4326")
+caff_line<-readOGR("Data/CAFF_boundary", "CAFF_Boundary_Line_4326")
+caff_laea<-spTransform(caff,polarproj)
+
+caffbuff<-gBuffer(caff_laea,width=0)#Apply a 0 buffer to fix that point
+caffbuff
+plot(caffbuff)
+cavm_caff<-gIntersection(caffbuff,allzones,byid = F)
+
+
 #Country boundaries
 boundaries <- maps::map('worldHires', fill=TRUE,plot=FALSE,ylim=c(40,90))
 IDs <- sapply(strsplit(boundaries$names, ":"), function(x) x[1])
@@ -166,7 +178,7 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16)) +
-  latticeExtra::layer(sp.polygons(subarcbound,col=grey(0.5)))+
+  latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2))
 dev.off()
 
