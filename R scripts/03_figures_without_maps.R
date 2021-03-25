@@ -2,19 +2,19 @@
 # script for producing figures 2 and 3
 
 
-# The script takes in a data file that has 
+# The script takes in a data file "AllCodedData_withGIScontext.csv"
 # 1) filtered away all redundant datapoints
 # 2) filtered away points outside arctic study area
 # 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
 
-# the script also takes in a separatae data file on plant functional groups
+# the script also takes in a separatae data file on plant functional groups "PFTs_Systematic_Herbivory_Map_03022021.txt"
 
 
 # load packages ---------------------------------------------------------
 
 library(ggplot2)  # plotting
 library(gridExtra) # plotting: arranging multiple grops on a page
-library(RColorBrewer)#Colours 
+#library(RColorBrewer)#Colours 
 library(tidyverse) #data wrangling
 library(networkD3) # for sankey diagrams
 library(harrypotter)# color palettes
@@ -25,19 +25,20 @@ library(htmlwidgets) # to add title in sankeydiagram
 
 alldata<-read.table("Data/AllCodedDataW.txt", sep=";", header=TRUE)
 head(alldata)
-dim(alldata)[1]
+#dim(alldata)[1]
+#toto<-alldata[alldata$evidence_point_ID=="3540_a",]
+
+plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_03022021.txt")
+head(plants)  
+
 
 # Figure 2 ---------------------------------------------------------
 
-## sample sizes to figures
-length(alldata$year[!is.na(alldata$year)])
-length(alldata$year[!is.na(alldata$year_start)])
-length(alldata$year[!is.na(alldata$extent_of_temporal_scale)])
-length(alldata$year[!is.na(alldata$temporal_resolution)])
+####Year of publication - panel A
+# sample size
+length(alldata$year[!is.na(alldata$year)]) # publication year
 
-
-#Year of publication - panel A
-pub<-ggplot(alldata,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("A) Publication year (n=678)")+
+pub<-ggplot(alldata,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("A) Publication year (n=662)")+
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.text.x  = element_text(size=16),
@@ -46,13 +47,15 @@ pub<-ggplot(alldata,aes(x=as.numeric(year)))+geom_histogram()+ggtitle("A) Public
 
 pub
 
-#Year of study start - panel B
-
+####Year of study start - panel B
+# sample size
 alldata$year_start[alldata$year_start=="not available"]<-NA
 alldata$year_start[alldata$year_start=="not relevant"]<-NA
 alldata$year_start[alldata$year_start=="not reported" ]<-NA
+length(alldata$year_start[!is.na(alldata$year_start)]) # study start year
 
-startyr<-ggplot(alldata,aes(x=as.numeric(as.character(year_start))))+geom_histogram()+ggtitle("B) First year (n=610)")+
+
+startyr<-ggplot(alldata,aes(x=as.numeric(as.character(year_start))))+geom_histogram()+ggtitle("B) First year (n=594)")+
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.text.x  = element_text(size=16),
@@ -60,26 +63,29 @@ startyr<-ggplot(alldata,aes(x=as.numeric(as.character(year_start))))+geom_histog
   theme(plot.margin=unit(c(0.2,0.2,0.4,0.4),"cm"))
 startyr
 
-#Extent of temporal scale - panel C
+#####Extent of temporal scale - panel C
 # the study with more than 1000 years temporal scale is a modeling study that simulates current (and future) climate for 1500 years
-# the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
-levels(alldata$extent_of_temporal_scale)[levels(alldata$extent_of_temporal_scale)=="0"] <- "1"
+# sample size
+alldata$extent_of_temporal_scale[alldata$extent_of_temporal_scale=="not relevant"]<-NA
+alldata$extent_of_temporal_scale[alldata$extent_of_temporal_scale=="not reported" ]<-NA
+length(alldata$extent_of_temporal_scale[!is.na(alldata$extent_of_temporal_scale)]) # study length
 
 tr1<-ggplot(alldata,aes(x=as.numeric(as.character(extent_of_temporal_scale))))+geom_histogram()+scale_x_continuous(trans='log10')+
-  ggtitle("C) Temporal extent (n=672)") + xlab("Years")  +ylab("")+ theme(axis.title.x = element_text(size=16),
+  ggtitle("C) Temporal extent (n=615)") + xlab("Years")  +ylab("")+ theme(axis.title.x = element_text(size=16),
                                                                                             axis.text.x  = element_text(size=16),
                                                                                             axis.text.y =element_text(size=16)) + theme(plot.title = element_text(size=16))+
   theme(plot.margin=unit(c(0.4,0.4,0.2,0.1),"cm"))
 
 tr1
 
-#Temporal resolution  - panel D
-# the study with temporal_resolution  = "twice" is now corrected in the raw data. it was a mistake, we have no level "twice"
-# the edit below is therefore redundant
-levels(alldata$temporal_resolution)[levels(alldata$temporal_resolution)=="twice"] <- "twice, interval longer than one year"
+#####Temporal resolution  - panel D
+# sample size
+table(alldata$temporal_resolution)
+alldata$temporal_resolution[alldata$temporal_resolution=="not reported" ]<-NA
+length(alldata$temporal_resolution[!is.na(alldata$temporal_resolution)]) # study start year
+
 
 # rename factor levels shorter to read
-
 levels(alldata$temporal_resolution)[levels(alldata$temporal_resolution)=="twice, interval one year or shorter"] <- "twice <= 1 yr"
 levels(alldata$temporal_resolution)[levels(alldata$temporal_resolution)=="twice, interval longer than one year"] <- "twice > 1 yr"
 levels(alldata$temporal_resolution)[levels(alldata$temporal_resolution)=="regular with intervals shorter than a year"] <- "regular < 1 yr"
@@ -94,7 +100,7 @@ alldata$temporal_resolution<-fct_relevel(alldata$temporal_resolution, "once",
                                                                     "annual","not reported")
 
 tr2<-ggplot(alldata,aes(x=temporal_resolution))+geom_bar()+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ ggtitle("D) Temporal resolution (n=678)") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ ggtitle("D) Temporal resolution (n=635)") +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.text.x  = element_text(size=16),
@@ -172,8 +178,7 @@ head(herbLnew)
 
 
 # data for plants
-plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_03022021.txt")
-head(plants)  
+head(plants)
 
 # change yes and no in plant data to zero and one
 plants <-
@@ -209,36 +214,7 @@ data_fig_3A<-merge(herbLnew, plantsL)
 
 #remove all lines with zero plant data
 data_fig_3A<-filter(data_fig_3A, count_plants== 1) 
-
 head(data_fig_3A)
-
-# # combine plant and herbivore data
-# data_sankey<-inner_join(herbLnew, plants, by="evidence_point_ID"); head(data_sankey)
-# data_sankey<-data_sankey %>% select(-c(article_checked, original_scored_data, comments, count_herbivores)); head(data_sankey)
-# 
-# #change yes and no to zero and one
-# data_sankey <-
-#   mutate(data_sankey, 
-#          evergreen_dwarf_shrubs = if_else(evergreen_dwarf_shrubs == "yes", 1L, 0L),
-#          decidious_dwarf_shrubs = if_else(decidious_dwarf_shrubs == "yes", 1L , 0L),
-#          decidious_tall_shrubs = if_else(decidious_tall_shrubs == "yes", 1L , 0L),
-#          evergreen_tall_shrubs = if_else(evergreen_tall_shrubs == "yes", 1L , 0L),
-#          decidious_trees = if_else(decidious_trees == "yes", 1L , 0L),
-#          evergreen_trees = if_else(evergreen_trees == "yes", 1L , 0L),
-#          graminoids = if_else(graminoids == "yes", 1L , 0L),
-#          forbs = if_else(forbs == "yes", 1L , 0L),
-#          ferns_and_allies = if_else(ferns_and_allies == "yes", 1L , 0L),
-#          bryophytes = if_else(bryophytes == "yes", 1L , 0L),
-#          vascular_plant_community = if_else(vascular_plant_community == "yes", 1L , 0L),
-#          lichens = if_else(lichens == "yes", 1L , 0L)
-#   )
-
-
-# # pivot to even longer data  
-# data_sankeyL<-
-#   data_sankey %>%
-#   pivot_longer(!c("evidence_point_ID", "herbivores"), names_to = "plants", values_to = "count_plants")
-# head(data_sankeyL)
 
 
 #rename herbivores and plants
@@ -263,7 +239,6 @@ levels(data_fig_3A$plants)[levels(data_fig_3A$plants)=="vascular_plant_community
 
 
 # summerize so that count is sum across the whole dataset, get rid of evid
-#data_sankeyL<-data_sankeyL %>% select(c(!evidence_point_ID))
 data_sankeyL<-data_fig_3A %>% select(c(!evidence_point_ID))
 links<-aggregate(data_sankeyL$count_plants,list(herbivore = data_sankeyL$herbivores, plant = data_sankeyL$plants),sum)
 names(links)<-c("source", "target", "value")
@@ -308,14 +283,7 @@ pal <- hp(n = 10, house = "Mischief")
 image(volcano, col = pal)
 pal
 
-    
-
-# example from Isabell E.
-#color_scale <- 
-#  "d3.scaleOrdinal()
-#.range(['#a4ff73', '#bee8ff', '#38a800', '#ffbebe', '#00734d', '#ff5500', '#e1e1e1', '#701e07', '#d7b09e', '#828282', '#005ce6', '#ffffff']);
-#"
-
+  
 color_scale <- 
   "d3.scaleOrdinal()
 .range(['#e7e3af', '#daca92','#ceb176','#b18e5b','#8e6841','#774c2e','#6d3b22','#672c19','#6e2219','#761919','#808080',
@@ -395,9 +363,6 @@ levels(data_fig_3B$herbivores)[levels(data_fig_3B$herbivores)=="other_invertebra
 data_fig_3B$herbivores<-fct_relevel(data_fig_3B$herbivores, 
                                    "Rangifer", "small rodents", "waterfowl", "defoliating inv.","Lagopus", "Ovibos", 
                                    "Lepus", "Ovis", "Alces","other inv.","unknown")
-#data_fig_3B$herbivores<-fct_relevel(data_fig_3B$herbivores, 
-#                                    "Rangifer", "small rodents", "waterfowl", "defoliating inv.","Lagopus", "Ovibos", 
-#                                    "Lepus", "Ovis", "Alces","unknown")
 
 # re-name plant levels
 levels(data_fig_3B$plants)[levels(data_fig_3B$plants)=="pop_sp"] <- "population/species"
@@ -412,7 +377,7 @@ dim(data_fig_3B)[1]
 
 ct2<-ggplot(data_fig_3B, aes(fill = plants, x = herbivores)) + geom_bar(aes(fill=plants))+
   scale_fill_manual("Plant level", values=hp_color_manual_3B)+
-  ggtitle("B) Herbivore type and plant level (n=847)")+
+  ggtitle("B) Herbivore type and plant level (n=912)")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=16),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
@@ -487,29 +452,14 @@ data_fig_3C$study_type<-fct_relevel(data_fig_3C$study_type,
                                    "observational, field","observational, remote sensing","observational, other")
 
 
-# # color palette for panel B
-# hp_color_manual <- c( "#006699FF", "#177CAFFF" ,"#369BCEFF", "#72B6D9FF",  "#B35900FF",  "#D99E66FF")
-# 
-# ct2<-ggplot(data_fig_3, aes(fill = biological_organization_level_reported, x = herbivores)) + geom_bar(aes(fill=biological_organization_level_reported))+
-#   scale_fill_manual("Plant level", values=hp_color_manual)+
-#   ggtitle("B) Herbivore type and plant level")+
-#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=16),
-#         axis.title.x = element_blank(),
-#         axis.title.y = element_blank(),
-#         axis.text.y =element_text(size=16),
-#         legend.title = element_text(size = 14),
-#         legend.text = element_text( size = 14))
-# ct2
-
 # color palette for panel C
-#hp_color_manual <- c( "#B35900FF", "#D3771CFF", "#D99E66FF" , "#B3B8B3FF" ,"#006699FF", "#177CAFFF" ,"#369BCEFF", "#72B6D9FF")
 hp_color_manual_3C <- c( "#B35900FF", "#D3771CFF", "#D99E66FF" , "#B3B8B3FF" ,"#006699FF" ,"#369BCEFF", "#72B6D9FF")
 levels(data_fig_3C$study_type)
 dim(data_fig_3C)[1]
 
 ct1<-ggplot(data_fig_3C, aes(fill = study_type, x = herbivores)) + geom_bar(aes(fill=study_type))+
   scale_fill_manual("Study type", values=hp_color_manual_3C)+
-  ggtitle("C) Herbivore type and study type (n=777)")+ 
+  ggtitle("C) Herbivore type and study type (n=849)")+ 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=16),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
@@ -520,7 +470,7 @@ ct1<-ggplot(data_fig_3C, aes(fill = study_type, x = herbivores)) + geom_bar(aes(
 #  theme(plot.margin=unit(c(0.4,0.2,0.2,0.4),"cm"))
 ct1
 
-# Figure combine figure 3  ---------------------------------------------------------
+# Figure combine figure 3 A and B ---------------------------------------------------------
 
 
 pdf('Figures/Figure3_BC.pdf',height=6,width=14)

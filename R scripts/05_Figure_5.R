@@ -50,7 +50,7 @@ dim(alldata)
 data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
 names(data_eco_cont)
 
-#source("Functions.R") 
+source("Functions.R") 
 
 # 
 # names(alldata)
@@ -117,19 +117,23 @@ data<-rbind.data.frame(available, used)
 #   theme_light()
 # first_plot
 
+
+
 legend_title <- "Data source"
 
-first_plot<-data %>%
-  ggplot(aes(x=x_variable, y=y_variable, group=group))+
-  geom_point(aes(color=group), alpha = 0.3, show.legend = TRUE)+
-  scale_color_manual(legend_title, values=c("Evidence base"=col_points_used,"Study area"=col_points_available))+
-  #geom_point(data=subset(data, group == "available"), aes(alpha = 0.3, color=col_points_available))+
-  #geom_point(data=subset(data, group == "used"), aes(alpha = 0.3, color=col_points_used))+
-  ggtitle("A) Geographic space")+
-  xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
-  theme_light()+
-   theme(legend.position = c(0.8, 0.8))
-first_plot  
+ first_plot<-data %>%
+   ggplot(aes(x=x_variable, y=y_variable, group=group))+
+   geom_point(aes(color=group), alpha = 0.3, show.legend = TRUE)+
+   scale_color_manual(legend_title, values=c("Evidence base"=col_points_used,"Study area"=col_points_available))+
+   #geom_point(data=subset(data, group == "available"), aes(alpha = 0.3, color=col_points_available))+
+   #geom_point(data=subset(data, group == "used"), aes(alpha = 0.3, color=col_points_used))+
+   ggtitle("A) Geographic space")+
+   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+   theme_light()+
+    theme(legend.position = c(0.8, 0.8))
+ first_plot  
+ 
+
 
 
 
@@ -161,22 +165,38 @@ names(data_eco_cont)
 
 used<-cbind.data.frame("x_variable"=alldata$bio12, "y_variable" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
 head(used)
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
 available<-cbind.data.frame("x_variable"=data_eco_cont$bio12, "y_variable" = data_eco_cont$bio1/10, "group" =rep("available", times=length(data_eco_cont$bio12)))
 head(available)
 
 data<-rbind.data.frame(used, available)
+head(data)
+ 
+ first_plot<-data %>%
+   ggplot(aes(x_variable, y_variable)) +
+   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
+   #stat_hpd_2d(data=subset(data, group == "available"), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
+   stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
+   scale_fill_manual(values=col_points_available)+
+   #geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+   xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature  ' (degree~C)))+
+   ggtitle("B) Climate space")+
+   theme_light()
+ first_plot
 
-
-first_plot<-data %>%
-  ggplot(aes(x_variable, y_variable)) +
-  #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
-  #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
-  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
-  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature ' (degree~C)))+
-  ggtitle("B) Climate space")+
-  theme_light()
-first_plot
+ # first_plot<-data %>%
+ #   ggplot(aes(x_variable, y_variable)) +
+ #   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
+ #   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
+ #   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+ #   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
+ #  xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature  ' (degree~C)))+
+ #   ggtitle("C) Climate space")+
+ #   theme_light()
+ # first_plot
+ 
 
 
 #create y-axis histogram
@@ -261,10 +281,10 @@ summary(alldata$Temperature.anomaly)
 names(alldata) 
 names(data_eco_cont)
 
-used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
-head(used)
-available<-cbind.data.frame("x_variable"=data_eco_cont$GrowingSeasonLength.trend, "y_variable" = data_eco_cont$NDVI.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
-head(available)
+#used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
+#head(used)
+#available<-cbind.data.frame("x_variable"=data_eco_cont$GrowingSeasonLength.trend, "y_variable" = data_eco_cont$NDVI.trend, "group" =rep("available", times=length(data_eco_cont$bio12)))
+#head(available)
 
 
 used<-cbind.data.frame("x_variable"=alldata$Temperature.anomaly, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
@@ -425,7 +445,9 @@ ggdraw(combined_plot_humans)
 #legtit<- "Latitude (°)"
 #png('Figures/5_contexts.png')
 #tiff('Figures/5_contexts.tif')
-tiff('Figures/5_contexts_11032021.tif',height=10,width=9,units = 'in',res=150)
+#tiff('Figures/5_contexts_24032021.tif',height=10,width=9,units = 'in',res=150)
+tiff('Figures/5_contexts_25032021.tif',height=10,width=9,units = 'in',res=150)
+
 
 # grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
 #              climchangespace+theme(legend.position="none"),
@@ -850,34 +872,6 @@ ggdraw(combined_plot)
 
 ####################### statistics to results  -------------
 
-## mean annual temp across study area
-mean(na.omit(data_eco_cont$bio1/10))
-
-## mean annual precipitation 
-mean(na.omit(data_eco_cont$bio12))
-boxplot(na.omit(data_eco_cont$bio12))
-#
-mean(na.omit(alldata$bio12))
-boxplot(na.omit(alldata$bio12))
-quantile(alldata$bio12, c(.25, .50, .90), na.rm=TRUE) 
-quantile(data_eco_cont$bio12, c(.25, .50, .90), na.rm=TRUE) 
-
-
-
-## annual range of temprature
-mean(na.omit(data_eco_cont$bio7/10)) # 48
-## 90% of evidence points had less than 49C annual range. 
-quantile(alldata$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
-quantile(data_eco_cont$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
-
-## how large part of the study area had larger annual range than this
-## BIO7 = Temperature Annual Range (BIO5-BIO6)
-boxplot(data_eco_cont$bio7/10)
-hist(data_eco_cont$bio7/10)
-toto<-c(na.omit(data_eco_cont$bio7/10))
-test<-toto>49
-test<-as.numeric(test)
-sum(test)/length(test) ## 48% of data_eco_cont$bio7/10 has larger values than 49!
 
 ## NDVI 
 mean(na.omit(data_eco_cont$Current.NDVI)) 
@@ -901,8 +895,5 @@ par(mfrow=c(1,2))
 hist(data_eco_cont$Permafrost, main="arctic")
 hist(alldata$permafrost, main="evidence base")
 
-# subarctic studies done at higher elevations than arctic studies
-suba<-filter(alldata, north_of_treeline<0)
-summary(suba$elevation_DEM)
-arct<-filter(alldata, north_of_treeline>0)
-summary(arct$elevation_DEM)
+
+

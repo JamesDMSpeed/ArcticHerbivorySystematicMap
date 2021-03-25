@@ -8,6 +8,9 @@
 
 # the script also takes in a separatae data file on plant functional groups
 
+rm(list=ls())
+objects()
+
 
 # load packages ---------------------------------------------------------
 
@@ -18,11 +21,10 @@ library(ggplot2) # exploring "study quality" across ecol contexts
 # Take in data that has redundant evidence points removed, spatial filtering done, and spatial variables added
 
 alldata<-read.csv("Data/AllCodedData_withGIScontext.csv")
-alldata<-read.delim("Data/AllCodedData_downloaded_fromEviAtlas_17022021.txt")
 dim(alldata)
 
 # data for plant functional groups
-plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_16022021.txt")
+plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_23032021.txt")
 #dim(plants)
 #head(plants)  
 
@@ -44,18 +46,18 @@ tito$study_method # dendrochronology study is in the group "other"
 
 # no. experimental field studies 
 tito<-filter(alldata, study_design=="experimental") 
-sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) # 306
+sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) 
 
 # no. observational field studies
 # first combine obs & quasi-exp
 alldata$study_design[alldata$study_design=="quasi-experimental"]<-"observational"
 tito<-filter(alldata, study_design=="observational") 
-sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) # 313
+sum(grepl("field",c(tito$study_method, tito$study_method_comments)), na.rm=TRUE) 
 
 # no other methods
-sum(grepl("remote sensing",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 29
-sum(grepl("greenhouse",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 13
-sum(grepl("modelling",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) # 19
+sum(grepl("remote sensing",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) 
+sum(grepl("greenhouse",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) 
+sum(grepl("modelling",c(alldata$study_method, alldata$study_method_comments)), na.rm=TRUE) 
 
 
 ## additional exposures
@@ -64,8 +66,8 @@ levels(as.factor(alldata$additional_treatments_comments))
 
 tito<-filter(alldata, study_method=="field") 
 tito<-filter(tito, study_design=="experimental") 
-sum(grepl("warming",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) # 19
-sum(grepl("nutrient manipulation",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) # 23
+sum(grepl("warming",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) 
+sum(grepl("nutrient manipulation",c(tito$additional_exposures, tito$additional_treatments_comments)), na.rm=TRUE) 
 
 
 ## temporal aspects
@@ -80,8 +82,15 @@ dim(tito)[1]
 tito<-filter(alldata, extent_of_temporal_scale==1) 
 dim(tito)[1]
 
-tito<-alldata[alldata$extent_of_temporal_scale>10,]
-dim(tito)[1]
+alldata$extent_of_temporal_scale
+tito<-filter(alldata, extent_of_temporal_scale>=10)
+tito$extent_of_temporal_scale
+length(tito$extent_of_temporal_scale)
+
+## spatial resolution
+table(alldata$spatial_resolution_reported)
+table(alldata$extent_of_spatial_scale)
+
 
 # Arctic plants and plant communities (population)  -----------------------------------------------
 
@@ -115,6 +124,7 @@ sum(grepl("yes",plants$decidious_tall_shrubs), na.rm=TRUE)
 
 # Herbivores (exposure) -----------------------------------------------
 
+dim(alldata)[1]
 table(alldata$herbivore_type)
 levels(as.factor(alldata$herbivore_type_comments))
 
@@ -122,7 +132,7 @@ levels(as.factor(alldata$herbivore_type_comments))
 sum(grepl("other vertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 405
 sum(grepl("waterfowl",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 135
 sum(grepl("small rodents and pikas",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 161
-sum(grepl("defoliating invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
+sum(grepl("defoliating",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 71
 sum(grepl("galling invertebrates",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 3
 sum(grepl("invertebrates feeding on reproductive structures",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 2
 sum(grepl("phloem feeders",c(alldata$herbivore_type, alldata$herbivore_type_comments)), na.rm=TRUE) # 1
@@ -174,6 +184,8 @@ table(vert$study_method)
 table(vert$study_design)
 table(vert$biological_organization_level_reported)
 
+
+
 invert<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type))
 invert2<-filter(alldata, grepl("invertebrates|insects|feeders|defoliating", alldata$herbivore_type_comments))
 invert<-rbind.data.frame(invert, invert2)
@@ -184,28 +196,11 @@ table(invert$biological_organization_level_reported)
 
 sev<-filter(alldata, grepl("several", alldata$herbivore_type))
 table(sev$study_method)
-table(sev$study_design) # nb quasi-experimental and observational pooled, so total = 56
-
-# Comparison between levels of herbivore impact (comparator) -----------------------------------------------
-
-
-tito<-filter(alldata, study_method=="field")
-tito<-filter(tito, study_design=="experimental")
-table(tito$exposure_quantification)
-tito<-filter(tito, exposure_quantification=="several")
-tito$exposure_quantification_comments # 8 additional exclosures, 2 additional simulated herbivory
-
-## approaches to herbivory in observational field studies
-tito<-filter(alldata, study_method=="field")
-tito<-filter(tito, study_design=="observational")
-table(tito$exposure_quantification)
-tito<-filter(tito, exposure_quantification=="several")
-sum(grepl("outbreak",tito$exposure_quantification_comments), na.rm=TRUE) #6
-sum(grepl("spatial contrast/gradient",tito$exposure_quantification_comments), na.rm=TRUE) #4
-sum(grepl("fence",tito$exposure_quantification_comments), na.rm=TRUE) #3
+table(sev$study_design) # nb quasi-experimental and observational pooled,
 
 
 # Comparison between levels of herbivore impact (comparator) -----------------------------------------------
+
 # get experimental field studies
 levels(as.factor(alldata$exposure_quantification))
 tito<-filter(alldata, study_method=="field")
@@ -215,7 +210,6 @@ tito<-filter(tito, study_design=="experimental")
 alldata$study_design[alldata$study_design=="quasi-experimental"]<-"observational"
 tito<-filter(alldata, study_method=="field")
 tito<-filter(tito, study_design=="observational") 
-
 
 sum(grepl("exclosure", c(tito$exposure_quantification, tito$exposure_quantification_comments)), na.rm=TRUE) 
 sum(grepl("simulated herbivory", c(tito$exposure_quantification, tito$exposure_quantification_comments)), na.rm=TRUE) 
@@ -227,9 +221,10 @@ sum(grepl("herbivore population down", c(tito$exposure_quantification, tito$expo
 sum(grepl("spatial contrast/gradient", c(tito$exposure_quantification, tito$exposure_quantification_comments)), na.rm=TRUE) 
 
 table(alldata$experimental_design)
+407+13
 table(tito$experimental_design)
-294/dim(tito)[1] # % of exp field studies using control-impact studies
-112/dim(tito)[1]# % of obs field studies using control-impact studies
+(287+8)/dim(tito)[1] # % of exp field studies using control-impact studies
+(105+5)/dim(tito)[1]# % of obs field studies using control-impact studies
 
 # Response types to herbivory (outcome) ---------------------------------------
 
@@ -241,34 +236,45 @@ sum(grepl("morphological measure", c(alldata$ measured_response_variable, alldat
 sum(grepl("several", c(alldata$ measured_response_variable)), na.rm=TRUE) 
 
 dim(alldata)[1]
-328/678
+317/662
 
 # Ecological contexts covered by the evidence base: countries and zones ----------------------------
 table(alldata$country)
 sum(grepl("Norway|Sweden|Finland", c(alldata$country, alldata$country_comments)), na.rm=TRUE) 
-277/dim(alldata)[1]
+263/dim(alldata)[1]
 
 # add here the arctic zones vs subarctic
+names(alldata)
 table(alldata$Subzone)
-5+43+106+51+120
+4+30+102+45+110
 
 
 # Ecological contexts covered by the evidence base: geographic space  ----------------------------
-
+str(alldata$elevation_DEM)
+alldata$elevation_DEM<-as.numeric(alldata$elevation_DEM)
 boxplot(alldata$elevation_DEM)
 quantile(alldata$elevation_DEM, c(.25, .50, .98), na.rm=TRUE) 
 summary(alldata$elevation_DEM)
+toto<-alldata[alldata$elevation_DEM<=100,]
+length(na.omit(toto$elevation_DEM))/dim(alldata)[1]
+
+# subarctic studies done at higher elevations than arctic studies
+suba<-filter(alldata, north_of_treeline<0)
+summary(suba$elevation_DEM)
+arct<-filter(alldata, north_of_treeline>0)
+summary(arct$elevation_DEM)
 
 boxplot(alldata$distance_from_coast)
 quantile(alldata$distance_from_coast, c(.25, .50, .90), na.rm=TRUE) 
 summary(alldata$distance_from_coast)
-dim(alldata[as.numeric(alldata$distance_from_coast)>=150,])[1]/dim(alldata)[1]
+dim(alldata[as.numeric(alldata$distance_from_coast)>=100,])[1]/dim(alldata)[1]
 
 # treeline
 names(alldata)
-summary(alldata$DistanceToTreeline/1000)
+summary(alldata$north_of_treeline)
 
-# all  points have an arctic zone
+
+# not all  points have an arctic zone - how can that be? - effect of coast!
 ggplot(alldata, aes(x=coordinates_E, y=coordinates_N, color=Subzone)) + 
   geom_point(size=6) 
 
@@ -286,8 +292,8 @@ ggplot(alldata, aes(x=country, y=DistanceToTreeline/1000, fill=country)) +
 geom_violin()
 #geom_boxplot()
  
-# how big % is less then 100km? of the treeline?
-new<-abs(alldata$DistanceToTreeline/1000)
+# how big % is close to the treeline?
+new<-abs(alldata$north_of_treeline)
 boxplot(new)
 close<-new<=200
 far<-new>=900
@@ -295,8 +301,8 @@ sum(close, na.rm = TRUE)
 sum(far, na.rm = TRUE)
 
 # permafrost
-table(alldata$Permafrost)
-table(alldata$Permafrost, alldata$country)
+table(alldata$permafrost)
+table(alldata$permafrost, alldata$country)
 
 
 # Soil type     
@@ -309,9 +315,15 @@ summary(as.factor(alldata$soil_type.))
 tito<-alldata[is.na(alldata$soil_type.),]
 table(tito$country)
 
+ggplot(alldata, aes(x=coordinates_E, y=coordinates_N, color=soil_type.)) + 
+  geom_point(size=6) 
+
+table(alldata$soil_type., alldata$country)
+table(alldata$country)
+
 # Disturbance 
 table(alldata$disturbance)
-481/678 # not reported
+470/662 # not reported
 
 
 sum(grepl("fire",c(alldata$disturbance_comment, alldata$disturbance)), na.rm=TRUE)
@@ -325,12 +337,41 @@ sum(grepl("outbreaks",c(alldata$disturbance_comment, alldata$disturbance)), na.r
 # Ecological contexts covered by the evidence base: current climate context   ----------------------------
 
 names(alldata)
-boxplot(alldata$Annual_Mean_Temperature)
-quantile(alldata$Annual_Mean_Temperature, c(.25, .50, .90), na.rm=TRUE) 
+boxplot(alldata$bio1/10)
+quantile(alldata$bio1/10, c(.25, .50, .90), na.rm=TRUE) 
+
+## mean annual temp across study area
+mean(na.omit(data_eco_cont$bio1/10))
+
+## mean annual precipitation 
+mean(na.omit(data_eco_cont$bio12))
+boxplot(na.omit(data_eco_cont$bio12))
+#
+mean(na.omit(alldata$bio12))
+boxplot(na.omit(alldata$bio12))
+quantile(alldata$bio12, c(.25, .50, .90), na.rm=TRUE) 
+quantile(data_eco_cont$bio12, c(.25, .50, .90), na.rm=TRUE) 
+
+
+## annual range of temprature
+mean(na.omit(data_eco_cont$bio7/10)) # 48
+## 90% of evidence points had less than 49C annual range. 
+quantile(alldata$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
+quantile(data_eco_cont$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
+
+## how large part of the study area had larger annual range than this
+## BIO7 = Temperature Annual Range (BIO5-BIO6)
+boxplot(data_eco_cont$bio7/10)
+hist(data_eco_cont$bio7/10)
+toto<-c(na.omit(data_eco_cont$bio7/10))
+test<-toto<49
+test<-as.numeric(test)
+sum(test)/length(test) 
 
 
 boxplot(alldata$Annual_Precipitation)
 quantile(alldata$Annual_Precipitation, c(.25, .50, .90), na.rm=TRUE) 
+
 
 
 boxplot(alldata$Max_Temperature_of_Warmest_Month)
@@ -346,6 +387,20 @@ quantile(alldata$Temperature_Annual_Range, c(.25, .50, .90), na.rm=TRUE)
 
 names(alldata)
 summary(alldata$GrowingSeasonLength.trend)
+summary(alldata$NDVI.trend)
+summary(alldata$Temperature.anomaly)
+
+temp_data<-cbind.data.frame("data"= c(alldata$Temperature.anomaly, data_eco_cont$Temperature.anomaly), "group"=c(rep("used", times=length(alldata$Temperature.anomaly)), rep("available", times=length(data_eco_cont$Temperature.anomaly))))
+temp_data<-cbind.data.frame("data"= c(alldata$NDVI.trend, data_eco_cont$NDVI.trend), "group"=c(rep("used", times=length(alldata$NDVI.trend)), rep("available", times=length(data_eco_cont$NDVI.trend))))
+temp_data<-cbind.data.frame("data"= c(alldata$GrowingSeasonLength.trend, data_eco_cont$GrowingSeasonLength.trend), "group"=c(rep("used", times=length(alldata$GrowingSeasonLength.trend)), rep("available", times=length(data_eco_cont$GrowingSeasonLength.trend))))
+
+toto<-alldata[!(is.na(alldata$NDVI.trend)),]
+temp_data<-cbind.data.frame("data"= c(toto$Temperature.anomaly, data_eco_cont$Temperature.anomaly), "group"=c(rep("used", times=length(toto$Temperature.anomaly)), rep("available", times=length(data_eco_cont$Temperature.anomaly))))
+
+ggplot(temp_data, aes(x = data, group = group)) +
+  geom_density(aes(fill = group), alpha = 0.4)
+
+## conclusion: the histograms in Fig 5 give all datapoints, not only those that are in the xyplot
 
 #  food web context   ----------------------------
 
@@ -369,7 +424,6 @@ table(alldata$conservation_herbivore_comments)
 table(alldata$conservation_focus)
 
 
-
 sum(grepl("historical|current|historical and current",alldata$management_area), na.rm=TRUE)
 sum(grepl("protected area",c(alldata$conservation_study_area, alldata$conservation_study_area_comment)), na.rm=TRUE)
 
@@ -385,18 +439,20 @@ waterfowl<-rbind.data.frame(geese, geese2)
 length(unique(waterfowl$evidence_point_ID))
 table(waterfowl$country)
 
-summary(waterfowl$Elevation)
-boxplot(waterfowl$Elevation)
+summary(waterfowl$elevation_DEM)
+boxplot(waterfowl$elevation_DEM)
 # how many are max 150m altitude
-quantile(waterfowl$Elevation, c(.25, .50, .90), na.rm=TRUE) 
-dim(waterfowl[waterfowl$Elevation<=150,])[1]
+quantile(waterfowl$elevation_DEM, c(.25, .50, .90), na.rm=TRUE) 
+dim(waterfowl[waterfowl$elevation_DEM<=150,])[1]
 
-boxplot(waterfowl$DistancetoCoast)
-dim(waterfowl[waterfowl$DistancetoCoast<=50,])[1]
+boxplot(waterfowl$distance_from_coast)
+dim(waterfowl[waterfowl$distance_from_coast<=50,])[1]
 
 table(waterfowl$Subzone)
 
 boxplot(waterfowl$Annual_Precipitation)
+
+table(waterfowl$permafrost)
 
 
 # small rodents and pikas
@@ -405,8 +461,8 @@ sma_2<-filter(alldata, herbivore_type_comments=="small rodents and pikas")
 sma$evidence_point_ID %in% sma_2$evidence_point_ID; sma_2$evidence_point_ID %in% sma$evidence_point_ID
 sma<-rbind.data.frame(sma, sma_2)
 
-boxplot(sma$DistancetoCoast)
-dim(sma[sma$DistancetoCoast<=50,])[1]
+boxplot(sma$distance_from_coast)
+dim(sma[sma$distance_from_coast<=50,])[1]
 
 
 table(sma$country)
@@ -421,14 +477,20 @@ oth<-rbind.data.frame(oth, oth2)
 dim(oth)
 
 table(oth$country)
-boxplot(oth$Annual_Mean_Temperature)
-quantile(oth$Annual_Mean_Temperature, c(.25, .50, .90), na.rm=TRUE) 
+oth_rus<-oth[oth$country=="Russia",]
+ggplot(oth_rus, aes(x=coordinates_E, y=coordinates_N, color="herbivore_type")) + 
+  geom_point(size=6) 
 
-boxplot(oth$DistancetoCoast)
-dim(oth[oth$DistancetoCoast<=50,])[1]
+names(oth_rus)
+
+boxplot(oth$bio1/10)
+quantile(oth$bio1/10, c(.25, .50, .90), na.rm=TRUE) 
+
+boxplot(oth$distance_from_coast)
+dim(oth[oth$distance_from_coast<=50,])[1]
 
 table(oth$Subzone)
-226+83
+197+75
 
 # defoliation invertebrates
 invert<-filter(alldata, grepl("defoliating", alldata$herbivore_type))
@@ -439,15 +501,15 @@ length(unique(invert$evidence_point_ID))
 
 table(invert$temporal_resolution)
 table(invert$exposure_quantification)
-boxplot(invert$Elevation)
-dim(invert[invert$Elevation<=300,])[1]
+boxplot(invert$elevation_DEM)
+dim(invert[invert$elevation_DEM<=300,])[1]
 table(invert$Subzone)
-boxplot(invert$Annual_Precipitation)
-dim(invert[invert$Annual_Precipitation>=400,])[1]
-boxplot(invert$Annual_Mean_Temperature)
-dim(invert[invert$Annual_Mean_Temperature>=-5,])[1]
+boxplot(invert$bio12)
+dim(invert[invert$bio12>=400,])[1]
+boxplot(invert$bio1/10)
+dim(invert[invert$bio1/10>=-5,])[1]
 table(invert$country)
-22+12+12
+22+15+10
 canada<-invert[invert$country=="Canada",]
 dim(canada[canada$coordinates_E>-100,])[1]
 
