@@ -1,12 +1,10 @@
 #Systematic map of herbivory in Arctic tundra
 # script for calculating statistics for the results chapter
 
-# The script takes in a data file that has 
-# 1) filtered away all redundant datapoints
-# 2) filtered away points outside arctic study area
-# 3) added all GIS-context variables (or NA for evidence points that cannot have them for various reasons)
-
-# the script also takes in a separatae data file on plant functional groups
+# The script takes in a data files for 
+# 1) evidence points
+# 2) plant functional groups grouped for evidence points
+# 3) ecological context variables for study area
 
 rm(list=ls())
 objects()
@@ -16,12 +14,15 @@ objects()
 
 library(tidyverse) #data wrangling
 library(ggplot2) # exploring "study quality" across ecol contexts
+library(plyr) #data wrangling (revalue)
 
-# Load data  -----------------------------------------------
+
+ # Load data  -----------------------------------------------
 # Take in data that has redundant evidence points removed, spatial filtering done, and spatial variables added
 
 alldata<-read.csv("Data/AllCodedData_withGIScontext.csv")
 dim(alldata)
+names(alldata)
 
 # data for plant functional groups
 plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_23032021.txt")
@@ -30,6 +31,11 @@ plants<-read.delim("Data/PFTs_Systematic_Herbivory_Map_23032021.txt")
 
 # filter plant data so only evidence points in alldata are considered 
 plants<-plants[plants$evidence_point_ID %in% alldata$evidence_point_ID,]
+
+# Take in pre-processed ecological context data
+data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
+names(data_eco_cont)
+
 
 # Approaches, study designs, and methods  -----------------------------------------------
 
@@ -530,7 +536,7 @@ table(tito$experimental_design)
 # missing information
 table(alldata$year_start)
 table(alldata$temporal_resolution)
-table(alldata$extent_of_spatial_scale) # not reported and not relevant pooled in data from shinyapp. see raw data
+table(alldata$extent_of_spatial_scale) 
 table(alldata$spatial_resolution_recorded)
 table(alldata$spatial_resolution_reported)
 
@@ -596,126 +602,155 @@ confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 
 # Mapping the quality of included studies, study types across ecological contexts ----------------------------------
 ## extent of spatial scale; are there ecol-contexts that 
+
+palette = c("#00AFBB", "#E7B800")
+
+
 toto<-alldata
 names(toto)
 
 toto$grouped_spat_ext<-toto$extent_of_spatial_scale
 levels(as.factor(toto$grouped_spat_ext))
-
-library(plyr)
-toto$grouped_spat_ext<- revalue(toto$extent_of_spatial_scale, c("1x1 km or less"="small", "from 1x1 km to 10x10 km"="local", "from 10x10 km to 100x100 km"="large",
+toto$grouped_spat_ext<- revalue(toto$extent_of_spatial_scale, c("1x1 km or less"="small", "from 1x1 km to 10x10 km"="small", "from 10x10 km to 100x100 km"="large",
              "from 100x100 km to 1000x1000 km" = "large", "larger than 1000x1000 km" ="large"))
+toto<-toto[!(toto$grouped_spat_ext=="not relevant"),]
+toto<-toto[!(toto$grouped_spat_ext=="not reported"),]
 
-ggplot(data=toto, aes(x=grouped_spat_ext, y=bio1/10))+
-  geom_boxplot()
-ggplot(data=toto, aes(x=grouped_spat_ext, y=bio7))+
-  geom_boxplot()
-ggplot(data=toto, aes(x=grouped_spat_ext, y=bio12))+
-  geom_boxplot()
+a<-ggplot(toto, aes(x = bio1/10, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3)+theme_light()+
+  theme(legend.position = c(0.1, 0.9), legend.text=element_text(size=15),legend.title = element_blank(), axis.title.y=element_blank())+
+  xlab("Mean annual temperature")+scale_fill_manual(values=palette)
+a
+b<-ggplot(toto, aes(x = bio12, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)+theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Annual precipitation")+scale_fill_manual(values=palette)
+c<-ggplot(toto, aes(x = bio7/10, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)+theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Temperature annual range")+scale_fill_manual(values=palette)
+d<-ggplot(toto, aes(x = Subzone, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette)
+e<-ggplot(toto, aes(x = north_of_treeline, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette)
+f<-ggplot(toto, aes(x = ArcticHerbivore_Species.richness, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore species richness")+scale_fill_manual(values=palette)
+g<-ggplot(toto, aes(x = ArcticHerbivore_Phylogenetic.diversity, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore phylogenetic diversity")+scale_fill_manual(values=palette)
+h<-ggplot(toto, aes(x = ArcticHerbivore_Functional.diversity, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore functional diversity")+scale_fill_manual(values=palette)
+i<-ggplot(toto, aes(x = GPW, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Human population density")+scale_fill_manual(values=palette)
+j<-ggplot(toto, aes(x = Footprint, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Human footprint")+scale_fill_manual(values=palette)
+k<-ggplot(toto, aes(x = Current.NDVI, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)  +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette)
+l<-ggplot(toto, aes(x = CurrentGrowingSeasonLength, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Growing season length")+scale_fill_manual(values=palette)
+m<-ggplot(toto, aes(x = NDVI.trend, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("NDVI trend")+scale_fill_manual(values=palette)
+n<-ggplot(toto, aes(x = GrowingSeasonLength.trend, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Growing season length trend")+scale_fill_manual(values=palette)
+o<-ggplot(toto, aes(x = Temperature.anomaly, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Temperature anomaly")+scale_fill_manual(values=palette)
+p<-ggplot(toto, aes(x = permafrost, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette)
+q<-ggplot(toto, aes(x = soil_type., group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette)
 
 
+tiff('Figures/supplement_spatial.tif',height=10,width=9,units = 'in',res=150)
 
 
+print(grid.arrange(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,
+                   ncol=3))
 
-# 
-# ## short-term studies over MAT
-# toto<-cbind.data.frame("MAT"=levels(as.factor(alldata$bio1)), "evi_points"=as.vector(table(alldata$bio1)))
-# tito<-filter(alldata, extent_of_spatial_scale=="1x1 km or less"|extent_of_spatial_scale=="from 1x1 km to 10x10 km") 
-# tito<-as.data.frame(table(tito$bio1))
-# names(tito)<-c("MAT", "evi_points_local")
-# prop_table<-left_join(toto, tito)
-# prop_table[is.na(prop_table)] <- 0
-# prop_table$evi_points_local_prop<-prop_table$evi_points_local/prop_table$evi_points
-# plot(prop_table$MAT, prop_table$evi_points_local_prop)
-# 
-# 
-# 
-# 
-# # extent of spatial scale not relevant?
-# tito<-filter(alldata, extent_of_spatial_scale=="not relevant") 
-# tito<-filter(tito, study_method!="greenhouse") 
-# tito<-filter(tito, study_method!="modelling") 
-# 
-# tito$evidence_point_ID
-# View(tito)
-# 
-# ## study type 
-# tito<-filter(alldata, study_design=="experimental")
-# table(tito$experimental_design)
-# 
-# 
-# tito<-filter(alldata, biological_organization_level_reported=="individual") 
-# table(tito$spatial_resolution_reported, tito$extent_of_spatial_scale)
-# 
-# 
-# 
-# 
-# 
-# 
-# ## spatial scale of sampling 
-# table(alldata$spatial_resolution_reported)
-# table(alldata$extent_of_spatial_scale) # data from shinyapp has no category from 10 to 100km. 
-# 
-# 
-# ## areas where long-term studies needed?
-# toto<-alldata
-# # the study with length = zero is now corrected in the raw data. it was a study with start year = end year, and should therefore have had one as study length
-# toto$extent_of_temporal_scale<-plyr::mapvalues(toto$extent_of_temporal_scale, 0, 1)
-# toto$grouped_temp_ext<-toto$extent_of_temporal_scale
-# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(2:5), rep("2-5", times=length(c(2:5))))
-# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(6:10), rep("6-10", times=length(c(6:10))))
-# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(11:20), rep("11-20", times=length(c(11:20))))
-# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
-# toto$grouped_temp_ext<-plyr::mapvalues(toto$grouped_temp_ext, c(21:45), rep("21-45", times=length(c(21:45))))
-# 
-# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not relevant"))
-# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "not reported"))
-# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "I15-I14+1"))
-# toto<-toto %>% mutate(grouped_temp_ext= na_if(grouped_temp_ext, "AH15-AH14+1"))
-# 
-# toto<-toto %>%
-#   mutate(grouped_temp_ext = fct_relevel(grouped_temp_ext, 
-#                                         "1", "2-5", "6-10", 
-#                                         "11-20", "21-45", "longer than 45"))
-# 
-#                               
-# ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
-#   geom_bar(position="fill")
-# 
-# ggplot(toto, aes(x=country, fill=grouped_temp_ext)) + 
-#   geom_bar()
-# 
-# ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
-#   geom_bar(position="fill")
-# 
-# ggplot(toto, aes(x=Subzone, fill=grouped_temp_ext)) + 
-#   geom_bar()
-# 
-# ## nb the datafile is missing one category
-# ggplot(toto, aes(x=Subzone, fill=extent_of_spatial_scale)) + 
-#   geom_bar()
-# 
-# 
-# 
-# # Rangifer   
-# levels(alldata$herbivore_identity)
-# sum(na.omit(str_count(alldata$herbivore_identity, "Rangifer"))) #366
-# dim(reindeer)[1]/dim(alldata)[1] #52%
-# 
-# reindeer<-filter(alldata, grepl("Rangifer", alldata$herbivore_identity))
-# table(reindeer$country)
-# table(reindeer$country_comments)
-# # Fennoscandia, Svalbard, Yamal 
-# 65+85+45+37+22+2+2+5+1
-# 264/349
-# 
-# #nearctic
-# (39+35)/dim(reindeer)[1] #20%
-# #scandinavia
-# (65+101+24+11)/dim(reindeer)[1]
-# 
-# 
-# 
-# 
-# 
-# 
+dev.off()
+dev.off()
+
+######### temporal scales
+
+toto<-alldata
+names(toto)
+
+toto$grouped_temp<-toto$extent_of_temporal_scale
+toto<-toto[!(toto$grouped_temp=="not relevant"),]
+toto<-toto[!(toto$grouped_temp=="not reported"),]
+toto$grouped_temp<-as.numeric(toto$grouped_temp)
+toto$grouped_temp<-base::cut(toto$grouped_temp, breaks=c(0,1,1500))
+toto$grouped_temp<- revalue(toto$grouped_temp, c("(0,1]"="one", "(1,1.5e+03]"="longer"))
+ 
+a<-ggplot(toto, aes(x = bio1/10, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3)+theme_light()+
+   theme(legend.position = c(0.1, 0.9), legend.text=element_text(size=15),legend.title = element_blank(), axis.title.y=element_blank())+
+  xlab("Mean annual temperature")+scale_fill_manual(values=palette)
+a
+b<-ggplot(toto, aes(x = bio12, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)+theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Annual precipitation")+scale_fill_manual(values=palette)
+c<-ggplot(toto, aes(x = bio7/10, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)+theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Temperature annual range")+scale_fill_manual(values=palette)
+d<-ggplot(toto, aes(x = Subzone, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette)
+e<-ggplot(toto, aes(x = north_of_treeline, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette)
+f<-ggplot(toto, aes(x = ArcticHerbivore_Species.richness, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore species richness")+scale_fill_manual(values=palette)
+g<-ggplot(toto, aes(x = ArcticHerbivore_Phylogenetic.diversity, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore phylogenetic diversity")+scale_fill_manual(values=palette)
+h<-ggplot(toto, aes(x = ArcticHerbivore_Functional.diversity, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Arctic herbivore functional diversity")+scale_fill_manual(values=palette)
+i<-ggplot(toto, aes(x = GPW, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Human population density")+scale_fill_manual(values=palette)
+j<-ggplot(toto, aes(x = Footprint, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Human footprint")+scale_fill_manual(values=palette)
+k<-ggplot(toto, aes(x = Current.NDVI, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)  +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette)
+l<-ggplot(toto, aes(x = CurrentGrowingSeasonLength, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Growing season length")+scale_fill_manual(values=palette)
+m<-ggplot(toto, aes(x = NDVI.trend, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("NDVI trend")+scale_fill_manual(values=palette)
+n<-ggplot(toto, aes(x = GrowingSeasonLength.trend, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Growing season length trend")+scale_fill_manual(values=palette)
+o<-ggplot(toto, aes(x = Temperature.anomaly, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Temperature anomaly")+scale_fill_manual(values=palette)
+p<-ggplot(toto, aes(x = permafrost, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette)
+q<-ggplot(toto, aes(x = soil_type., group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette)
+
+tiff('Figures/supplement_temporal.tif',height=10,width=9,units = 'in',res=150)
+
+
+print(grid.arrange(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,
+                   ncol=3))
+
+dev.off()
+dev.off()
