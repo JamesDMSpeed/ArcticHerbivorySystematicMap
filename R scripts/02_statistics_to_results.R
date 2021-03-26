@@ -603,6 +603,8 @@ confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 # Mapping the quality of included studies, study types across ecological contexts ----------------------------------
 ## extent of spatial scale; are there ecol-contexts that 
 
+### missing elevation and distance to coast!!!
+
 palette = c("#00AFBB", "#E7B800")
 
 

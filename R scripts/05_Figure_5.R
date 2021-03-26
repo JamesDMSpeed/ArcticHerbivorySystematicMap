@@ -50,7 +50,7 @@ dim(alldata)
 data_eco_cont<-read.csv("Data/RangeofEcoContexts.csv")
 names(data_eco_cont)
 
-source("Functions.R") 
+#source("Functions.R") 
 
 # 
 # names(alldata)
@@ -88,55 +88,26 @@ col_points_available<-c("#006699FF")
 
 ####################### geographic space -------------
 
-names(alldata) 
-names(data_eco_cont)
-
 used<-cbind.data.frame("x_variable"=alldata$distance_from_coast, "y_variable" = alldata$elevation_DEM, "group" =rep("Evidence base", times=length(alldata$bio12)))
 available<-cbind.data.frame("x_variable"=data_eco_cont$DistancetoCoast, "y_variable" = data_eco_cont$Elevation, "group" =rep("Study area", times=length(data_eco_cont$bio12)))
-#
-#used<-cbind.data.frame("x_variable"=alldata$north_of_treeline, "y_variable" = alldata$elevation_DEM, "group" =rep("used", times=length(alldata$bio12)))
-#available<-cbind.data.frame("x_variable"=data_eco_cont$NorthofTreeline/1000, "y_variable" = data_eco_cont$Elevation, "group" =rep("available", times=length(data_eco_cont$bio12)))
-#
-#used<-cbind.data.frame("x_variable"=alldata$north_of_treeline, "y_variable" = alldata$distance_from_coast, "group" =rep("used", times=length(alldata$bio12)))
-#available<-cbind.data.frame("x_variable"=data_eco_cont$NorthofTreeline/1000, "y_variable" = data_eco_cont$DistancetoCoast, "group" =rep("available", times=length(data_eco_cont$bio12)))
-
 data<-rbind.data.frame(available, used)
-#data <- data[order(data$group, decreasing=TRUE),]
 
-# first_plot<-data %>%
-#   ggplot(aes(x_variable, y_variable)) +
-#   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1, show.legend = FALSE) +
-#   #scale_fill_manual(values=c(col_points_available,col_points_used))+
-#   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
-#   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-#   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
-#   theme(legend.position = c(0.8, 0.8))+
-#  # xlab("Distance to treeline (km)")+ ylab("Elevation (m)")+
-#   #xlab("Distance to treeline (km)")+ ylab("Distance to coast (km)")+
-#   ggtitle("A) Geographic space")+
-#   theme_light()
-# first_plot
-
-
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
 
 legend_title <- "Data source"
 
  first_plot<-data %>%
    ggplot(aes(x=x_variable, y=y_variable, group=group))+
    geom_point(aes(color=group), alpha = 0.3, show.legend = TRUE)+
+   scale_fill_manual(values=c(col_points_available,col_points_used))+
    scale_color_manual(legend_title, values=c("Evidence base"=col_points_used,"Study area"=col_points_available))+
-   #geom_point(data=subset(data, group == "available"), aes(alpha = 0.3, color=col_points_available))+
-   #geom_point(data=subset(data, group == "used"), aes(alpha = 0.3, color=col_points_used))+
    ggtitle("A) Geographic space")+
-   xlab("Distance to coast (km)")+ ylab("Elevation (m)")+
+   xlab("Distance to coast (km, n=661)")+ ylab("Elevation (m, n=623)")+
    theme_light()+
     theme(legend.position = c(0.8, 0.8))
  first_plot  
- 
-
-
-
-
 
 #create y-axis histogram
 y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
@@ -159,45 +130,30 @@ ggdraw(combined_plot_geo_space)
 
 ####################### climate space 1 -------------
 
-names(alldata) 
-names(data_eco_cont)
-
-
 used<-cbind.data.frame("x_variable"=alldata$bio12, "y_variable" = alldata$bio1/10, "group" =rep("used", times=length(alldata$bio12)))
-head(used)
-length(na.omit(used$x_variable))
-length(na.omit(used$y_variable))
 available<-cbind.data.frame("x_variable"=data_eco_cont$bio12, "y_variable" = data_eco_cont$bio1/10, "group" =rep("available", times=length(data_eco_cont$bio12)))
-head(available)
-
 data<-rbind.data.frame(used, available)
 head(data)
- 
+
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
+
+
  first_plot<-data %>%
    ggplot(aes(x_variable, y_variable)) +
    #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
    #stat_hpd_2d(data=subset(data, group == "available"), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
-   stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
-   scale_fill_manual(values=col_points_available)+
-   #geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
+   #stat_density_2d(data=subset(data, group == "available"), geom = "polygon", aes(alpha = ..level.., fill = group), bins = 100, show.legend=FALSE) +
+   #scale_fill_manual(values=col_points_available)+
+   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
    geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-   xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature  ' (degree~C)))+
-   ggtitle("B) Climate space")+
+   xlab("Mean Annual Precipitation")+ ylab(expression('Mean Annual Temperature  ' (degree~C)))+
+   ggtitle("B) Climate space (n=643)")+
    theme_light()
  first_plot
-
- # first_plot<-data %>%
- #   ggplot(aes(x_variable, y_variable)) +
- #   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
- #   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
- #   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
- #   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
- #  xlab("Mean Annual Precipitation (mm)")+ ylab(expression('Mean Annual Temperature  ' (degree~C)))+
- #   ggtitle("C) Climate space")+
- #   theme_light()
- # first_plot
  
-
+ 
 
 #create y-axis histogram
 y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
@@ -231,6 +187,12 @@ head(available)
 data<-rbind.data.frame(used, available)
 
 
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
+
+
+
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
   #stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
@@ -238,7 +200,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Growing season summed NDVI")+ ylab("Growing season length (days)")+
-  ggtitle("C) Climate space")+
+  ggtitle("C) Climate space (n=453)")+
   theme_light()
 first_plot
 
@@ -268,18 +230,6 @@ ggdraw(combined_plot_climate_2)
 # GrowingSeasonLength.trend
 # Temperature.anomaly
 
-summary(alldata)
-summary(data_eco_cont)
-summary(alldata$NDVI.trend)
-summary(alldata$Current.NDVI)
-
-summary(alldata$GrowingSeasonLength.trend)
-summary(alldata$CurrentGrowingSeasonLength)
-
-summary(alldata$Temperature.anomaly)
-
-names(alldata) 
-names(data_eco_cont)
 
 #used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$NDVI.trend, "group" =rep("used", times=length(alldata$bio12)))
 #head(used)
@@ -294,6 +244,12 @@ head(available)
 
 data<-rbind.data.frame(used, available)
 
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
+
+
+
 
 first_plot<-data %>%
   ggplot(aes(x_variable, y_variable)) +
@@ -301,11 +257,11 @@ first_plot<-data %>%
   #scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  #xlab("Change in growing season length (days per decade)")+ ylab("Change in NDVI (% per decade)")+
-  xlab("Change in temperature")+ ylab("Change in NDVI (% per decade)")+
+  xlab("Change in temperature (n=662)")+ ylab("Change in NDVI (% per decade, n=455)")+
   ggtitle("D) Climate change space")+
   theme_light()
 first_plot
+
 
 
 #create y-axis histogram
@@ -332,20 +288,13 @@ ggdraw(combined_plot_climate_change)
 
 ####################### food web space -------------
 
-summary(alldata)
-summary(data_eco_cont)
-
-names(alldata) 
-names(data_eco_cont)
-
-
 used<-cbind.data.frame("x_variable"=alldata$ArcticHerbivore_Species.richness, "y_variable" = alldata$ArcticHerbivore_Functional.diversity, "group" =rep("used", times=length(alldata$bio12)))
-head(used)
 available<-cbind.data.frame("x_variable"=data_eco_cont$ArcticHerbivore_Species.richness, "y_variable" = data_eco_cont$ArcticHerbivore_Functional.diversity, "group" =rep("available", times=length(data_eco_cont$bio12)))
-head(available)
-
-
 data<-rbind.data.frame(used, available)
+
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
 
 
 first_plot<-data %>%
@@ -355,7 +304,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab("Vertebrate herbivore species richness")+ ylab("Vertebrate herbivore functional diversity")+
-  ggtitle("E) Food web space")+
+  ggtitle("E) Food web space (n=580)")+
   theme_light()
 first_plot
 
@@ -383,14 +332,8 @@ ggdraw(combined_plot_richness)
 ####################### human space -------------
 
 
-summary(alldata)
-summary(data_eco_cont)
-
-names(alldata) 
-names(data_eco_cont)
 
 ## seems to be necessary to log the variables before plotting, otherwise the histogram plotting messes up
-
 used<-cbind.data.frame("x_variable"=log(alldata$GPW), "y_variable" = log(alldata$Footprint), "group" =rep("used", times=length(alldata$bio12)))
 head(used)
 available<-cbind.data.frame("x_variable"=log(data_eco_cont$HumanPopulationDensity), "y_variable" = log(data_eco_cont$Human.footprint), "group" =rep("available", times=length(data_eco_cont$bio12)))
@@ -398,6 +341,12 @@ head(available)
 
 data<-rbind.data.frame(used, available)
 summary(data)
+
+#sample size for axes
+length(na.omit(used$x_variable))
+length(na.omit(used$y_variable))
+
+
 
 labels_x<-c(2.06e-09, 0.0000003, 0.00005, 0.007,1, 140)
 breaks_x<-c(-20,  -15, -10, -5, 0,  4.941642)
@@ -409,7 +358,7 @@ first_plot<-data %>%
   geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
   geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
   xlab(expression("Human population density" ~(km^-2)))+ ylab("Human footprint index")+
-  ggtitle("F) Human space")+
+  ggtitle("F) Human space (n=656)")+
   scale_y_continuous(breaks=c(-10, 5),labels=c('Low','High'))+
   scale_x_continuous(breaks=breaks_x,labels=labels_x)+
   theme_light()
@@ -446,7 +395,7 @@ ggdraw(combined_plot_humans)
 #png('Figures/5_contexts.png')
 #tiff('Figures/5_contexts.tif')
 #tiff('Figures/5_contexts_24032021.tif',height=10,width=9,units = 'in',res=150)
-tiff('Figures/5_contexts_25032021.tif',height=10,width=9,units = 'in',res=150)
+tiff('Figures/5_contexts_26032021.tif',height=10,width=9,units = 'in',res=150)
 
 
 # grid.arrange(climatespace2+theme(legend.position = c(0.8,0.8))+labs(color=legtit),
