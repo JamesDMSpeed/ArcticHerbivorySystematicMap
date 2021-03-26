@@ -485,7 +485,7 @@ names(alldata_final)[1]<-"author_list"
 #alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
 #dim(alldata_finalr)
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
-alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic,proj4string = bioclimdat@crs)
+alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic@data,proj4string = bioclimdat@crs)
 
 alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
