@@ -448,20 +448,25 @@ available<-cbind.data.frame("x_variable"=data_eco_cont$Current.NDVI, "y_variable
 used<-cbind.data.frame("x_variable"=alldata$GrowingSeasonLength.trend, "y_variable" = alldata$Temperature.anomaly, "group" =rep("used", times=length(alldata$bio12)))
 available<-cbind.data.frame("x_variable"=data_eco_cont$GrowingSeasonLength.trend, "y_variable" = data_eco_cont$Temperature.anomaly, "group" =rep("available", times=length(data_eco_cont$bio12)))
 #
+used<-cbind.data.frame("x_variable"=alldata$north_of_treeline, "y_variable" = alldata$elevation_DEM, "group" =rep("Evidence base", times=length(alldata$bio12)))
+available<-cbind.data.frame("x_variable"=data_eco_cont$NorthofTreeline, "y_variable" = data_eco_cont$Elevation, "group" =rep("Study area", times=length(data_eco_cont$bio12)))
+data<-rbind.data.frame(available, used)
 
 
 data<-rbind.data.frame(used, available)
 #
-first_plot<-data %>%
-  ggplot(aes(x_variable, y_variable)) +
-  stat_hpd_2d(aes(fill = group), prob = 0.8, alpha = 0.2, linetype = "22", size = 1,show.legend = FALSE) +
- scale_fill_manual(values=c(col_points_available,col_points_used), name = "Data", labels = c("The Arctic", "Evidence points"))+
-  geom_point(data=subset(data, group == "available"), alpha = 0.3, color=col_points_available)+
-  geom_point(data=subset(data, group == "used"), alpha = 0.3, color=col_points_used)+
-  xlab("Growing season length")+ ylab("Annual temperature")+
-  theme_light()
-first_plot
 
+legend_title <- "Data source"
+first_plot<-data %>%
+  ggplot(aes(x=x_variable, y=y_variable, group=group))+
+  geom_point(aes(color=group), alpha = 0.3, show.legend = TRUE)+
+  scale_fill_manual(values=c(col_points_available,col_points_used))+
+  scale_color_manual(legend_title, values=c("Evidence base"=col_points_used,"Study area"=col_points_available))+
+  ggtitle("A) Geographic space")+
+  xlab("Distance to coast (km, n=661)")+ ylab("Elevation (m, n=623)")+
+  theme_light()+
+  theme(legend.position = c(0.8, 0.8))
+first_plot  
 
 #create y-axis histogram
 y_density <- axis_canvas(first_plot, axis = "y", coord_flip = TRUE) +
@@ -478,6 +483,9 @@ x_density <- axis_canvas(first_plot, axis = "x", coord_flip = TRUE) +
 # create the combined plot
 combined_plot <- insert_yaxis_grob(first_plot, y_density, position = "right")
 combined_plot %<>% insert_xaxis_grob(., x_density, position = "top")
+ggdraw(combined_plot)
+
+
 
 # show the result
 tiff('Figures/current_growing_season_MAT.tif',height=5,width=5,units = 'in',res=150)

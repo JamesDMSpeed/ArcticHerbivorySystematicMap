@@ -178,6 +178,10 @@ table(alldata$herbivore_identity)
 sum(grepl("Operophtera|Operopthera", alldata$herbivore_identity), na.rm=TRUE) 
 sum(grepl("Epirrita", alldata$herbivore_identity), na.rm=TRUE) 
 
+## were there many different Branta species
+grepl("Branta", alldata$herbivore_identity)
+Branta<-filter(alldata, grepl("Branta", alldata$herbivore_identity))
+Branta$herbivore_identity
 
 ## approaches to study different types of herbivores 
 vert<-filter(alldata, grepl("other vertebrates|waterfowl|small rodents and pikas", alldata$herbivore_type))
@@ -277,7 +281,13 @@ dim(alldata[as.numeric(alldata$distance_from_coast)>=100,])[1]/dim(alldata)[1]
 
 # treeline
 names(alldata)
+summary(abs(alldata$north_of_treeline))
 summary(alldata$north_of_treeline)
+
+boxplot(alldata$north_of_treeline)
+hist(abs(alldata$north_of_treeline), breaks=30)
+
+# number of evidence points decreases with distance from treeline
 
 
 # not all  points have an arctic zone - how can that be? - effect of coast!
@@ -308,7 +318,10 @@ sum(far, na.rm = TRUE)
 
 # permafrost
 table(alldata$permafrost)
-table(alldata$permafrost, alldata$country)
+table(alldata$permafrost, alldata$Subzone, useNA="ifany")
+3+15+20
+
+sum(grepl("spatial contrast/gradient", c(tito$exposure_quantification, tito$exposure_quantification_comments)), na.rm=TRUE) 
 
 
 # Soil type     
@@ -360,10 +373,18 @@ quantile(data_eco_cont$bio12, c(.25, .50, .90), na.rm=TRUE)
 
 
 ## annual range of temprature
-mean(na.omit(data_eco_cont$bio7/10)) # 48
+mean(na.omit(data_eco_cont$bio7/10)) # 47
+mean(na.omit(alldata$bio7/10)) # 34
+
+median(na.omit(data_eco_cont$bio7/10)) # 47
+median(na.omit(alldata$bio7/10)) # 34
+
+
 ## 90% of evidence points had less than 49C annual range. 
 quantile(alldata$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
 quantile(data_eco_cont$bio7/10, c(.25, .50, .90), na.rm=TRUE) 
+mean(data_eco_cont$bio7/10, na.rm=TRUE)
+summary(data_eco_cont$bio7/10)
 
 ## how large part of the study area had larger annual range than this
 ## BIO7 = Temperature Annual Range (BIO5-BIO6)
@@ -607,7 +628,6 @@ confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 
 palette = c("#00AFBB", "#E7B800")
 
-
 toto<-alldata
 names(toto)
 
@@ -756,3 +776,7 @@ print(grid.arrange(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,
 
 dev.off()
 dev.off()
+
+
+## additional check arctic zones
+table(alldata$Subzone)
