@@ -169,10 +169,13 @@ plot(hb)
 points<-cbind.data.frame("xcoord"=hb@xcm, "ycoord"=hb@ycm, "count"=hb@count)
 sppoints<-SpatialPointsDataFrame(points[,1:2],points,proj4string = crs(alldata_splaea))
 
+k <- list(x = 1.2, y = 0.4, corner = c(0, 0), points=list(cex=c(10/5,0,25/5,0,50/5), col='darkorange',pch=16,alpha=0.2), 
+          text=list(c('10','','25','','50')))
+
 tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=6,height=5,res=200)
 levelplot(blankras,
-          margin=F,scales=list(draw=F),colorkey=myColorkey,col.regions=list(col='trasparent'))+
-  latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+          margin=F,scales=list(draw=F),colorkey=myColorkey,key=k,col.regions=list(col='trasparent'))+
+    latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
                                   fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
   latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
