@@ -196,7 +196,7 @@ k <- list(x = 1.2, y = 0.4, corner = c(0, 0), points=list(cex=c(10/5,0,25/5,0,50
 tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=10,height=5,res=200)
 l0<-levelplot(blankras,
           margin=F,scales=list(draw=F),colorkey=myColorkey,key=k,col.regions=list(col='trasparent'))+
-    latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+    latticeExtra::layer(sp.polygons(crop(subarcbound,caffbuff),fill=colzones[1],col=NA))+
   latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
                                   fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
   latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
@@ -206,8 +206,8 @@ l0<-levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-    latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=2))+
-  latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
+   latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.5),lwd=1))+
+   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 l0
 dev.off()
@@ -215,8 +215,8 @@ dev.off()
 
 #Sample plot but with delta temperature as background
 tiff('Figures/SpatialDistribution_tempdiff.tif',units='in',width=6,height=5,res=200)
-l1<-levelplot(tempdiffppm,
-          margin=F,scales=list(draw=F),colorkey=list(title=expression("B) Temperature anomaly("*~degree*C*")")))+
+l1<-levelplot(mask(tempdiffppm,cavm_caff),
+          margin=F,scales=list(draw=F),colorkey=list(title=expression("B) Temperature anomaly (1980-2000"*~degree*C*")")))+
   #latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   #latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
   #                                fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
@@ -227,7 +227,7 @@ l1<-levelplot(tempdiffppm,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-  latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=1))+
+ # latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=1))+
   #latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 
