@@ -182,7 +182,7 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-    latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
+    latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=0.5))+
   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 dev.off()
@@ -202,7 +202,7 @@ l1<-levelplot(tempdiffppm,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-  latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
+  latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=0.5))+
   #latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 
