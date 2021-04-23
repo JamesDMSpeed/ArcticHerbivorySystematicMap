@@ -15,7 +15,7 @@ objects()
 library(tidyverse) #data wrangling
 library(ggplot2) # exploring "study quality" across ecol contexts
 library(plyr) #data wrangling (revalue)
-
+library(gridExtra)
 
  # Load data  -----------------------------------------------
 # Take in data that has redundant evidence points removed, spatial filtering done, and spatial variables added
@@ -624,8 +624,6 @@ confint(lm(prop_table$evi_points_missing_prop~as.numeric(prop_table$year)))
 # Mapping the quality of included studies, study types across ecological contexts ----------------------------------
 ## extent of spatial scale; are there ecol-contexts that 
 
-### missing elevation and distance to coast!!!
-
 palette = c("#00AFBB", "#E7B800")
 
 toto<-alldata
@@ -638,65 +636,79 @@ toto$grouped_spat_ext<- revalue(toto$extent_of_spatial_scale, c("1x1 km or less"
 toto<-toto[!(toto$grouped_spat_ext=="not relevant"),]
 toto<-toto[!(toto$grouped_spat_ext=="not reported"),]
 
-a<-ggplot(toto, aes(x = bio1/10, group = grouped_spat_ext)) +
-  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3)+theme_light()+
-  theme(legend.position = c(0.1, 0.9), legend.text=element_text(size=15),legend.title = element_blank(), axis.title.y=element_blank())+
-  xlab("Mean annual temperature")+scale_fill_manual(values=palette)
-a
-b<-ggplot(toto, aes(x = bio12, group = grouped_spat_ext)) +
+# N small and large study area; 
+table(toto$grouped_spat_ext)
+
+names(toto)
+
+# to get same colors for short/smmall and large/long, need to get the grouping variable to start with small group
+toto<-arrange(toto, (desc(toto$grouped_spat_ext)))
+head(toto$grouped_spat_ext)
+
+a<-ggplot(toto, aes(x = bio12, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3)+theme_light()+ 
+  theme(legend.position = c(0.8, 0.6), legend.text=element_text(size=10),legend.title = element_blank(), axis.title.y=element_blank())+
+  theme(axis.title.y=element_blank())+xlab("Annual precipitation (mm)")+scale_fill_manual(values=palette, limits=c("small", "large"))
+b<-ggplot(toto, aes(x = bio1/10, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)+theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Annual precipitation")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Mean Annual Temperature  ' (degree~C)))+scale_fill_manual(values=palette, limits=c("small", "large"))
 c<-ggplot(toto, aes(x = bio7/10, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)+theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Temperature annual range")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Temperature annual range  ' (degree~C)))+scale_fill_manual(values=palette, limits=c("small", "large"))
 d<-ggplot(toto, aes(x = Subzone, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette, limits=c("small", "large"))
 e<-ggplot(toto, aes(x = north_of_treeline, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 f<-ggplot(toto, aes(x = ArcticHerbivore_Species.richness, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore species richness")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH species richness (proportion)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 g<-ggplot(toto, aes(x = ArcticHerbivore_Phylogenetic.diversity, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore phylogenetic diversity")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH phylogenetic diversity (proportion)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 h<-ggplot(toto, aes(x = ArcticHerbivore_Functional.diversity, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore functional diversity")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH functional diversity (proportion)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 i<-ggplot(toto, aes(x = GPW, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Human population density")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression("Human population density" ~(km^-2)))+scale_fill_manual(values=palette, limits=c("small", "large"))
 j<-ggplot(toto, aes(x = Footprint, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Human footprint")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Human footprint index")+scale_fill_manual(values=palette, limits=c("small", "large"))
 k<-ggplot(toto, aes(x = Current.NDVI, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE)  +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette, limits=c("small", "large"))
 l<-ggplot(toto, aes(x = CurrentGrowingSeasonLength, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Growing season length")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Growing season length (days)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 m<-ggplot(toto, aes(x = NDVI.trend, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("NDVI trend")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("NDVI trend (% per decade)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 n<-ggplot(toto, aes(x = GrowingSeasonLength.trend, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Growing season length trend")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Growing season length* (days/decade)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 o<-ggplot(toto, aes(x = Temperature.anomaly, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Temperature anomaly")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Temperature anomaly ' (degree~C)))+scale_fill_manual(values=palette, limits=c("small", "large"))
 p<-ggplot(toto, aes(x = permafrost, group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette, limits=c("small", "large"))
 q<-ggplot(toto, aes(x = soil_type., group = grouped_spat_ext)) +
   geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette, limits=c("small", "large"))
+r<-ggplot(toto, aes(x = elevation_DEM, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Elevation (m.a.s.l)")+scale_fill_manual(values=palette, limits=c("small", "large"))
+s<-ggplot(toto, aes(x = north_of_treeline, group = grouped_spat_ext)) +
+  geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("North of treeline (km)")+scale_fill_manual(values=palette, limits=c("small", "large"))
 
 
-tiff('Figures/supplement_spatial.tif',height=10,width=9,units = 'in',res=150)
+tiff('Figures/supplement_spatial_April.tif',height=11,width=9,units = 'in',res=150)
 
 
-print(grid.arrange(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,
+print(grid.arrange(a,b,c,d,r,e,s,f,g,h,i,j,k,l,m,n,o,p,q,
                    ncol=3))
 
 dev.off()
@@ -714,69 +726,122 @@ toto$grouped_temp<-as.numeric(toto$grouped_temp)
 toto$grouped_temp<-base::cut(toto$grouped_temp, breaks=c(0,1,1500))
 toto$grouped_temp<- revalue(toto$grouped_temp, c("(0,1]"="one", "(1,1.5e+03]"="longer"))
  
-a<-ggplot(toto, aes(x = bio1/10, group = grouped_temp)) +
-  geom_density(aes(fill = grouped_temp), alpha = 0.3)+theme_light()+
-   theme(legend.position = c(0.1, 0.9), legend.text=element_text(size=15),legend.title = element_blank(), axis.title.y=element_blank())+
-  xlab("Mean annual temperature")+scale_fill_manual(values=palette)
-a
-b<-ggplot(toto, aes(x = bio12, group = grouped_temp)) +
+
+# N short and long studies ; 
+table(toto$grouped_temp)
+
+# to get same colors for short/smmall and large/long, need to get the grouping variable to start with small group
+toto<-arrange(toto, toto$grouped_temp)
+head(toto$grouped_temp)
+
+a<-ggplot(toto, aes(x = bio12, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3)+theme_light()+ 
+  theme(legend.position = c(0.8, 0.6), legend.text=element_text(size=10),legend.title = element_blank(), axis.title.y=element_blank())+
+  theme(axis.title.y=element_blank())+xlab("Annual precipitation (mm)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
+b<-ggplot(toto, aes(x = bio1/10, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)+theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Annual precipitation")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Mean Annual Temperature  ' (degree~C)))+scale_fill_manual(values=palette, limits=c("one", "longer"))
 c<-ggplot(toto, aes(x = bio7/10, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)+theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Temperature annual range")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Temperature annual range  ' (degree~C)))+scale_fill_manual(values=palette, limits=c("one", "longer"))
 d<-ggplot(toto, aes(x = Subzone, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Subzone")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 e<-ggplot(toto, aes(x = north_of_treeline, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Distance to treeline (km)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 f<-ggplot(toto, aes(x = ArcticHerbivore_Species.richness, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore species richness")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH species richness (proportion)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 g<-ggplot(toto, aes(x = ArcticHerbivore_Phylogenetic.diversity, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore phylogenetic diversity")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH phylogenetic diversity (proportion)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 h<-ggplot(toto, aes(x = ArcticHerbivore_Functional.diversity, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Arctic herbivore functional diversity")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("VH functional diversity (proportion)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 i<-ggplot(toto, aes(x = GPW, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Human population density")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression("Human population density" ~(km^-2)))+scale_fill_manual(values=palette, limits=c("one", "longer"))
 j<-ggplot(toto, aes(x = Footprint, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Human footprint")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Human footprint index")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 k<-ggplot(toto, aes(x = Current.NDVI, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE)  +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("NDVI")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 l<-ggplot(toto, aes(x = CurrentGrowingSeasonLength, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Growing season length")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Growing season length (days)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 m<-ggplot(toto, aes(x = NDVI.trend, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("NDVI trend")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("NDVI trend (% per decade)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 n<-ggplot(toto, aes(x = GrowingSeasonLength.trend, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Growing season length trend")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Growing season length* (days/decade)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 o<-ggplot(toto, aes(x = Temperature.anomaly, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Temperature anomaly")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab(expression('Temperature anomaly ' (degree~C)))+scale_fill_manual(values=palette, limits=c("one", "longer"))
 p<-ggplot(toto, aes(x = permafrost, group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Permafrost")+scale_fill_manual(values=palette, limits=c("one", "longer"))
 q<-ggplot(toto, aes(x = soil_type., group = grouped_temp)) +
   geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
-  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette)
+  theme(axis.title.y=element_blank())+xlab("Soil type")+scale_fill_manual(values=palette, limits=c("one", "longer"))
+r<-ggplot(toto, aes(x = elevation_DEM, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("Elevation (m.a.s.l)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
+s<-ggplot(toto, aes(x = north_of_treeline, group = grouped_temp)) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3, show.legend=FALSE) +theme_light()+
+  theme(axis.title.y=element_blank())+xlab("North of treeline (km)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
+s
 
-tiff('Figures/supplement_temporal.tif',height=10,width=9,units = 'in',res=150)
+tiff('Figures/supplement_temporal_April.tif',height=11,width=9,units = 'in',res=150)
 
 
-print(grid.arrange(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,
+print(grid.arrange(a,b,c,d,r,e,s,f,g,h,i,j,k,l,m,n,o,p,q,
                    ncol=3))
-
 dev.off()
 dev.off()
 
 
-## additional check arctic zones
-table(alldata$Subzone)
+## additional check arctic zones spatial
+toto<-alldata
+toto$grouped_spat_ext<-toto$extent_of_spatial_scale
+levels(as.factor(toto$grouped_spat_ext))
+toto$grouped_spat_ext<- revalue(toto$extent_of_spatial_scale, c("1x1 km or less"="small", "from 1x1 km to 10x10 km"="small", "from 10x10 km to 100x100 km"="large",
+                                                                "from 100x100 km to 1000x1000 km" = "large", "larger than 1000x1000 km" ="large"))
+toto<-toto[!(toto$grouped_spat_ext=="not relevant"),]
+toto<-toto[!(toto$grouped_spat_ext=="not reported"),]
+toto$Subzone<- revalue(toto$Subzone, c("A"="Arctic", "B"="Arctic", "C"="Arctic","D" = "Arctic", "E" ="Arctic"))
+
+table(toto$Subzone,toto$grouped_spat_ext)
+ggplot(toto, aes(x = Subzone, group = grouped_spat_ext)) +geom_density(aes(fill = grouped_spat_ext), alpha = 0.3, show.legend=TRUE) +theme_light()
+
+
+## additional check arctic zones temporal
+toto<-alldata
+toto$grouped_temp<-toto$extent_of_temporal_scale
+toto<-toto[!(toto$grouped_temp=="not relevant"),]
+toto<-toto[!(toto$grouped_temp=="not reported"),]
+toto$grouped_temp<-as.numeric(toto$grouped_temp)
+toto$grouped_temp<-base::cut(toto$grouped_temp, breaks=c(0,1,1500))
+toto$grouped_temp<- revalue(toto$grouped_temp, c("(0,1]"="one", "(1,1.5e+03]"="longer"))
+toto$Subzone<- revalue(toto$Subzone, c("A"="Arctic", "B"="Arctic", "C"="Arctic","D" = "Arctic", "E" ="Arctic"))
+
+table(toto$Subzone,toto$grouped_temp)
+a<-ggplot(toto, aes(x = Subzone,group = grouped_temp, after_stat(count()))) +geom_density(aes(fill = grouped_temp), trim=TRUE, alpha = 0.3, show.legend=TRUE)
+b<-ggplot(toto, aes(x = Subzone, group = grouped_temp)) +geom_density(aes(fill = grouped_temp), trim=FALSE,alpha = 0.3, show.legend=TRUE)
+print(grid.arrange(a,b,ncol=2))
+a
+114/(114+140)
+130/(130+186)
+
+
+ggplot(toto, aes(x=bio12, group = grouped_temp, after_stat(count))) + geom_density(aes(fill = grouped_temp), alpha = 0.3)
+ggplot(toto, aes(x=bio12, group = grouped_temp)) + geom_density(aes(fill = grouped_temp), alpha = 0.3)
+
+
+a<-ggplot(toto, aes(x = bio12, group = grouped_temp,after_stat(count))) +
+  geom_density(aes(fill = grouped_temp), alpha = 0.3)+theme_light()+ 
+  theme(legend.position = c(0.8, 0.6), legend.text=element_text(size=10),legend.title = element_blank(), axis.title.y=element_blank())+
+  theme(axis.title.y=element_blank())+xlab("Annual precipitation (mm)")+scale_fill_manual(values=palette, limits=c("one", "longer"))
+a
