@@ -216,7 +216,7 @@ dev.off()
 #Sample plot but with delta temperature as background
 tiff('Figures/SpatialDistribution_tempdiff.tif',units='in',width=6,height=5,res=200)
 l1<-levelplot(mask(tempdiffppm,cavm_caff),
-          margin=F,scales=list(draw=F),colorkey=list(title=expression("B) Temperature anomaly (1980-2000"*~degree*C*")")))+
+          margin=F,scales=list(draw=F),colorkey=list(title="B) Temperature anomaly (\u00B0C)"))+
   #latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   #latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
   #                                fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
