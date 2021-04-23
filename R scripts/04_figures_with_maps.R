@@ -172,7 +172,7 @@ sppoints<-SpatialPointsDataFrame(points[,1:2],points,proj4string = crs(alldata_s
 k <- list(x = 1.2, y = 0.4, corner = c(0, 0), points=list(cex=c(10/5,0,25/5,0,50/5), col='darkorange',pch=16,alpha=0.2), 
           text=list(c('10','','25','','50')))
 
-tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=6,height=5,res=200)
+tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=8,height=5,res=200)
 levelplot(blankras,
           margin=F,scales=list(draw=F),colorkey=myColorkey,key=k,col.regions=list(col='trasparent'))+
     latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
