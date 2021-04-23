@@ -128,12 +128,33 @@ tempdiff<-raster('Data/GIS_layers/amaps.nc')
 tempdiffpp<-projectRaster(tempdiff,blankras)
 tempdiffppm<-mask(tempdiffpp,bPolslaea)
 plot(tempdiffppm)
+diverge0 <- function(p, ramp) {
+  require(RColorBrewer)
+  require(rasterVis)
+  if(length(ramp)==1 && is.character(ramp) && ramp %in% 
+     row.names(brewer.pal.info)) {
+    ramp <- suppressWarnings(colorRampPalette(rev(brewer.pal(11, ramp))))
+  } else if(length(ramp) > 1 && is.character(ramp) && all(ramp %in% colors())) {
+    ramp <- colorRampPalette(ramp)
+  } else if(!is.function(ramp)) 
+    stop('ramp should be either the name of a RColorBrewer palette, ', 
+         'a vector of colours to be interpolated, or a colorRampPalette.')
+  rng <- range(p$legend[[1]]$args$key$at)
+  s <- seq(-max(abs(rng)), max(abs(rng)), len=1001)
+  i <- findInterval(rng[which.min(abs(rng))], s)
+  zlim <- switch(which.min(abs(rng)), `1`=i:(1000+1), `2`=1:(i+1))
+  p$legend[[1]]$args$key$at <- s[zlim]
+  p$par.settings$regions$col <- ramp(1000)[zlim[-length(zlim)]]
+  p
+}
 
+
+#Colour key for subzones
 colzones<-rev(brewer.pal(6,'YlGn'))
 
 myColorkey <- list(space='right',
                    col=colzones,
-                   at=seq(0.5,6.5,by=1), title='Arctic subzone',
+                   at=seq(0.5,6.5,by=1), title= 'A) Arctic subzone',
                    labels=list(labels=c('Subarctic','E','D','C','B','A'),at=1:6))
 
 #blankras<-vertherb_sr*0
@@ -172,8 +193,8 @@ sppoints<-SpatialPointsDataFrame(points[,1:2],points,proj4string = crs(alldata_s
 k <- list(x = 1.2, y = 0.4, corner = c(0, 0), points=list(cex=c(10/5,0,25/5,0,50/5), col='darkorange',pch=16,alpha=0.2), 
           text=list(c('10','','25','','50')))
 
-tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=8,height=5,res=200)
-levelplot(blankras,
+tiff('Figures/SpatialDistribution_HexBins.tif',units='in',width=10,height=5,res=200)
+l0<-levelplot(blankras,
           margin=F,scales=list(draw=F),colorkey=myColorkey,key=k,col.regions=list(col='trasparent'))+
     latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
@@ -185,16 +206,17 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-    latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=0.5))+
+    latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=2))+
   latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
+l0
 dev.off()
 
 
 #Sample plot but with delta temperature as background
 tiff('Figures/SpatialDistribution_tempdiff.tif',units='in',width=6,height=5,res=200)
 l1<-levelplot(tempdiffppm,
-          margin=F,scales=list(draw=F),colorkey=list(title=expression("Temperature anomaly ("*~degree*C*")")))+
+          margin=F,scales=list(draw=F),colorkey=list(title=expression("B) Temperature anomaly("*~degree*C*")")))+
   #latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
   #latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
   #                                fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
@@ -205,15 +227,17 @@ l1<-levelplot(tempdiffppm,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-  latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=0.5))+
+  latticeExtra::layer(sp.polygons(caffbuff,col=grey(0.4),lwd=1))+
   #latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
   latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 
-diverge0(l1,'RdBu')
-  dev.off()
+d1<-diverge0(l1,'RdBu')
+d1  
+dev.off()
 
-
-
+tiff('Figures/SpatialDistribution_BinsandTemp.tif',units='in',width=12,height=5,res=200)
+grid.arrange(l0,d1,ncol=2)
+dev.off()
 
 
 #Simple number of evidence points per raster cell
