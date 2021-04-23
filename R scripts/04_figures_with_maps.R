@@ -123,8 +123,13 @@ bPols <- map2SpatialPolygons(boundaries, IDs=IDs,
                              proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 bPolslaea<-spTransform(bPols,polarproj)
 
+#Temperature anomaly
+tempdiff<-raster('Data/GIS_layers/amaps.nc')
+tempdiffpp<-projectRaster(tempdiff,blankras)
+tempdiffppm<-mask(tempdiffpp,bPolslaea)
+plot(tempdiffppm)
 
-colzones<-brewer.pal(6,'YlGn')
+colzones<-rev(brewer.pal(6,'YlGn'))
 
 myColorkey <- list(space='right',
                    col=colzones,
@@ -177,10 +182,36 @@ levelplot(blankras,
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
   #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
-  latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16)) +
-  latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
-  latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2))
+    latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
+  latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
+  latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
 dev.off()
+
+
+#Sample plot but with delta temperature as background
+tiff('Figures/SpatialDistribution_tempdiff.tif',units='in',width=6,height=5,res=200)
+l1<-levelplot(tempdiffppm,
+          margin=F,scales=list(draw=F),colorkey=list(title=expression("Temperature anomaly ("*~degree*C*")")))+
+  #latticeExtra::layer(sp.polygons(subarcbound,fill=colzones[1],col=NA))+
+  #latticeExtra::layer(sp.polygons(spTransform(agzones,alldata_splaea@proj4string),
+  #                                fill=colzones[6:2][agzones$ZONE],col=NA,colorkey=myColorkey))+
+  latticeExtra::layer(sp.polygons(bPolslaea,col=grey(0.5),lwd=0.5))+
+  latticeExtra::layer(sp.lines(glp,col=grey(0.7),lwd=0.5))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count==1,],pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>1 &sppoints$count<11,],cex=2,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>10 &sppoints$count<21,],cex=3,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>20 &sppoints$count<31,],cex=4,pch=1))+
+  #latticeExtra::layer(sp.points(sppoints[sppoints$count>30 ,],cex=5,pch=1))
+  latticeExtra::layer(sp.polygons(caffbuff,col=1,lwd=0.2))+
+  #latticeExtra::layer(sp.points(sppoints,cex=((sppoints$count)/5),pch=16,alpha=0.2,col='darkorange3'))+
+  latticeExtra::layer(sp.points(alldata_splaea,cex=0.3,col=1,pch=16))
+
+diverge0(l1,'RdBu')
+  dev.off()
+
+
+
+
 
 #Simple number of evidence points per raster cell
 #Points per cell
