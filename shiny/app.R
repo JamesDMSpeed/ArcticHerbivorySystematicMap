@@ -15,6 +15,7 @@ library(stringr)
 library(data.table)
 library(rlang)
 library(sf)
+library(RColorBrewer)
 #
 
 #Note: If map fails to load need to install older version of mapview
@@ -25,7 +26,7 @@ library(sf)
 # Get Data ----------------------------------------------------------------
 
 MyTab <- fread("AllCodedData_withGIScontext.csv")
-#MyTab <- read_csv("AllCodedData_withGIScontext.csv")
+#MyTab <- fread("shiny/AllCodedData_withGIScontext.csv")
 
 # Add shortened versions of author lists, but first, change weird column name
 if(!"author_list" %in% names(MyTab)) colnames(MyTab)[2] <- "author_list"
@@ -35,15 +36,15 @@ MyTab$author_list2 <- substr(MyTab$author_list, start = 1, stop = 20)
 MyTab$author_list2 <-  ifelse(nchar(MyTab$author_list)>20, 
                               paste0(MyTab$author_list2, " [...]"),
                               MyTab$author_list2)
-names(MyTab)[names(MyTab)=='GPW']<-'HumanPopulationDensity'
-names(MyTab)[names(MyTab)=='Footprint']<-'Human.footprint'
+#names(MyTab)[names(MyTab)=='GPW']<-'HumanPopulationDensity'
+#names(MyTab)[names(MyTab)=='Footprint']<-'Human.footprint'
 
 # Fix alternate spelling
 MyTab$language[MyTab$language == "English"] <- "english"
 # Make a colums whihc is later used in the filter by species function
 MyTab$incl <- NULL
 # Scale species richness whihc is currently as proportions
-MyTab$ArcticHerbivore_Species.richness <- MyTab$ArcticHerbivore_Species.richness*70
+MyTab$ArcticHerbivore_Species.richness <- MyTab$ArcticHerbivore_Species.richness*69
 MyTab[,c("bio1", 
          "bio2",
          "bio5",
@@ -82,7 +83,16 @@ MyTab <- dplyr::rename(MyTab,
                 "Precipitation_of_Driest_Quarter" = bio17,
                 "Precipitation_of_Warmest_Quarter" = bio18,
                 "Precipitation_of_Coldest_Quarter" = bio19,
-                "DistancetoCoast"=distance_from_coast)
+                "Distance_to_Coast"=distance_from_coast,
+                "Distance_from_treeline"=north_of_treeline,
+                "Growing_season"=CurrentGrowingSeasonLength,
+                "Extent_of_recent_growing_season_change"=GrowingSeasonLength.trend,
+                "Extent_of_recent_warming"=Temperature.anomaly,
+                "Extent_of_recent_greening"=NDVI.trend,
+                "Productivity"=Current.NDVI,
+                "Human_population_density"=GPW,
+                "Human_footprint"=Footprint
+)
 
 MyTab <- dplyr::rename(MyTab, "Elevation" = elevation_DEM)
 
@@ -102,10 +112,10 @@ MyTab$extent_of_spatial_scale <- as.factor(MyTab$extent_of_spatial_scale)
 
 MyTab$extent_of_spatial_scale <- plyr::revalue(MyTab$extent_of_spatial_scale,
          c("not reported"="not reported or nor relevant",
-           "not relevant"="not reported or nor relevant",
-           "from 100x100 km to 1000x1000 km (including 1000x1000 km)" = "from 100x100 km to 1000x1000 km",
-           "from 10x10 km to 100x100 km (including 100x100 km)" = "from 10x10 km to 100x100 km",
-           "from 1x1 km to 10x10 km (including 10x10 km)" = "from 1x1 km to 10x10 km"
+           "not relevant"="not reported or nor relevant"#,
+         #  "from 100x100 km to 1000x1000 km (including 1000x1000 km)" = "from 100x100 km to 1000x1000 km",
+          # "from 10x10 km to 100x100 km (including 100x100 km)" = "from 10x10 km to 100x100 km",
+          # "from 1x1 km to 10x10 km (including 10x10 km)" = "from 1x1 km to 10x10 km"
            ))
 MyTab$extent_of_spatial_scale <- factor(MyTab$extent_of_spatial_scale, 
                                         levels = c("1x1 km or less", 
@@ -128,8 +138,9 @@ rm(species, species2, species3)
 
 # Import dataset with the ranges of environmental variables within the study region
 RangeofEcoContexts <- fread("RangeofEcoContexts.csv")
+#RangeofEcoContexts <- fread("shiny/RangeofEcoContexts.csv")
 # remove row and id columns
-range <- select(RangeofEcoContexts,-V1, -ID)
+range <- select(RangeofEcoContexts,-V1)
 # remove empty rows
 range <- range[rowSums(is.na(range)) != ncol(range),]
 rm(RangeofEcoContexts)
@@ -171,8 +182,18 @@ range <- dplyr::rename(range,
                 "Precipitation_of_Wettest_Quarter" = bio16,
                 "Precipitation_of_Driest_Quarter" = bio17,
                 "Precipitation_of_Warmest_Quarter" = bio18,
-                "Precipitation_of_Coldest_Quarter" = bio19)
-range$ArcticHerbivore_Species.richness <- range$ArcticHerbivore_Species.richness*70
+                "Precipitation_of_Coldest_Quarter" = bio19,
+                "Distance_to_Coast"=DistancetoCoast,
+                "Distance_from_treeline"=NorthofTreeline,
+                "Growing_season"=CurrentGrowingSeasonLength,
+                "Extent_of_recent_growing_season_change"=GrowingSeasonLength.trend,
+                "Extent_of_recent_warming"=Temperature.anomaly,
+                "Extent_of_recent_greening"=NDVI.trend,
+                "Productivity"=Current.NDVI,
+                "Human_population_density"=HumanPopulationDensity,
+                "Human_footprint"=Human.footprint)
+
+range$ArcticHerbivore_Species.richness <- range$ArcticHerbivore_Species.richness*69
 
 
 # List environmental and ecological variables -----------------------------
@@ -183,12 +204,15 @@ EEvars <- c(
   "ArcticHerbivore_Functional.diversity",
   "ArcticHerbivore_Phylogenetic.diversity",
   "ArcticHerbivore_Species.richness",
-  "DistancetoCoast",
-  "DistanceToTreeline",
+  "Distance_to_Coast",
+  "Distance_from_treeline",
   "Elevation",
-  "GrowingSeasonLength.trend",
-  "Human.footprint",
-  "HumanPopulationDensity",
+  "Extent_of_recent_greening",
+  "Extent_of_recent_growing_season_change",
+  "Extent_of_recent_warming",
+  "Growing_season",
+  "Human_footprint",
+  "Human_population_density",
   "Isothermality",
   "Max_Temperature_of_Warmest_Month",
   "Mean_Diurnal_Range",
@@ -197,7 +221,6 @@ EEvars <- c(
   "Mean_Temperature_of_Warmest_Quarter",
   "Mean_Temperature_of_Wettest_Quarter",
   "Min_Temperature_of_Coldest_Month",
-  "NDVI.trend",
   "Precipitation_of_Coldest_Quarter",
   "Precipitation_of_Driest_Month",
   "Precipitation_of_Driest_Quarter",
@@ -205,6 +228,7 @@ EEvars <- c(
   "Precipitation_of_Wettest_Month",
   "Precipitation_of_Wettest_Quarter",
   "Precipitation_Seasonality",
+  "Productivity",
   "Temperature_Annual_Range",
   "Temperature_Seasonality"
   )
@@ -234,7 +258,7 @@ varA <- c("additional_exposures",
 )
 
 # those without background data
-EEvars2 <- c("bbb" )
+#EEvars2 <- c("bbb" )
 
 # Soil type
 soil <- fread("SoilLegend.csv")
@@ -307,7 +331,7 @@ ui <- dashboardPage(
        pickerInput(inputId = "colour", 
                    label = "Colour by:", 
                    choices = varA,
-                   selected = "Subzone"))),
+                   selected = "herbivore_type"))),
 
       
       
@@ -438,7 +462,12 @@ verbatimTextOutput('remaining')
 
 
 # Active Filters ####
-h5("Click to see which filters are active: "),
+h5("This is an interactive user interface of the systematic map of herbivory in the Arctic",tags$br(),
+   "The systematic map is published as Soininen et al. XXXX", tags$a(href="https://environmentalevidencejournal.biomedcentral.com/","Environmental Evidence"), "- click to download here [will be added]",tags$br(),
+   "The systematic map protocol can be downloaded", tags$a(href="https://environmentalevidencejournal.biomedcentral.com/track/pdf/10.1186/s13750-018-0135-1.pdf", "here"),tags$br(),
+   "For further information contact", tags$a(href="mailto:James.Speed@ntnu.no", "James Speed"), "or",tags$a(href="mailto:Eeva.Soininen@uit.no",'Eeva Soininen'),tags$br(),
+   "",tags$br(),
+  "Click to see which filters are active: "),
 uiOutput('activeFilters'), br(),
 
 
@@ -453,7 +482,8 @@ tabBox(width = NULL, id = 'additionals',
 
           
   tabPanel('Count cases',
-      h5("This figure is responsive to the filters applied above. When filters are applied, the unfiltered data is shown as light gray bars."),
+      h5("This figure is responsive to the filters applied above. When filters are applied, the unfiltered data is shown as light gray bars.", tags$br(),
+         "Download Appendix below for full description of variables and coding"),
            selectInput(inputId = "uni", 
                 label = "Select variable",
                 choices = varA,
@@ -466,7 +496,8 @@ tabBox(width = NULL, id = 'additionals',
 
      
          tabPanel('Univariate continuous variables',
-                  h5("This figure is responsive to the filters applied above"),
+                  h5("This figure is responsive to the filters applied above", tags$br(),
+                     "Download Appendix below for full description of variables and coding"),
                   
                   pickerInput(
                     inputId = "cont",
@@ -478,6 +509,7 @@ tabBox(width = NULL, id = 'additionals',
                                 "last_year_of_study",
                                 EEvars)),
                   plotOutput('trends')),
+          
 
 
 # . pairwise plots --------------------------------------------------------
@@ -487,7 +519,8 @@ tabBox(width = NULL, id = 'additionals',
       fluidRow(h5("The coloured circles are the evidence points 
                   identified in the systematic review. The grey 
                   background points show all possible values for each 
-                  variable inside the study region")),
+                  variable inside the study region", tags$br(),
+                  "Download Appendix below for full description of variables and coding")),
       fluidRow(
            column(width = 2,
            pickerInput(
@@ -500,7 +533,7 @@ tabBox(width = NULL, id = 'additionals',
            pickerInput(
              inputId = "var2",
              label = "Y variable", 
-             choices = EEvars[!EEvars %in% EEvars2],  # avoid weird error by removing 4 variables that don't have background points
+             choices = EEvars,#[!EEvars %in% EEvars2],  # avoid weird error by removing 4 variables that don't have background points
              selected = "Annual_Precipitation"
            )),
            column(width = 2,
@@ -528,7 +561,8 @@ tabBox(width = NULL, id = 'additionals',
       fluidRow(     
           plotOutput('space')),
       fluidRow(
-          h5("For information about the climatic variables, 
+          h5("For information on the variables and coding please see Appendix 3" ,tags$br(),
+          "For information about the climatic variables, 
              go to: https://www.worldclim.org/data/bioclim.html"))),
 
 
@@ -558,7 +592,9 @@ tabBox(width = NULL, id = 'additionals',
 
 
 h4("Press the download button to download a speadsheet copy of the raw data:"),
-downloadButton("downloadData", "Download")
+downloadButton("downloadData", "DownloadData"),
+h4("Press the download button to download the description of variables and coding:"),
+downloadButton("downloadAppendix", "DownloadAppendix")
 
                 
 ) # body
@@ -641,7 +677,7 @@ server <- function(input, output, session){
                   layer.name = "Evidence Point",
                   map.types = c("Esri.WorldImagery","Esri.WorldShadedRelief"),
                   cex = 5,
-                  alpha.regions = 0.5,
+                  alpha.regions = 0.8,
                   zcol = input$colour,
                   popup = leafpop::popupTable(dat2, 
                                               row.numbers = F, feature.id = F,
@@ -656,7 +692,9 @@ server <- function(input, output, session){
                                                        "herbivore_type",
                                                        "study_method",
                                                        "effect_type")),
-                  legend=T)
+                  col.regions=brewer.pal(12, "Set3"),
+                 # color=heat.colors(100),
+                 legend=T)
                   
      m@map
      
@@ -723,10 +761,10 @@ output$space <- renderPlot({
     myG <- myG+    geom_point(shape=21,  fill="blue", 
                       stroke = 1, alpha=0.5, colour="black")
                           }
- # add background points is var 1 and 2 are not GPW, Footprint ...                         
-  if(!c(input$var1, input$var2) %in% EEvars2 ){
+  # add background points is var 1 and 2 are not GPW, Footprint ...                         
+#  if(!c(input$var1, input$var2) %in% EEvars2 ){
     myG <- myG +geom_point(data = range, aes_string(x = input$var1, y = input$var2),
-                           alpha=input$alpha, size=2)  }
+                           alpha=input$alpha, size=2)  #}
   
  
   myG
@@ -752,6 +790,18 @@ output$space <- renderPlot({
       write.csv( MyTab, file,  row.names = FALSE)}
   )
   
+  output$downloadAppendix<-downloadHandler(
+    filename="Appendix 3.xlsx",
+    content= function(file) {
+      file.copy("www/Appendix 3_Coding template, including descriptions of coded variables.xlsx", file)}
+      )
+  
+  output$downloadProtocol<-downloadHandler(
+    filename='Soininen_et_al._2016_Protocol.pdf',
+    content=function(file){
+      file.copy('www/Soininen_2018_Protocol.pdf')
+    }
+  )
 
 # Active filters --------------------------------------------------------------
   output$years <- renderPrint({
