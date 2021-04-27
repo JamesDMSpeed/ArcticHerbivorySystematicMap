@@ -91,8 +91,8 @@ MyTab <- dplyr::rename(MyTab,
                 "Extent_of_recent_greening"=NDVI.trend,
                 "Productivity"=Current.NDVI,
                 "Human_population_density"=GPW,
-                "Human_footprint"=Footprint
-)
+                "Human_footprint"=Footprint,
+                )
 
 MyTab <- dplyr::rename(MyTab, "Elevation" = elevation_DEM)
 
@@ -125,6 +125,17 @@ MyTab$extent_of_spatial_scale <- factor(MyTab$extent_of_spatial_scale,
                                                    "not reported or nor relevant"))
 
 
+exttemp<-(as.numeric(as.character(MyTab$extent_of_temporal_scale)))
+MyTab$extent_of_temporal_scale[exttemp==1]<-'1 year'
+MyTab$extent_of_temporal_scale[exttemp>1  & exttemp<=5]<-'2-5 years'
+MyTab$extent_of_temporal_scale[exttemp>5  & exttemp<=10]<-'5-10 years'
+MyTab$extent_of_temporal_scale[exttemp>10 & exttemp<=20]<-'11-20 years'
+MyTab$extent_of_temporal_scale[exttemp>20 & exttemp<=50]<-'21-50 years'
+MyTab$extent_of_temporal_scale[exttemp>50 & exttemp<=100]<-'51-100 years'
+MyTab$extent_of_temporal_scale[exttemp>100 ]<-'Over 100 years'
+MyTab$extent_of_temporal_scale<-factor(MyTab$extent_of_temporal_scale,
+                                          levels= c('1 year','2-5 years','5-10 years','11-20 years','21-50 years','51-100 years','Over 100 years'),
+                                          ordered=T)
 
 # Get total species list --------------------------------------------------
 species  <- paste(MyTab$herbivore_identity, collapse = ",")
@@ -246,7 +257,7 @@ varA <- c("additional_exposures",
           "management",
           "management_herbivore",
           "measured_response_variable",
-          "Permafrost",
+          "permafrost",
           "redundancy",
           "soil_type",
           "study_design",
@@ -267,13 +278,14 @@ MyTab$soil_type <- soil$SoilType[match(MyTab$soil_type., soil$Letter)]
 
 #Set factor levels for subzone
 MyTab$Subzone<-as.factor(MyTab$Subzone)
-levels(MyTab$Subzone)<-c('A','B','C','D','E','Non-Arctic','Non-Arctic')
+#levels(MyTab$Subzone)<-c('A','B','C','D','E','Non-Arctic')#,'Non-Arctic')
 
 #Factor levels for permafrost
-MyTab$Permafrost[is.na(MyTab$Permafrost)]<-'None'
-MyTab$Permafrost<-as.factor(MyTab$Permafrost)
-levels(MyTab$Permafrost)<-c('Continuous','Discontinuous','IsolatedPatches','Sporadic','None')
-
+#MyTab$permafrost[is.na(MyTab$permafrost)]<-'None'
+MyTab$permafrost<-as.factor(MyTab$permafrost)
+#levels(MyTab$permafrost)<-c('Continuous','Discontinuous','IsolatedPatches','Sporadic','None')
+levels(MyTab$permafrost)<-c('IsolatedPatches','Sporadic','Discontinuous','Continuous')#,'None')
+MyTab$permafrost<-factor(MyTab$permafrost,ordered=T,levels=c('IsolatedPatches','Sporadic','Discontinuous','Continuous'))
 
 # UI ----------------------------------------------------------------------
 
@@ -331,7 +343,8 @@ ui <- dashboardPage(
        pickerInput(inputId = "colour", 
                    label = "Colour by:", 
                    choices = varA,
-                   selected = "herbivore_type"))),
+                   selected = "herbivore_type",
+                   options = list(size=10)))),
 
       
       
@@ -461,10 +474,12 @@ verbatimTextOutput('remaining')
 ), # abs.panel1
 
 
-# Active Filters ####
-h5("This is an interactive user interface of the systematic map of herbivory in the Arctic",tags$br(),
+# Description text and Active Filters ####
+h5("This is an interactive user interface of the systematic map of herbivory in the Arctic.",tags$br(),
+   "Above, the spatial distribution of evidence points is shown. These can be filtered or coloured by a range of variables.",tags$br(),
+   "Below, individual variables can be summarised, or pairs of variables can be plotted against one another. The full data set can be downloaded below.",tags$br(),
    "The systematic map is published as Soininen et al. XXXX", tags$a(href="https://environmentalevidencejournal.biomedcentral.com/","Environmental Evidence"), "- click to download here [will be added]",tags$br(),
-   "The systematic map protocol can be downloaded", tags$a(href="https://environmentalevidencejournal.biomedcentral.com/track/pdf/10.1186/s13750-018-0135-1.pdf", "here"),tags$br(),
+   "The systematic map protocol is published as Soininen et al. 2018 Environmental Evidence and can be downloaded", tags$a(href="https://environmentalevidencejournal.biomedcentral.com/track/pdf/10.1186/s13750-018-0135-1.pdf", "here"),tags$br(),
    "For further information contact", tags$a(href="mailto:James.Speed@ntnu.no", "James Speed"), "or",tags$a(href="mailto:Eeva.Soininen@uit.no",'Eeva Soininen'),tags$br(),
    "",tags$br(),
   "Click to see which filters are active: "),
@@ -672,10 +687,13 @@ server <- function(input, output, session){
     
     dat2 <- sf::st_as_sf(dat2)
     dat2 <- st_jitter(dat2, factor = 0.00001)
+   
+    colpoints = brewer.pal(12,"Set3")
+    #pal = mapviewPalette("mapviewRasterColors")
     
      m <- mapview::mapview(dat2,
                   layer.name = "Evidence Point",
-                  map.types = c("Esri.WorldImagery","Esri.WorldShadedRelief"),
+                  map.types = c("Stamen.Terrain","Esri.WorldImagery","Esri.WorldShadedRelief"),
                   cex = 5,
                   alpha.regions = 0.8,
                   zcol = input$colour,
@@ -692,9 +710,9 @@ server <- function(input, output, session){
                                                        "herbivore_type",
                                                        "study_method",
                                                        "effect_type")),
-                  col.regions=brewer.pal(12, "Set3"),
-                 # color=heat.colors(100),
-                 legend=T)
+                 col.regions=colpoints,
+                 #col.regions=pal,
+                                legend=F)
                   
      m@map
      
