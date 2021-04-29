@@ -455,6 +455,7 @@ tempdiff<-raster('Data/GIS_layers/amaps.nc')
 tempdiffpp<-(resample(projectRaster(tempdiff,crs=climatec_laea),climatec_laea,method='ngb'))
 
 climatechangestack<-stack(climatec_laea,tempdiffpp)
+climatechangestack<-stack(climatestack,resample(tempdiff,climatestack))
 #climatechangestack<-mask(climatechangestack,arczones)
 names(climatechangestack)[1:4]<-c('Current NDVI','CurrentGrowingSeasonLength','NDVI trend','GrowingSeasonLength trend')
 plot(climatechangestack)
@@ -485,7 +486,7 @@ names(alldata_final)[1]<-"author_list"
 #alldata_finalr<-rbind(alldata_final[,1:85],retained@data)
 #dim(alldata_finalr)
 alldata_final_sp<-SpatialPointsDataFrame(cbind(alldata_final$coordinates_E,alldata_final$coordinates_N),alldata_final)
-alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic,proj4string = bioclimdat@crs)
+alldata_splaea_removeoutsidearctic<-SpatialPointsDataFrame(cbind(alldata_splaea_removeoutsidearctic$coordinates_E,alldata_splaea_removeoutsidearctic$coordinates_N),alldata_splaea_removeoutsidearctic@data,proj4string = bioclimdat@crs)
 
 alldata_final_sp1<-cbind(alldata_final_sp,raster::extract(bioclimdat,alldata_final_sp))
 alldata_final_sp1$elevation_DEM<-raster::extract(arcelev,alldata_final_sp1)
@@ -496,7 +497,7 @@ alldata_final_sp1$Subzone<-over(spTransform(alldata_splaea_removeoutsidearctic,C
 alldata_final_sp1$north_of_treeline<-raster::extract(projectRaster(northoftreeline,crs=crs(bioclimdat)),alldata_final_sp1)
 alldata_final_sp2<-cbind(alldata_final_sp1,raster::extract(projectRaster(vertherb_div,crs = crs(bioclimdat)),alldata_final_sp1))
 alldata_final_sp2a<-cbind(alldata_final_sp2,raster::extract(humanstack,alldata_final_sp2))
-alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(projectRaster(climatechangestack,crs=crs(bioclimdat)),alldata_final_sp2a))
+alldata_final_sp3a<-cbind(alldata_final_sp2a,raster::extract(climatechangestack,alldata_final_sp2a))
 head(alldata_final_sp3a)
 names(alldata_final_sp3a)
 
