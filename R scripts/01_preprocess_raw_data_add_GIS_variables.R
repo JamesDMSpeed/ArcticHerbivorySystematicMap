@@ -443,7 +443,7 @@ plot(losc)
 climatestack<-stack(ndvi,losc,ndvitrend,lostrend)
 
 climatestack@crs<-bioclimdat@crs
-climatec_laea<-projectRaster(climatestack,crs=arczones)
+climatec_laea<-projectRaster(climatestack,crs=arczones_laea)
 plot(climatec_laea[[1]])
 points(alldata_splaea_removeoutsidearctic,pch=16,cex=0.1,col=2)
 plot(arczones,add=T)
