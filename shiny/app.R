@@ -21,7 +21,7 @@ library(RColorBrewer)
 #Note: If map fails to load need to install older version of mapview
 #library(devtools)
 #install_version('mapview',version='2.7.8')
-
+#install_version('rlang',version='0.4.9')
 
 # Get Data ----------------------------------------------------------------
 
@@ -136,6 +136,9 @@ MyTab$extent_of_temporal_scale[exttemp>100 ]<-'Over 100 years'
 MyTab$extent_of_temporal_scale<-factor(MyTab$extent_of_temporal_scale,
                                           levels= c('1 year','2-5 years','5-10 years','11-20 years','21-50 years','51-100 years','Over 100 years'),
                                           ordered=T)
+
+#Blank column for colouring points the same
+MyTab$none<-rep('Evidence point',times=nrow(MyTab))
 
 # Get total species list --------------------------------------------------
 species  <- paste(MyTab$herbivore_identity, collapse = ",")
@@ -257,6 +260,7 @@ varA <- c("additional_exposures",
           "management",
           "management_herbivore",
           "measured_response_variable",
+          "none",
           "permafrost",
           "redundancy",
           "soil_type",
@@ -342,7 +346,7 @@ ui <- dashboardPage(
          column(width=5,
        pickerInput(inputId = "colour", 
                    label = "Colour by:", 
-                   choices = varA,
+                   choices =varA,
                    selected = "herbivore_type",
                    options = list(size=10)))),
 
@@ -542,26 +546,30 @@ tabBox(width = NULL, id = 'additionals',
              inputId = "var1",
              label = "X variable", 
              choices = EEvars,
-             selected = "Annual_Mean_Temperature"
+             selected = "Annual_Mean_Temperature",
+             options = list(size=10)
            )),
            column(width = 2,
            pickerInput(
              inputId = "var2",
              label = "Y variable", 
              choices = EEvars,#[!EEvars %in% EEvars2],  # avoid weird error by removing 4 variables that don't have background points
-             selected = "Annual_Precipitation"
+             selected = "Annual_Precipitation",
+             options = list(size=10)
            )),
            column(width = 2,
            pickerInput(
              inputId = "var3",
              label = "Size variable", 
              choices = c("NULL" = 3, EEvars),
-             selected = "ArcticHerbivore_Species.richness"
+             selected = "ArcticHerbivore_Species.richness",
+             options = list(size=10)
            )),
            column(width=2,
            pickerInput(
              inputId = "var4",
-             label = "Colour", 
+             label = "Colour",
+             options = list(size=10),
              choices = c("NULL", varA) #"extent_of_spatial_scale", "study_design", "experimental_design")
              )),
            column(width=3,
@@ -688,15 +696,20 @@ server <- function(input, output, session){
     dat2 <- sf::st_as_sf(dat2)
     dat2 <- st_jitter(dat2, factor = 0.00001)
    
-    colpoints = brewer.pal(12,"Set3")
-    #pal = mapviewPalette("mapviewRasterColors")
+    #colpoints = brewer.pal(12,"Set3")
+    pal = mapviewPalette("mapviewVectorColors")
+    
+   # mapviewOptions(vector.palette = brewer.pal(12,"Set3"),
+  #                 na.color = grey(0.8),
+   #                layers.control.pos = "topright") 
     
      m <- mapview::mapview(dat2,
                   layer.name = "Evidence Point",
-                  map.types = c("Stamen.Terrain","Esri.WorldImagery","Esri.WorldShadedRelief"),
+                  map.types = c("Stamen.Terrain","Esri.WorldImagery"),
                   cex = 5,
                   alpha.regions = 0.8,
                   zcol = input$colour,
+               #   na.color=grey(0.8,alpha=0.8),
                   popup = leafpop::popupTable(dat2, 
                                               row.numbers = F, feature.id = F,
                                               zcol = c("evidence_point_ID",
@@ -704,18 +717,18 @@ server <- function(input, output, session){
                                                        "year",
                                                        "journal",
                                                        "locality",
-                                                       "elevation",
                                                        "study_design",
                                                        "experimental_design",
                                                        "herbivore_type",
                                                        "study_method",
                                                        "effect_type")),
-                 col.regions=colpoints,
-                 #col.regions=pal,
-                                legend=F)
+                 #col.regions=colpoints,
+                 col.regions=pal,
+                 color=pal,
+                                legend=T)
                   
      m@map
-     
+     #addLegend(m@map,position='right',pal=colpoints,values=input$colour)
     })
     
   
